@@ -1,0 +1,61 @@
+﻿[*.cs]
+
+# SA1101: Prefix local calls with this
+dotnet_diagnostic.SA1101.severity = suggestion
+
+# SA1201: Elements should appear in the correct order
+dotnet_diagnostic.SA1201.severity = suggestion
+
+# SA1306: Field names should begin with lower-case letter
+dotnet_diagnostic.SA1306.severity = none
+
+# SA1309: Field names should not begin with underscore
+dotnet_diagnostic.SA1309.severity = none
+
+# SA1312: Variable names should begin with lower-case letter
+dotnet_diagnostic.SA1312.severity = none
+
+# SA1503: Braces should not be omitted
+dotnet_diagnostic.SA1503.severity = suggestion
+
+# SA1405: Debug.Assert should provide message text
+dotnet_diagnostic.SA1405.severity = suggestion
+
+# SA1519: Braces should not be omitted from multi-line child statement
+dotnet_diagnostic.SA1519.severity = suggestion
+
+# SA1615: Element return value should be documented
+dotnet_diagnostic.SA1615.severity = suggestion
+
+# SA1633: File should have header
+dotnet_diagnostic.SA1633.severity = suggestion
+
+# Local symbol group naming convention
+dotnet_naming_symbols.local_symbol_group.applicable_kinds = local
+## Naming style
+dotnet_naming_style.local_naming_style.capitalization = first_word_upper
+## Set group, style and violation severity
+dotnet_naming_rule.locals_are_first_word_upper.symbols = local_symbol_group
+dotnet_naming_rule.locals_are_first_word_upper.style = local_naming_style
+dotnet_naming_rule.locals_are_first_word_upper.severity = warning
+
+# Field symbol group naming convention
+dotnet_naming_symbols.field_symbol_group.applicable_kinds = field
+## Naming style
+dotnet_naming_style.field_naming_style.capitalization = first_word_upper
+dotnet_naming_style.field_naming_style.required_prefix = _
+## Set group, style and violation severity
+dotnet_naming_rule.fields_are_first_word_upper.symbols = field_symbol_group
+dotnet_naming_rule.fields_are_first_word_upper.style = field_naming_style
+dotnet_naming_rule.fields_are_first_word_upper.severity = warning
+
+# Public Const Field symbol group naming convention
+dotnet_naming_symbols.public_const_field_symbol_group.applicable_kinds = field
+dotnet_naming_symbols.public_const_field_symbol_group.applicable_accessibilities = public
+dotnet_naming_symbols.public_const_field_symbol_group.required_modifiers = const
+## Naming style
+dotnet_naming_style.public_const_field_naming_style.capitalization = first_word_upper
+## Set group, style and violation severity
+dotnet_naming_rule.fields_are_first_word_upper.symbols = public_const_field_symbol_group
+dotnet_naming_rule.fields_are_first_word_upper.style = public_const_field_naming_style
+dotnet_naming_rule.fields_are_first_word_upper.severity = warning
