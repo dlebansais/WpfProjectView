@@ -19,6 +19,7 @@ public class TestProject
         TestCreate(LocalLocation);
     }
 
+#if ENABLE_REMOTE
     [Test]
     public void TestCreateRemote()
     {
@@ -27,6 +28,7 @@ public class TestProject
 
         TestCreate(RemoteLocation);
     }
+#endif
 
     private void TestCreate(ILocation location)
     {
@@ -34,6 +36,10 @@ public class TestProject
         TestProjectTask.Wait();
 
         IProject TestProject = TestProjectTask.Result;
+
         Assert.That(TestProject, Is.Not.Null);
+        Assert.That(TestProject.Location, Is.EqualTo(location));
+        Assert.That(TestProject.Files, Is.Not.Null);
+        Assert.That(TestProject.Files, Has.Count.GreaterThan(0));
     }
 }
