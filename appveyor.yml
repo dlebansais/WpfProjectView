@@ -50,8 +50,7 @@ after_build:
   - if exist nuget-debug\%APPVEYOR_PROJECT_NAME%-Debug.nuspec nuget pack nuget-debug\%APPVEYOR_PROJECT_NAME%-Debug.nuspec
 
 before_test:
-  - dir
-  - git clone https://github.com/dlebansais/PgCompletionist.git
+  - git clone https://github.com/dlebansais/PgCompletionist.git ../PgCompletionist
   - nuget install OpenCover -Version %opencover_version% -OutputDirectory packages
   - nuget install CodecovUploader -Version %codecov_version% -OutputDirectory packages
   - |-
@@ -62,12 +61,12 @@ before_test:
   - |-
     printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:\x25\x31 -mergeoutput -output:""Coverage-%APPVEYOR_PROJECT_NAME%"".xml\n" > opencover.bat
 
-#test_script:
-#  - opencover.bat runtests1.bat
+test_script:
+  - opencover.bat runtests1.bat
 
-#after_test:
-#  - ps: Get-Content Coverage-*.xml -Head 3
-#  - if '%CONFIGURATION%' == 'Debug' if '%APPVEYOR_REPO_BRANCH%' == 'master' .\packages\CodecovUploader.%codecov_version%\Tools\codecov.exe -f "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+after_test:
+  - ps: Get-Content Coverage-*.xml -Head 3
+  - if '%CONFIGURATION%' == 'Debug' if '%APPVEYOR_REPO_BRANCH%' == 'master' .\packages\CodecovUploader.%codecov_version%\Tools\codecov.exe -f "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
 
 artifacts:
   - path: $(APPVEYOR_PROJECT_NAME)-Debug.*.nupkg
