@@ -53,6 +53,9 @@ before_test:
   - git clone https://github.com/dlebansais/PgCompletionist.git ../PgCompletionist
   - mkdir "../PgCompletionist/PgCompletionist/bin"
   - dir > ../PgCompletionist/PgCompletionist/bin/dummyfile.txt
+  - dir ../PgCompletionist
+  - dir ../PgCompletionist/PgCompletionist
+  - dir ../PgCompletionist/PgCompletionist/bin
   - nuget install OpenCover -Version %opencover_version% -OutputDirectory packages
   - nuget install CodecovUploader -Version %codecov_version% -OutputDirectory packages
   - |-

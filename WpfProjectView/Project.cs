@@ -90,8 +90,29 @@ public record Project : IProject
 
         // Proceed with sub-folders recursively.
         foreach (IFolder Item in folder.Folders)
+        {
+            if (!IsRootFolder)
+            {
+            }
+            else
+            {
+            }
+
+            if (!IgnoredFolders.Contains(Item.Name))
+            {
+            }
+            else
+            {
+            }
+
             if (!IsRootFolder || !IgnoredFolders.Contains(Item.Name))
+            {
                 FillFileList(Item, files);
+            }
+            else
+            {
+            }
+        }
     }
 
     private static void FillFileList<T>(T newFile, List<IFile> files)
