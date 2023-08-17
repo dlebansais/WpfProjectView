@@ -1,6 +1,5 @@
 ﻿namespace WpfProjectView.Test;
 
-using FolderView;
 using NUnit.Framework;
 
 public class TestProject
@@ -8,7 +7,7 @@ public class TestProject
     [Test]
     public void TestCreate()
     {
-        ILocation Location = TestTools.GetLocalLocation();
+        FolderView.ILocation Location = TestTools.GetLocalLocation();
 
         var TestProjectTask = Project.CreateAsync(Location);
         TestProjectTask.Wait();

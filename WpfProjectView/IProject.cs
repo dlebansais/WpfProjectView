@@ -14,6 +14,11 @@ public interface IProject
     ILocation Location { get; }
 
     /// <summary>
+    /// Gets the project root folder.
+    /// </summary>
+    IFolder RootFolder { get; }
+
+    /// <summary>
     /// Gets the list of files in the project.
     /// </summary>
     IReadOnlyList<IFile> Files { get; }

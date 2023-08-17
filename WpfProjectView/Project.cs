@@ -20,14 +20,13 @@ public record Project : IProject
         Files = files;
     }
 
-    /// <summary>
-    /// Gets the project location.
-    /// </summary>
+    /// <inheritdoc/>
     public ILocation Location { get; }
 
-    /// <summary>
-    /// Gets the list of files in the project.
-    /// </summary>
+    /// <inheritdoc/>
+    public required IFolder RootFolder { get; init; }
+
+    /// <inheritdoc/>
     public IReadOnlyList<IFile> Files { get; }
 
     /// <summary>
@@ -41,7 +40,7 @@ public record Project : IProject
         IFolder RootFolder = await Path.RootFolderFromAsync(location);
         FillFileList(RootFolder, Files);
 
-        Project Result = new Project(location, Files);
+        Project Result = new Project(location, Files) { RootFolder = RootFolder };
 
         return Result;
     }
@@ -80,10 +79,10 @@ public record Project : IProject
         }
 
         // Finally fill the list of files.
-        XamlCodeFileList.ForEach(item => FillFileList(new XamlCodeFile(item.Path), files));
-        XamlFileList.ForEach(item => FillFileList(new XamlResourceFile(item.Path), files));
-        CodeFileList.ForEach(item => FillFileList(new CodeFile(item.Path), files));
-        OtherFileList.ForEach(item => FillFileList(new OtherFile(item.Path), files));
+        XamlCodeFileList.ForEach(item => FillFileList(new XamlCodeFile(item), files));
+        XamlFileList.ForEach(item => FillFileList(new XamlResourceFile(item), files));
+        CodeFileList.ForEach(item => FillFileList(new CodeFile(item), files));
+        OtherFileList.ForEach(item => FillFileList(new OtherFile(item), files));
 
         List<string> IgnoredFolders = new() { "bin", "obj" };
         bool IsRootFolder = folder.IsRoot;

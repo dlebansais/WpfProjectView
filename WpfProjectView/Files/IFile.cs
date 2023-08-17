@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView;
 
+using System.Threading.Tasks;
 using FolderView;
 
 /// <summary>
@@ -8,7 +9,18 @@ using FolderView;
 public interface IFile
 {
     /// <summary>
+    /// Gets the source file.
+    /// </summary>
+    FolderView.IFile SourceFile { get; }
+
+    /// <summary>
     /// Gets the path to the file.
     /// </summary>
     IPath Path { get; }
+
+    /// <summary>
+    /// Loads the file content.
+    /// </summary>
+    /// <param name="rootFolder">The project root folder.</param>
+    Task LoadAsync(IFolder rootFolder);
 }
