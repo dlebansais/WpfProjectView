@@ -2,10 +2,23 @@
 
 using System;
 using System.Diagnostics;
+using FolderView;
 
 public static class TestTools
 {
-    public static string GetExecutingProjectRootPath()
+    private const string ProjectRepositoryName = "PgCompletionist";
+    private const string ProjectName = "PgCompletionist";
+
+    public static ILocation GetLocalLocation()
+    {
+        string ProjectRootPath = TestTools.GetExecutingProjectRootPath();
+        string TestProjectRootPath = @$"{ProjectRootPath}\..\..\..\{ProjectRepositoryName}\{ProjectName}";
+        LocalLocation Location = new(TestProjectRootPath);
+
+        return Location;
+    }
+
+    private static string GetExecutingProjectRootPath()
     {
         string? CurrentDirectory = Environment.CurrentDirectory;
         bool Continue = true;
