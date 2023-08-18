@@ -23,6 +23,9 @@ public class TestCodeFile
             {
                 CodeFileCount++;
 
+                AsCodeFile.Parse();
+                Assert.That(AsCodeFile.SyntaxTree, Is.Null);
+
                 AsCodeFile.LoadAsync(TestProject.RootFolder);
                 Assert.That(AsCodeFile.SyntaxTree, Is.Null);
 

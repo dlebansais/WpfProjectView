@@ -20,6 +20,9 @@ public class TestXamlCodeFile
             {
                 CodeFileCount++;
 
+                AsXamlCodeFile.Parse();
+                Assert.That(AsXamlCodeFile.Content, Is.Null);
+
                 AsXamlCodeFile.LoadAsync(TestProject.RootFolder);
                 Assert.That(AsXamlCodeFile.Content, Is.Null);
 

@@ -20,6 +20,9 @@ public class TestOtherFile
             {
                 CodeFileCount++;
 
+                AsOtherFile.Parse();
+                Assert.That(AsOtherFile.Content, Is.Null);
+
                 AsOtherFile.LoadAsync(TestProject.RootFolder);
                 Assert.That(AsOtherFile.Content, Is.Null);
 
