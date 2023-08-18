@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView.Test;
 
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using FolderView;
@@ -51,8 +52,10 @@ public class TestCodeFile
         _ = DeleteFile(DummyFileName);
 
         foreach (var Item in TestProject.Files)
-            if (Item is ICodeFile AsCodeFile && AsCodeFile.SourceFile.Name == DummyFileName)
+            if (Item is ICodeFile AsCodeFile)
             {
+                Debug.Assert(AsCodeFile.SourceFile.Name == DummyFileName);
+
                 Assert.ThrowsAsync<FileNotFoundException>(async () => await AsCodeFile.LoadAsync(TestProject.RootFolder));
 
                 AsCodeFile.Parse();
