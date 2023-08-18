@@ -21,6 +21,9 @@ public class TestXamlResourceFile
                 CodeFileCount++;
 
                 AsXamlResourceFile.LoadAsync(TestProject.RootFolder);
+                Assert.That(AsXamlResourceFile.Content, Is.Null);
+
+                AsXamlResourceFile.Parse();
                 Assert.That(AsXamlResourceFile.Content, Is.Not.Null);
             }
 

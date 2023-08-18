@@ -18,6 +18,11 @@ internal record CodeFile(FolderView.IFile SourceFile) : File(SourceFile), ICodeF
     public override async Task LoadAsync(IFolder rootFolder)
     {
         await SourceFile.LoadAsync();
+    }
+
+    /// <inheritdoc/>
+    public override void Parse()
+    {
         SyntaxTree = LoadCodeSyntaxTreeAsync(SourceFile.Content);
     }
 

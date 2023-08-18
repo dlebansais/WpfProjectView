@@ -22,10 +22,17 @@ internal record XamlCodeFile(FolderView.IFile SourceFile) : File(SourceFile), IX
     public override async Task LoadAsync(IFolder rootFolder)
     {
         await SourceFile.LoadAsync();
-        Content = SourceFile.Content;
 
-        FolderView.IFile CodeSourceFile = FolderView.Path.GetRelativeFile(rootFolder, CodeBehindPath);
+        CodeSourceFile = FolderView.Path.GetRelativeFile(rootFolder, CodeBehindPath);
         await CodeSourceFile.LoadAsync();
-        SyntaxTree = CodeFile.LoadCodeSyntaxTreeAsync(CodeSourceFile.Content);
     }
+
+    /// <inheritdoc/>
+    public override void Parse()
+    {
+        Content = SourceFile.Content;
+        SyntaxTree = CodeFile.LoadCodeSyntaxTreeAsync(CodeSourceFile?.Content);
+    }
+
+    private FolderView.IFile? CodeSourceFile;
 }

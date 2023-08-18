@@ -23,4 +23,9 @@ public interface IFile
     /// </summary>
     /// <param name="rootFolder">The project root folder.</param>
     Task LoadAsync(IFolder rootFolder);
+
+    /// <summary>
+    /// Parses the content.
+    /// </summary>
+    void Parse();
 }

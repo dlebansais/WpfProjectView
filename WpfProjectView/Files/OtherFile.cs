@@ -15,6 +15,11 @@ internal record OtherFile(FolderView.IFile SourceFile) : File(SourceFile), IOthe
     public override async Task LoadAsync(IFolder rootFolder)
     {
         await SourceFile.LoadAsync();
+    }
+
+    /// <inheritdoc/>
+    public override void Parse()
+    {
         Content = SourceFile.Content;
     }
 }
