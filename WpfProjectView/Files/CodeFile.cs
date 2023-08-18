@@ -23,23 +23,6 @@ internal record CodeFile(FolderView.IFile SourceFile) : File(SourceFile), ICodeF
     /// <inheritdoc/>
     public override void Parse()
     {
-        SyntaxTree = LoadCodeSyntaxTreeAsync(SourceFile.Content);
-    }
-
-    /// <summary>
-    /// Parses a C# code file and returns the syntax tree.
-    /// </summary>
-    /// <param name="content">The content to parse.</param>
-    public static SyntaxTree? LoadCodeSyntaxTreeAsync(byte[]? content)
-    {
-        if (content is null)
-            return null;
-
-        string SourceCode = Encoding.UTF8.GetString(content);
-        CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.CSharp11, DocumentationMode.None);
-
-        SyntaxTree Result = CSharpSyntaxTree.ParseText(SourceCode, Options);
-
-        return Result;
+        SyntaxTree = CodeParser.Parse(SourceFile.Content);
     }
 }
