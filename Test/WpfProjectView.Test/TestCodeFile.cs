@@ -1,8 +1,6 @@
 ﻿namespace WpfProjectView.Test;
 
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using FolderView;
 using NUnit.Framework;
 
@@ -41,7 +39,7 @@ public class TestCodeFile
     public void TestNullContent()
     {
         string DummyFileName = "dummy.cs";
-        _ = DeleteFile(DummyFileName);
+        _ = TestTools.DeleteFile(DummyFileName);
         CreateLocalDummyFile(DummyFileName);
 
         LocalLocation Location = new(".");
@@ -49,7 +47,7 @@ public class TestCodeFile
         TestProjectTask.Wait();
         IProject TestProject = TestProjectTask.Result;
 
-        _ = DeleteFile(DummyFileName);
+        _ = TestTools.DeleteFile(DummyFileName);
 
         Assert.That(TestProject.Files, Has.Count.GreaterThan(0));
         ICodeFile? CodeFile = TestProject.Files[0] as ICodeFile;
@@ -68,7 +66,4 @@ public class TestCodeFile
         using BinaryWriter Writer = new BinaryWriter(Stream);
         Writer.Write("Dummy");
     }
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    public static extern bool DeleteFile(string path);
 }

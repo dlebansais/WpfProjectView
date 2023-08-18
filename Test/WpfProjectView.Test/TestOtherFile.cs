@@ -13,12 +13,12 @@ public class TestOtherFile
         TestProjectTask.Wait();
 
         IProject TestProject = TestProjectTask.Result;
-        int CodeFileCount = 0;
+        int OtherFileCount = 0;
 
         foreach (IFile Item in TestProject.Files)
             if (Item is IOtherFile AsOtherFile)
             {
-                CodeFileCount++;
+                OtherFileCount++;
 
                 AsOtherFile.Parse();
                 Assert.That(AsOtherFile.Content, Is.Null);
@@ -30,6 +30,6 @@ public class TestOtherFile
                 Assert.That(AsOtherFile.Content, Is.Not.Null);
             }
 
-        Assert.That(CodeFileCount, Is.GreaterThan(0));
+        Assert.That(OtherFileCount, Is.GreaterThan(0));
     }
 }

@@ -6,7 +6,7 @@
 public interface IXamlResourceFile : IFile
 {
     /// <summary>
-    /// Gets the file content.
+    /// Gets the file content as a node tree.
     /// </summary>
-    byte[]? Content { get; }
+    object? NoteTree { get; }
 }

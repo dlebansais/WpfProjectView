@@ -1,5 +1,7 @@
 ﻿namespace WpfProjectView;
-/*
+
+using System.Diagnostics;
+using System.IO;
 using System.Xaml;
 
 /// <summary>
@@ -11,15 +13,24 @@ internal static class XamlParser
     /// Parses xaml content and returns the node tree.
     /// </summary>
     /// <param name="content">The content to parse.</param>
-    public static SyntaxTree? Parse(byte[]? content)
+    public static object? Parse(byte[]? content)
     {
         if (content is null)
             return null;
 
+        MemoryStream Stream = new(content);
+        XamlXmlReader Reader = new(Stream);
+        string? RootItemName = null;
 
-        XamlXmlReader Reader = new();
+        while (Reader.Read())
+        {
+            if (Reader.NodeType == XamlNodeType.StartObject)
+            {
+                RootItemName = Reader.Type.Name;
+                break;
+            }
+        }
 
-        return Result;
+        return RootItemName;
     }
 }
-*/

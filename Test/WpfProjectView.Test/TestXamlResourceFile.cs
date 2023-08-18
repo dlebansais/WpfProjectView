@@ -1,5 +1,7 @@
 ﻿namespace WpfProjectView.Test;
 
+using System.IO;
+using FolderView;
 using NUnit.Framework;
 
 public class TestXamlResourceFile
@@ -13,23 +15,55 @@ public class TestXamlResourceFile
         TestProjectTask.Wait();
 
         IProject TestProject = TestProjectTask.Result;
-        int CodeFileCount = 0;
+        int XamlFileCount = 0;
 
         foreach (IFile Item in TestProject.Files)
             if (Item is IXamlResourceFile AsXamlResourceFile)
             {
-                CodeFileCount++;
+                XamlFileCount++;
 
                 AsXamlResourceFile.Parse();
-                Assert.That(AsXamlResourceFile.Content, Is.Null);
+                Assert.That(AsXamlResourceFile.NoteTree, Is.Null);
 
                 AsXamlResourceFile.LoadAsync(TestProject.RootFolder);
-                Assert.That(AsXamlResourceFile.Content, Is.Null);
+                Assert.That(AsXamlResourceFile.NoteTree, Is.Null);
 
                 AsXamlResourceFile.Parse();
-                Assert.That(AsXamlResourceFile.Content, Is.Not.Null);
+                Assert.That(AsXamlResourceFile.NoteTree, Is.Not.Null);
             }
 
-        Assert.That(CodeFileCount, Is.GreaterThan(0));
+        Assert.That(XamlFileCount, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void TestNullContent()
+    {
+        string DummyFileName = "dummy.xaml";
+        _ = TestTools.DeleteFile(DummyFileName);
+        CreateLocalDummyFile(DummyFileName);
+
+        LocalLocation Location = new(".");
+        var TestProjectTask = Project.CreateAsync(Location);
+        TestProjectTask.Wait();
+        IProject TestProject = TestProjectTask.Result;
+
+        _ = TestTools.DeleteFile(DummyFileName);
+
+        Assert.That(TestProject.Files, Has.Count.GreaterThan(0));
+        IXamlResourceFile? XamlFile = TestProject.Files[0] as IXamlResourceFile;
+        Assert.That(XamlFile, Is.Not.Null);
+        Assert.That(XamlFile.SourceFile.Name, Is.EqualTo(DummyFileName));
+
+        Assert.ThrowsAsync<FileNotFoundException>(async () => await XamlFile.LoadAsync(TestProject.RootFolder));
+
+        XamlFile.Parse();
+        Assert.That(XamlFile.NoteTree, Is.Null);
+    }
+
+    private void CreateLocalDummyFile(string fileName)
+    {
+        using FileStream Stream = new(fileName, FileMode.Create, FileAccess.Write);
+        using BinaryWriter Writer = new BinaryWriter(Stream);
+        Writer.Write("Dummy");
     }
 }

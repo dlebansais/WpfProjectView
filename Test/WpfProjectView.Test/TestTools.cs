@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using FolderView;
 
 public static class TestTools
@@ -48,4 +49,7 @@ public static class TestTools
 
         return CurrentDirectory!;
     }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    public static extern bool DeleteFile(string path);
 }

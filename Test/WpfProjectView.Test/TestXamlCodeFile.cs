@@ -13,23 +13,26 @@ public class TestXamlCodeFile
         TestProjectTask.Wait();
 
         IProject TestProject = TestProjectTask.Result;
-        int CodeFileCount = 0;
+        int FileCount = 0;
 
         foreach (IFile Item in TestProject.Files)
             if (Item is IXamlCodeFile AsXamlCodeFile)
             {
-                CodeFileCount++;
+                FileCount += 2;
 
                 AsXamlCodeFile.Parse();
-                Assert.That(AsXamlCodeFile.Content, Is.Null);
+                Assert.That(AsXamlCodeFile.NoteTree, Is.Null);
+                Assert.That(AsXamlCodeFile.SyntaxTree, Is.Null);
 
                 AsXamlCodeFile.LoadAsync(TestProject.RootFolder);
-                Assert.That(AsXamlCodeFile.Content, Is.Null);
+                Assert.That(AsXamlCodeFile.NoteTree, Is.Null);
+                Assert.That(AsXamlCodeFile.SyntaxTree, Is.Null);
 
                 AsXamlCodeFile.Parse();
-                Assert.That(AsXamlCodeFile.Content, Is.Not.Null);
+                Assert.That(AsXamlCodeFile.NoteTree, Is.Not.Null);
+                Assert.That(AsXamlCodeFile.SyntaxTree, Is.Not.Null);
             }
 
-        Assert.That(CodeFileCount, Is.GreaterThan(0));
+        Assert.That(FileCount, Is.GreaterThan(0));
     }
 }
