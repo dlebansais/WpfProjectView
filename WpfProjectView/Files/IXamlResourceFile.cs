@@ -6,7 +6,7 @@
 public interface IXamlResourceFile : IFile
 {
     /// <summary>
-    /// Gets the file content as a tree of xaml elements.
+    /// Gets the result of parsing the xaml file.
     /// </summary>
-    IXamlElement? RootElement { get; }
+    IXamlParsingResult? XamlParsingResult { get; }
 }

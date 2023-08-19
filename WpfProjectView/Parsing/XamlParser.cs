@@ -1,7 +1,6 @@
 ﻿namespace WpfProjectView;
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Xaml;
 
@@ -14,59 +13,52 @@ internal static class XamlParser
     /// Parses xaml content and returns the node tree.
     /// </summary>
     /// <param name="content">The content to parse.</param>
-    public static IXamlElement? Parse(byte[]? content)
+    public static IXamlParsingResult Parse(byte[]? content)
     {
-        if (content is null)
-            return null;
+        XamlParsingResult Result = new();
 
-        MemoryStream Stream = new(content);
-        XamlXmlReader Reader = new(Stream);
+        if (content is not null)
+        {
+            using MemoryStream Stream = new(content);
+            using XamlXmlReader Reader = new(Stream);
 
-        if (!Reader.Read())
-            throw new NotImplementedException();
+            if (!Reader.Read())
+                throw new NotImplementedException();
 
-        return ParseElement(Reader);
+            Result.Root = ParseElement(Reader);
+        }
+
+        return Result;
     }
 
     private static int Rounds = 0;
 
-    private static IXamlElement ParseElement(XamlXmlReader reader)
+    private static XamlElement ParseElement(XamlXmlReader reader)
     {
         Rounds++;
 
         XamlNamespaceCollection Namespaces = new();
-        XamlElementCollection Children = new();
-        XamlAttributeCollection Attributes = new();
-        ParseElementWithNamespaces(reader, out string Name, Namespaces, Children, Attributes);
-
-        return new XamlElement(Name, Namespaces, Children, Attributes);
-    }
-
-    private static void ParseElementWithNamespaces(XamlXmlReader reader, out string name, XamlNamespaceCollection namespaces, XamlElementCollection children, XamlAttributeCollection attributes)
-    {
-        Rounds++;
 
         while (reader.NodeType == XamlNodeType.NamespaceDeclaration)
         {
             NamespaceDeclaration Namespace = reader.Namespace;
-            namespaces.Add(new XamlNamespace(Namespace.Prefix, Namespace.Namespace));
+            Namespaces.Add(new XamlNamespace(Namespace.Prefix, Namespace.Namespace));
 
             if (!reader.Read())
                 throw new NotImplementedException();
         }
 
-        ParseElement(reader, out name, children, attributes);
-    }
-
-    private static void ParseElement(XamlXmlReader reader, out string name, XamlElementCollection children, XamlAttributeCollection attributes)
-    {
-        Rounds++;
+        XamlElementCollection Children = new();
+        XamlAttributeCollection Attributes = new();
+        string Name;
 
         if (reader.NodeType != XamlNodeType.StartObject)
             throw new NotImplementedException();
 
-        name = reader.Type.Name;
-        ParseElementContent(reader, children, attributes);
+        Name = reader.Type.Name;
+        ParseElementContent(reader, Children, Attributes);
+
+        return new XamlElement(Name, Namespaces, Children, Attributes);
     }
 
     private static void ParseElementContent(XamlXmlReader reader, XamlElementCollection children, XamlAttributeCollection attributes)
@@ -76,7 +68,7 @@ internal static class XamlParser
         while (reader.Read() && reader.NodeType == XamlNodeType.StartMember)
         {
             if (reader.Member == XamlLanguage.Initialization)
-                ParseElementMemberInitialization(reader);
+                ParseElementMemberInitialization(reader, attributes);
             else if (reader.Member == XamlLanguage.UnknownContent)
                 ParseElementMemberUnknownContent(reader, children, attributes);
             else if (reader.Member == XamlLanguage.PositionalParameters)
@@ -91,9 +83,25 @@ internal static class XamlParser
             throw new NotImplementedException();
     }
 
-    private static void ParseElementMemberInitialization(XamlXmlReader reader)
+    private static void ParseElementMemberInitialization(XamlXmlReader reader, XamlAttributeCollection attributes)
     {
-        throw new NotImplementedException();
+        if (!reader.Read())
+            throw new NotImplementedException();
+
+        if (reader.NodeType != XamlNodeType.Value)
+            throw new NotImplementedException();
+
+        if (reader.Value is not string StringValue)
+            throw new NotImplementedException();
+
+        XamlAttribute Attribute = new(string.Empty, StringValue);
+        attributes.Add(Attribute);
+
+        if (!reader.Read())
+            throw new NotImplementedException();
+
+        if (reader.NodeType != XamlNodeType.EndMember)
+            throw new NotImplementedException();
     }
 
     private static void ParseElementMemberUnknownContent(XamlXmlReader reader, XamlElementCollection children, XamlAttributeCollection attributes)
@@ -180,10 +188,7 @@ internal static class XamlParser
                 AttributeValue = reader.Value;
                 break;
             case XamlNodeType.StartObject:
-                XamlElementCollection Children = new();
-                XamlAttributeCollection Attributes = new();
-                ParseElement(reader, out string Name, Children, Attributes);
-                AttributeValue = new XamlElement(Name, new XamlNamespaceCollection(), Children, Attributes);
+                AttributeValue = ParseElement(reader);
                 break;
             default:
                 throw new NotImplementedException();
@@ -282,10 +287,7 @@ internal static class XamlParser
 
         for (; ;)
         {
-            XamlElementCollection Children = new();
-            XamlAttributeCollection Attributes = new();
-            ParseElement(reader, out string Name, Children, Attributes);
-            object? AttributeValue = new XamlElement(Name, new XamlNamespaceCollection(), Children, Attributes);
+            object? AttributeValue = ParseElement(reader);
 
             XamlAttribute Attribute = new(attributeName, AttributeValue);
             attributes.Add(Attribute);

@@ -14,9 +14,9 @@ public interface IXamlCodeFile : IFile
     IPath CodeBehindPath { get; }
 
     /// <summary>
-    /// Gets the file content as a tree of xaml elements.
+    /// Gets the result of parsing the xaml file.
     /// </summary>
-    IXamlElement? RootElement { get; }
+    IXamlParsingResult? XamlParsingResult { get; }
 
     /// <summary>
     /// Gets the code syntax tree.
