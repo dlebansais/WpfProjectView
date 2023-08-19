@@ -5,8 +5,6 @@
 /// </summary>
 public class XamlParsingResult : IXamlParsingResult
 {
-    /// <summary>
-    /// Gets the root element.
-    /// </summary>
+    /// <inheritdoc/>
     public IXamlElement? Root { get; internal set; }
 }

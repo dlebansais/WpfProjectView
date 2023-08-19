@@ -3,7 +3,6 @@
 /// <summary>
 /// Implements a xaml element attribute.
 /// </summary>
-/// <inheritdoc/>
-internal record XamlAttribute(string Name, object? Value) : IXamlAttribute
+internal record XamlAttributeSimpleValue(string StringValue) : XamlAttribute(string.Empty, StringValue)
 {
 }
