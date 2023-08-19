@@ -6,7 +6,7 @@
 public interface IXamlResourceFile : IFile
 {
     /// <summary>
-    /// Gets the file content as a node tree.
+    /// Gets the file content as a tree of xaml elements.
     /// </summary>
-    object? NoteTree { get; }
+    IXamlElement? RootElement { get; }
 }

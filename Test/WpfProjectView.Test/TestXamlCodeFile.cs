@@ -21,15 +21,15 @@ public class TestXamlCodeFile
                 FileCount += 2;
 
                 AsXamlCodeFile.Parse();
-                Assert.That(AsXamlCodeFile.NoteTree, Is.Null);
+                Assert.That(AsXamlCodeFile.RootElement, Is.Null);
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Null);
 
                 AsXamlCodeFile.LoadAsync(TestProject.RootFolder);
-                Assert.That(AsXamlCodeFile.NoteTree, Is.Null);
+                Assert.That(AsXamlCodeFile.RootElement, Is.Null);
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Null);
 
                 AsXamlCodeFile.Parse();
-                Assert.That(AsXamlCodeFile.NoteTree, Is.Not.Null);
+                Assert.That(AsXamlCodeFile.RootElement, Is.Not.Null);
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Not.Null);
             }
 

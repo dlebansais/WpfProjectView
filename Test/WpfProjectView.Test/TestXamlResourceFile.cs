@@ -23,13 +23,13 @@ public class TestXamlResourceFile
                 XamlFileCount++;
 
                 AsXamlResourceFile.Parse();
-                Assert.That(AsXamlResourceFile.NoteTree, Is.Null);
+                Assert.That(AsXamlResourceFile.RootElement, Is.Null);
 
                 AsXamlResourceFile.LoadAsync(TestProject.RootFolder);
-                Assert.That(AsXamlResourceFile.NoteTree, Is.Null);
+                Assert.That(AsXamlResourceFile.RootElement, Is.Null);
 
                 AsXamlResourceFile.Parse();
-                Assert.That(AsXamlResourceFile.NoteTree, Is.Not.Null);
+                Assert.That(AsXamlResourceFile.RootElement, Is.Not.Null);
             }
 
         Assert.That(XamlFileCount, Is.GreaterThan(0));
@@ -57,7 +57,7 @@ public class TestXamlResourceFile
         Assert.ThrowsAsync<FileNotFoundException>(async () => await XamlFile.LoadAsync(TestProject.RootFolder));
 
         XamlFile.Parse();
-        Assert.That(XamlFile.NoteTree, Is.Null);
+        Assert.That(XamlFile.RootElement, Is.Null);
     }
 
     private void CreateLocalDummyFile(string fileName)

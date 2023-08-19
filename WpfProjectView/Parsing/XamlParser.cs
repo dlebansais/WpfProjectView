@@ -13,24 +13,38 @@ internal static class XamlParser
     /// Parses xaml content and returns the node tree.
     /// </summary>
     /// <param name="content">The content to parse.</param>
-    public static object? Parse(byte[]? content)
+    public static IXamlElement? Parse(byte[]? content)
     {
         if (content is null)
             return null;
 
         MemoryStream Stream = new(content);
         XamlXmlReader Reader = new(Stream);
-        string? RootItemName = null;
+        IXamlElement? Result = null;
 
         while (Reader.Read())
         {
-            if (Reader.NodeType == XamlNodeType.StartObject)
+            switch (Reader.NodeType)
             {
-                RootItemName = Reader.Type.Name;
-                break;
+                case XamlNodeType.None:
+                    break;
+                case XamlNodeType.StartObject:
+                    break;
+                case XamlNodeType.GetObject:
+                    break;
+                case XamlNodeType.EndObject:
+                    break;
+                case XamlNodeType.StartMember:
+                    break;
+                case XamlNodeType.EndMember:
+                    break;
+                case XamlNodeType.Value:
+                    break;
+                case XamlNodeType.NamespaceDeclaration:
+                    break;
             }
         }
 
-        return RootItemName;
+        return Result;
     }
 }

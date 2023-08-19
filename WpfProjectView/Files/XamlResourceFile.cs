@@ -9,7 +9,7 @@ using FolderView;
 internal record XamlResourceFile(FolderView.IFile SourceFile) : File(SourceFile), IXamlResourceFile
 {
     /// <inheritdoc/>
-    public object? NoteTree { get; private set; }
+    public IXamlElement? RootElement { get; private set; }
 
     /// <inheritdoc/>
     public override async Task LoadAsync(IFolder rootFolder)
@@ -20,6 +20,6 @@ internal record XamlResourceFile(FolderView.IFile SourceFile) : File(SourceFile)
     /// <inheritdoc/>
     public override void Parse()
     {
-        NoteTree = XamlParser.Parse(SourceFile.Content);
+        RootElement = XamlParser.Parse(SourceFile.Content);
     }
 }

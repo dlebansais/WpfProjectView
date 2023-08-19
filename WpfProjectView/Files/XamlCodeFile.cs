@@ -13,7 +13,7 @@ internal record XamlCodeFile(FolderView.IFile SourceFile) : File(SourceFile), IX
     public IPath CodeBehindPath { get; } = new Path(SourceFile.Path.Ancestors, SourceFile.Path.Name + ".cs");
 
     /// <inheritdoc/>
-    public object? NoteTree { get; private set; }
+    public IXamlElement? RootElement { get; private set; }
 
     /// <inheritdoc/>
     public SyntaxTree? SyntaxTree { get; private set; }
@@ -30,7 +30,7 @@ internal record XamlCodeFile(FolderView.IFile SourceFile) : File(SourceFile), IX
     /// <inheritdoc/>
     public override void Parse()
     {
-        NoteTree = XamlParser.Parse(SourceFile.Content);
+        RootElement = XamlParser.Parse(SourceFile.Content);
         SyntaxTree = CodeParser.Parse(CodeSourceFile?.Content);
     }
 
