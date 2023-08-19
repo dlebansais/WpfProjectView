@@ -7,10 +7,10 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents a Xaml file with code behind.
 /// </summary>
-internal record XamlCodeFile(FolderView.IFile SourceFile) : File(SourceFile), IXamlCodeFile
+internal record XamlCodeFile(FolderView.IFile XamlSourceFile, FolderView.IFile CodeSourceFile) : File(XamlSourceFile), IXamlCodeFile
 {
     /// <inheritdoc/>
-    public IPath CodeBehindPath { get; } = new Path(SourceFile.Path.Ancestors, SourceFile.Path.Name + ".cs");
+    public IPath CodeBehindPath { get; } = CodeSourceFile.Path;
 
     /// <inheritdoc/>
     public IXamlElement? RootElement { get; private set; }
@@ -22,8 +22,6 @@ internal record XamlCodeFile(FolderView.IFile SourceFile) : File(SourceFile), IX
     public override async Task LoadAsync(IFolder rootFolder)
     {
         await SourceFile.LoadAsync();
-
-        CodeSourceFile = FolderView.Path.GetRelativeFile(rootFolder, CodeBehindPath);
         await CodeSourceFile.LoadAsync();
     }
 
@@ -33,6 +31,4 @@ internal record XamlCodeFile(FolderView.IFile SourceFile) : File(SourceFile), IX
         RootElement = XamlParser.Parse(SourceFile.Content);
         SyntaxTree = CodeParser.Parse(CodeSourceFile?.Content);
     }
-
-    private FolderView.IFile? CodeSourceFile;
 }

@@ -29,7 +29,7 @@ internal static class XamlParser
                 case XamlNodeType.None:
                     break;
                 case XamlNodeType.StartObject:
-                    break;
+                    return new XamlElement(new XamlNamespaceCollection(), new XamlElementCollection(), new XamlAttributeCollection());
                 case XamlNodeType.GetObject:
                     break;
                 case XamlNodeType.EndObject:

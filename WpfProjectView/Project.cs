@@ -79,7 +79,7 @@ public record Project : IProject
         }
 
         // Finally fill the list of files.
-        XamlCodeFileList.ForEach(item => FillFileList(new XamlCodeFile(item), files));
+        XamlWithCodeBehindList.ForEach(item => FillFileList(new XamlCodeFile(item.DotXaml, item.DotCs), files));
         XamlFileList.ForEach(item => FillFileList(new XamlResourceFile(item), files));
         CodeFileList.ForEach(item => FillFileList(new CodeFile(item), files));
         OtherFileList.ForEach(item => FillFileList(new OtherFile(item), files));

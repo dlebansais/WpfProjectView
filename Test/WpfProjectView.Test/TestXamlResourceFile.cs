@@ -17,7 +17,7 @@ public class TestXamlResourceFile
         IProject TestProject = TestProjectTask.Result;
         int XamlFileCount = 0;
 
-        foreach (IFile Item in TestProject.Files)
+        foreach (var Item in TestProject.Files)
             if (Item is IXamlResourceFile AsXamlResourceFile)
             {
                 XamlFileCount++;
