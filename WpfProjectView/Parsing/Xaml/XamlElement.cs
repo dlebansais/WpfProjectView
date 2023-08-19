@@ -4,6 +4,6 @@
 /// Implements a xaml element.
 /// </summary>
 /// <inheritdoc/>
-internal record XamlElement(IXamlNamespaceCollection Namespaces, IXamlElementCollection Children, IXamlAttributeCollection Attributes) : IXamlElement
+internal record XamlElement(string Name, IXamlNamespaceCollection Namespaces, IXamlElementCollection Children, IXamlAttributeCollection Attributes) : IXamlElement
 {
 }

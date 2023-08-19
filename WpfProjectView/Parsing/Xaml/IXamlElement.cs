@@ -6,6 +6,11 @@
 public interface IXamlElement
 {
     /// <summary>
+    /// Gets the element name.
+    /// </summary>
+    string Name { get; }
+
+    /// <summary>
     /// Gets the collection of namespaces available in the scope of this element.
     /// </summary>
     IXamlNamespaceCollection Namespaces { get; }
