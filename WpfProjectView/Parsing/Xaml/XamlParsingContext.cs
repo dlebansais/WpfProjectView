@@ -167,6 +167,11 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
     public object Value { get => Reader.Value; }
 
     /// <summary>
+    /// Gets the reader line number.
+    /// </summary>
+    public int LineNumber { get => Reader.LineNumber; }
+
+    /// <summary>
     /// Reads once.
     /// </summary>
     public bool Read() => Reader.Read();

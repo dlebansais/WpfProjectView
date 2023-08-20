@@ -46,15 +46,7 @@ internal static partial class XamlParser
         XamlElementCollection Children = new();
         XamlAttributeCollection Attributes = new();
 
-        while (context.NodeType == XamlNodeType.NamespaceDeclaration)
-        {
-            NamespaceDeclaration Namespace = context.NamespacePath;
-            IXamlNamespace NewNamespace = XamlNamespace.Create(Namespace.Prefix, Namespace.Namespace);
-            Namespaces.Add(NewNamespace);
-
-            if (!context.Read())
-                throw new NotImplementedException();
-        }
+        ParseNamespaceDeclarations(context, Namespaces);
 
         XamlNamespaceCollection NewNamespaces = new(context.Namespaces);
         NewNamespaces.AddRange(Namespaces);
@@ -69,6 +61,19 @@ internal static partial class XamlParser
         ParseElementContent(context, Children, Attributes);
 
         return new XamlElement(ElementNamespace, ElementName, Namespaces, Children, Attributes);
+    }
+
+    private static void ParseNamespaceDeclarations(XamlParsingContext context, XamlNamespaceCollection namespaces)
+    {
+        while (context.NodeType == XamlNodeType.NamespaceDeclaration)
+        {
+            NamespaceDeclaration Namespace = context.NamespacePath;
+            IXamlNamespace NewNamespace = XamlNamespace.Create(Namespace.Prefix, Namespace.Namespace);
+            namespaces.Add(NewNamespace);
+
+            if (!context.Read())
+                throw new NotImplementedException();
+        }
     }
 
     private static void ParseElementContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)
@@ -250,6 +255,8 @@ internal static partial class XamlParser
             throw new NotImplementedException();
 
         string AttributeName = context.Member.Name;
+        int AttributeLineNumber = context.LineNumber;
+
         IXamlAttribute Attribute;
 
         if (!context.Read())
@@ -263,7 +270,8 @@ internal static partial class XamlParser
                 break;
             case XamlNodeType.StartObject:
                 XamlElementCollection ElementCollection = ParseElementMemberObjectsValue(context);
-                Attribute = new XamlAttributeElementCollection(AttributeName, ElementCollection);
+                bool IsOneLine = AttributeLineNumber == context.LineNumber;
+                Attribute = new XamlAttributeElementCollection(AttributeName, ElementCollection, IsOneLine);
                 break;
             default:
                 throw new NotImplementedException();

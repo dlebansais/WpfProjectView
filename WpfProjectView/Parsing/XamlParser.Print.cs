@@ -10,38 +10,39 @@ internal static partial class XamlParser
 {
     private static void Print(IXamlElement element, int indentation)
     {
-        SplitElementFields(element, out List<string> AttributeDirectiveList, out List<string> NamespaceList, out List<string> AttributeMemberList, out string? ValueString, out List<XamlAttributeElementCollection> ElementCollectionAttributeList);
+        SplitElementFields(element, out List<string> AttributeDirectiveList, out List<string> NamespaceList, out List<string> AttributeMemberList, out string? ValueString, out List<XamlAttributeElementCollection> OneLineElementCollectionAttributeList, out List<XamlAttributeElementCollection> MultiLineElementCollectionAttributeList);
 
-        if (element.Children.Count == 0 && ElementCollectionAttributeList.Count == 0 && (NamespaceList.Count == 0 || (NamespaceList.Count == 1 && AttributeDirectiveList.Count == 0 && AttributeMemberList.Count == 0) || ValueString is not null))
+        if (element.Children.Count == 0 && MultiLineElementCollectionAttributeList.Count == 0 && (NamespaceList.Count == 0 || (NamespaceList.Count == 1 && AttributeDirectiveList.Count == 0 && AttributeMemberList.Count == 0) || ValueString is not null))
         {
-            PrintAttributeOnSameLine(element, indentation, AttributeDirectiveList, NamespaceList, AttributeMemberList, ValueString, true);
+            PrintAttributeOnSameLine(element, indentation, AttributeDirectiveList, NamespaceList, AttributeMemberList, ValueString, OneLineElementCollectionAttributeList, true);
         }
-        else if (element.Children.Count == 0 && ElementCollectionAttributeList.Count == 0)
+        else if (element.Children.Count == 0 && MultiLineElementCollectionAttributeList.Count == 0)
         {
-            PrintAttributeOnMultipleLines(element, indentation, AttributeDirectiveList, NamespaceList, AttributeMemberList, true);
+            PrintAttributeOnMultipleLines(element, indentation, AttributeDirectiveList, NamespaceList, AttributeMemberList, OneLineElementCollectionAttributeList, true);
         }
         else
         {
             if (NamespaceList.Count == 0)
             {
-                PrintAttributeOnSameLine(element, indentation, AttributeDirectiveList, NamespaceList, AttributeMemberList, null, false);
-                PrintChildren(element, indentation, ElementCollectionAttributeList);
+                PrintAttributeOnSameLine(element, indentation, AttributeDirectiveList, NamespaceList, AttributeMemberList, null, OneLineElementCollectionAttributeList, false);
+                PrintChildren(element, indentation, MultiLineElementCollectionAttributeList);
             }
             else
             {
-                PrintAttributeOnMultipleLines(element, indentation, AttributeDirectiveList, NamespaceList, AttributeMemberList, false);
-                PrintChildren(element, indentation, ElementCollectionAttributeList);
+                PrintAttributeOnMultipleLines(element, indentation, AttributeDirectiveList, NamespaceList, AttributeMemberList, OneLineElementCollectionAttributeList, false);
+                PrintChildren(element, indentation, MultiLineElementCollectionAttributeList);
             }
         }
     }
 
-    private static void SplitElementFields(IXamlElement element, out List<string> attributeDirectiveList, out List<string> namespaceList, out List<string> attributeMemberList, out string? valueString, out List<XamlAttributeElementCollection> elementCollectionAttributeList)
+    private static void SplitElementFields(IXamlElement element, out List<string> attributeDirectiveList, out List<string> namespaceList, out List<string> attributeMemberList, out string? valueString, out List<XamlAttributeElementCollection> oneLineElementCollectionAttributeList, out List<XamlAttributeElementCollection> multiLineElementCollectionAttributeList)
     {
         attributeDirectiveList = new();
         namespaceList = new();
         attributeMemberList = new();
         valueString = null;
-        elementCollectionAttributeList = new();
+        oneLineElementCollectionAttributeList = new();
+        multiLineElementCollectionAttributeList = new();
 
         foreach (IXamlNamespace Namespace in element.Namespaces)
             if (Namespace.Prefix == string.Empty)
@@ -63,13 +64,16 @@ internal static partial class XamlParser
                     attributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
                     break;
                 case XamlAttributeElementCollection ElementCollection:
-                    elementCollectionAttributeList.Add(ElementCollection);
+                    if (ElementCollection.IsOneLine)
+                        oneLineElementCollectionAttributeList.Add(ElementCollection);
+                    else
+                        multiLineElementCollectionAttributeList.Add(ElementCollection);
                     break;
             }
         }
     }
 
-    private static void PrintAttributeOnSameLine(IXamlElement element, int indentation, List<string> attributeDirectiveList, List<string> namespaceList, List<string> attributeMemberList, string? valueString, bool endTag)
+    private static void PrintAttributeOnSameLine(IXamlElement element, int indentation, List<string> attributeDirectiveList, List<string> namespaceList, List<string> attributeMemberList, string? valueString, List<XamlAttributeElementCollection> oneLineElementCollectionAttributeList, bool endTag)
     {
         Debug.Assert(namespaceList.Count <= 1);
         Debug.Assert(valueString is null || endTag);
@@ -86,10 +90,25 @@ internal static partial class XamlParser
         if (AttributeMemberString != string.Empty)
             AttributeMemberString = " " + AttributeMemberString;
 
+        string ElementCollectionMemberString = string.Empty;
+
+        foreach (XamlAttributeElementCollection ElementCollectionAttribute in oneLineElementCollectionAttributeList)
+        {
+            string ChildString = $" {ElementCollectionAttribute.Name}=\"";
+
+            IXamlElementCollection ElementCollection = ElementCollectionAttribute.Children;
+            foreach (IXamlElement Child in ElementCollection)
+                ChildString += OneLineElement(Child);
+
+            ChildString += "\"";
+
+            ElementCollectionMemberString += ChildString;
+        }
+
         if (valueString is null)
         {
             string Termination = endTag ? "/>" : ">";
-            Debug.WriteLine($"{Whitespaces(indentation)}<{ElementName}{AttributeDirectiveString}{NamespaceString}{AttributeMemberString}{Termination}");
+            Debug.WriteLine($"{Whitespaces(indentation)}<{ElementName}{AttributeDirectiveString}{NamespaceString}{AttributeMemberString}{ElementCollectionMemberString}{Termination}");
         }
         else
         {
@@ -97,7 +116,7 @@ internal static partial class XamlParser
         }
     }
 
-    private static void PrintAttributeOnMultipleLines(IXamlElement element, int indentation, List<string> attributeDirectiveList, List<string> namespaceList, List<string> attributeMemberList, bool endTag)
+    private static void PrintAttributeOnMultipleLines(IXamlElement element, int indentation, List<string> attributeDirectiveList, List<string> namespaceList, List<string> attributeMemberList, List<XamlAttributeElementCollection> oneLineElementCollectionAttributeList, bool endTag)
     {
         string ElementName = NameWithPrefix(element.Namespace, element.Name);
 
@@ -148,6 +167,53 @@ internal static partial class XamlParser
         Debug.WriteLine($"{Whitespaces(indentation)}<{ElementName}/>");
     }
 
+    private static string OneLineElement(IXamlElement element)
+    {
+        string ElementName = NameWithPrefix(element.Namespace, element.Name);
+
+        string AttributeListString = string.Empty;
+
+        foreach (IXamlAttribute Attribute in element.Attributes)
+        {
+            if (AttributeListString.Length > 0)
+                AttributeListString += ", ";
+
+            switch (Attribute)
+            {
+                case XamlAttributeDirective Directive:
+                    AttributeListString += "d";
+                    break;
+                case XamlAttributeMember Member:
+                    string MemberString = $"{Member.Value}";
+                    if (Member.Name != string.Empty)
+                        MemberString = $"{Member.Name}=" + MemberString;
+
+                    AttributeListString += MemberString;
+                    break;
+                case XamlAttributeElementCollection ElementCollection:
+                    string ElementCollectionString = string.Empty;
+
+                    foreach (IXamlElement Child in ElementCollection.Children)
+                        ElementCollectionString += OneLineElement(Child);
+
+                    if (ElementCollection.Name != string.Empty)
+                        ElementCollectionString = $"{ElementCollection.Name}=" + ElementCollectionString;
+
+                    AttributeListString += ElementCollectionString;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (AttributeListString.Length > 0)
+            AttributeListString = " " + AttributeListString;
+
+        string Result = $"{{{ElementName}{AttributeListString}}}";
+
+        return Result;
+    }
+
     private static string Whitespaces(int indentation)
     {
         string Result = string.Empty;
@@ -162,6 +228,8 @@ internal static partial class XamlParser
     {
         if (@namespace.Prefix == string.Empty)
             return name;
+        else if (@namespace is XamlNamespaceExtension && name.EndsWith("Extension"))
+            return $"{@namespace.Prefix}:{name.Substring(0, name.Length - 9)}";
         else
             return $"{@namespace.Prefix}:{name}";
     }
