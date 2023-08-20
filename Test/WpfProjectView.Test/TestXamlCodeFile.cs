@@ -1,18 +1,16 @@
 ﻿namespace WpfProjectView.Test;
 
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 public class TestXamlCodeFile
 {
     [Test]
-    public void TestLoad()
+    public async Task TestLoadAsync()
     {
         FolderView.ILocation Location = TestTools.GetLocalLocation();
 
-        var TestProjectTask = Project.CreateAsync(Location);
-        TestProjectTask.Wait();
-
-        IProject TestProject = TestProjectTask.Result;
+        IProject TestProject = await Project.CreateAsync(Location);
         int FileCount = 0;
 
         foreach (IFile Item in TestProject.Files)
@@ -36,7 +34,7 @@ public class TestXamlCodeFile
                 Assert.That(AsXamlCodeFile.XamlParsingResult.Root, Is.Null);
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Null);
 
-                AsXamlCodeFile.LoadAsync(TestProject.RootFolder);
+                await AsXamlCodeFile.LoadAsync(TestProject.RootFolder);
 
                 Assert.That(AsXamlCodeFile.XamlSourceFile, Is.Not.Null);
                 Assert.That(AsXamlCodeFile.XamlSourceFile.Content, Is.Not.Null);
@@ -52,7 +50,8 @@ public class TestXamlCodeFile
                 Assert.That(AsXamlCodeFile.XamlParsingResult.Root, Is.Not.Null);
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Not.Null);
 
-                TestTools.CompareXamlParingResultWithOriginalContent(AsXamlCodeFile.XamlSourceFile.Content, AsXamlCodeFile.XamlParsingResult);
+                string ComparisonMessage = TestTools.CompareXamlParingResultWithOriginalContent(AsXamlCodeFile.XamlSourceFile.Content, AsXamlCodeFile.XamlParsingResult);
+                Assert.That(ComparisonMessage, Is.Empty, $"{AsXamlCodeFile.XamlSourceFile.Name}\r\n{ComparisonMessage}");
             }
 
         Assert.That(FileCount, Is.GreaterThan(0));

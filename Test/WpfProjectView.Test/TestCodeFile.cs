@@ -1,20 +1,18 @@
 ﻿namespace WpfProjectView.Test;
 
 using System.IO;
+using System.Threading.Tasks;
 using FolderView;
 using NUnit.Framework;
 
 public class TestCodeFile
 {
     [Test]
-    public void TestLoad()
+    public async Task TestLoadAsync()
     {
         ILocation Location = TestTools.GetLocalLocation();
 
-        var TestProjectTask = Project.CreateAsync(Location);
-        TestProjectTask.Wait();
-
-        IProject TestProject = TestProjectTask.Result;
+        IProject TestProject = await Project.CreateAsync(Location);
         int CodeFileCount = 0;
 
         foreach (var Item in TestProject.Files)
@@ -25,7 +23,7 @@ public class TestCodeFile
                 AsCodeFile.Parse();
                 Assert.That(AsCodeFile.SyntaxTree, Is.Null);
 
-                AsCodeFile.LoadAsync(TestProject.RootFolder);
+                await AsCodeFile.LoadAsync(TestProject.RootFolder);
                 Assert.That(AsCodeFile.SyntaxTree, Is.Null);
 
                 AsCodeFile.Parse();
@@ -36,17 +34,15 @@ public class TestCodeFile
     }
 
     [Test]
-    public void TestNullContent()
+    public async Task TestNullContentAsync()
     {
         string DummyFileName = "dummy.cs";
         _ = TestTools.DeleteFile(DummyFileName);
         CreateLocalDummyFile(DummyFileName);
 
         LocalLocation Location = new(".");
-        var TestProjectTask = Project.CreateAsync(Location);
-        TestProjectTask.Wait();
-        IProject TestProject = TestProjectTask.Result;
-
+        IProject TestProject = await Project.CreateAsync(Location);
+        
         _ = TestTools.DeleteFile(DummyFileName);
 
         Assert.That(TestProject.Files, Has.Count.GreaterThan(0));

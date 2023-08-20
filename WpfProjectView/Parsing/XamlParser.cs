@@ -21,7 +21,7 @@ public static partial class XamlParser
         if (content is not null)
         {
             using MemoryStream Stream = new(content);
-            using XamlXmlReader Reader = new(Stream);
+            using XamlXmlReader Reader = new(Stream, new XamlXmlReaderSettings() { ProvideLineInfo = true });
 
             if (!Reader.Read())
                 throw new NotImplementedException();

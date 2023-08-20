@@ -36,7 +36,12 @@ internal record XamlPrintingContext(StringBuilder Builder, IXamlElement Element,
     /// <summary>
     /// Gets a value indicating whether the entire element can be printed on one line.
     /// </summary>
-    public bool IsFullSingleLine => !Element.IsMultiLine && Element.Children.Count == 0 && MultiLineElementCollectionAttributeList.Count == 0 && (NamespaceList.Count == 0 || (NamespaceList.Count == 1 && AttributeDirectiveList.Count == 0 && AttributeMemberList.Count == 0) || ValueString.Count > 0);
+    public bool IsFullSingleLine => !Element.IsMultiLine &&
+                                    Element.Children.Count == 0 &&
+                                    MultiLineElementCollectionAttributeList.Count == 0 &&
+                                    (NamespaceList.Count == 0 ||
+                                        (NamespaceList.Count == 1 && AttributeDirectiveList.Count == 0 && AttributeMemberList.Count == 0) ||
+                                        ValueString.Count > 0);
 
     /// <summary>
     /// Gets a value indicating whether the element can be printed on multiple line without children.

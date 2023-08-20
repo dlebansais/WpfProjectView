@@ -1,6 +1,7 @@
 ﻿namespace WpfProjectView.Test;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -15,7 +16,7 @@ public static class TestTools
 
     public static ILocation GetLocalLocation()
     {
-        string ProjectRootPath = TestTools.GetExecutingProjectRootPath();
+        string ProjectRootPath = GetExecutingProjectRootPath();
         string TestProjectRootPath = @$"{ProjectRootPath}\..\..\..\{ProjectRepositoryName}\{ProjectName}";
         LocalLocation Location = new(TestProjectRootPath);
 
@@ -53,7 +54,7 @@ public static class TestTools
         return CurrentDirectory!;
     }
 
-    public static void CompareXamlParingResultWithOriginalContent(byte[] content, IXamlParsingResult xamlParsingResult)
+    public static string CompareXamlParingResultWithOriginalContent(byte[] content, IXamlParsingResult xamlParsingResult)
     {
         bool HasUf8Bom = content.Length >= 3 && content[0] == 0xEF && content[1] == 0xBB && content[2] == 0xBF;
         string ContentString = HasUf8Bom ? Encoding.UTF8.GetString(content, 3, content.Length - 3) : Encoding.UTF8.GetString(content);
@@ -64,33 +65,71 @@ public static class TestTools
         PrintResultString = PrintResultString.Trim();
 
         if (ContentString == PrintResultString)
-            return;
+            return string.Empty;
 
-        var Differences = InlineDiffBuilder.Diff(ContentString, PrintResultString, ignoreWhiteSpace: false);
+        return PrintParsingDifferences(ContentString, PrintResultString);
+    }
 
-        var SavedColor = Console.ForegroundColor;
+
+    public static string PrintParsingDifferences(string contentString, string printResultString)
+    {
+        StringBuilder Builder = new();
+        var Differences = InlineDiffBuilder.Diff(contentString, printResultString, ignoreWhiteSpace: false);
+        bool HasDifferences = false;
+        int SimilarityCount = 0;
+        int LineNumber = 1;
+        List<string> DebugLines = new();
+
         foreach (var Line in Differences.Lines)
         {
             switch (Line.Type)
             {
                 case ChangeType.Inserted:
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Debug.Write("+ ");
+                    DebugLines.Add($"+ {Line.Text}");
+                    HasDifferences = true;
+                    SimilarityCount = 0;
                     break;
                 case ChangeType.Deleted:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Debug.Write("- ");
+                    DebugLines.Add($"- {Line.Text}");
+                    HasDifferences = true;
+                    SimilarityCount = 0;
                     break;
                 default:
-                    Console.ForegroundColor = ConsoleColor.Gray; // compromise for dark or light background
-                    Debug.Write("  ");
+                    DebugLines.Add($"  {Line.Text}");
+                    SimilarityCount++;
+
+                    if (!HasDifferences)
+                    {
+                        if (DebugLines.Count >= 3)
+                            DebugLines.RemoveAt(0);
+                    }
+                    else if (SimilarityCount >= 3)
+                    {
+                        PrintParsingDifferences(Builder, LineNumber, DebugLines);
+
+                        DebugLines.Clear();
+                        HasDifferences = false;
+                        SimilarityCount = 0;
+                    }
+
                     break;
             }
 
-            Debug.WriteLine(Line.Text);
+            LineNumber++;
         }
 
-        Console.ForegroundColor = SavedColor;
+        if (HasDifferences)
+            PrintParsingDifferences(Builder, LineNumber, DebugLines);
+
+        return Builder.ToString();
+    }
+
+    public static void PrintParsingDifferences(StringBuilder builder, int lineNumber, List<string> debugLines)
+    {
+        builder.AppendLine($"****** Line {lineNumber - debugLines.Count + 1}");
+
+        foreach (string DebugLine in debugLines)
+            builder.AppendLine(DebugLine);
     }
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]

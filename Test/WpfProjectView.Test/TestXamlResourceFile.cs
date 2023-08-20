@@ -1,20 +1,18 @@
 ﻿namespace WpfProjectView.Test;
 
 using System.IO;
+using System.Threading.Tasks;
 using FolderView;
 using NUnit.Framework;
 
 public class TestXamlResourceFile
 {
     [Test]
-    public void TestLoad()
+    public async Task TestLoadAsync()
     {
-        FolderView.ILocation Location = TestTools.GetLocalLocation();
+        ILocation Location = TestTools.GetLocalLocation();
 
-        var TestProjectTask = Project.CreateAsync(Location);
-        TestProjectTask.Wait();
-
-        IProject TestProject = TestProjectTask.Result;
+        IProject TestProject = await Project.CreateAsync(Location);
         int XamlFileCount = 0;
 
         foreach (var Item in TestProject.Files)
@@ -22,33 +20,47 @@ public class TestXamlResourceFile
             {
                 XamlFileCount++;
 
+                Assert.That(AsXamlResourceFile.SourceFile, Is.Not.Null);
+                Assert.That(AsXamlResourceFile.SourceFile.Content, Is.Null);
                 Assert.That(AsXamlResourceFile.XamlParsingResult, Is.Null);
 
                 AsXamlResourceFile.Parse();
+
+                Assert.That(AsXamlResourceFile.SourceFile, Is.Not.Null);
+                Assert.That(AsXamlResourceFile.SourceFile.Content, Is.Null);
                 Assert.That(AsXamlResourceFile.XamlParsingResult, Is.Not.Null);
                 Assert.That(AsXamlResourceFile.XamlParsingResult.Root, Is.Null);
 
-                AsXamlResourceFile.LoadAsync(TestProject.RootFolder);
+                await AsXamlResourceFile.LoadAsync(TestProject.RootFolder);
+
+                Assert.That(AsXamlResourceFile.SourceFile, Is.Not.Null);
+                Assert.That(AsXamlResourceFile.SourceFile.Content, Is.Not.Null);
+                Assert.That(AsXamlResourceFile.XamlParsingResult, Is.Not.Null);
                 Assert.That(AsXamlResourceFile.XamlParsingResult.Root, Is.Null);
 
                 AsXamlResourceFile.Parse();
+
+                Assert.That(AsXamlResourceFile.SourceFile, Is.Not.Null);
+                Assert.That(AsXamlResourceFile.SourceFile.Content, Is.Not.Null);
+                Assert.That(AsXamlResourceFile.XamlParsingResult, Is.Not.Null);
                 Assert.That(AsXamlResourceFile.XamlParsingResult.Root, Is.Not.Null);
+
+                string ComparisonMessage = TestTools.CompareXamlParingResultWithOriginalContent(AsXamlResourceFile.SourceFile.Content, AsXamlResourceFile.XamlParsingResult);
+                Assert.That(ComparisonMessage, Is.Empty, $"{AsXamlResourceFile.SourceFile.Name}\r\n{ComparisonMessage}");
             }
 
         Assert.That(XamlFileCount, Is.GreaterThan(0));
     }
 
     [Test]
-    public void TestNullContent()
+    public async Task TestNullContentAsync()
     {
         string DummyFileName = "dummy.xaml";
         _ = TestTools.DeleteFile(DummyFileName);
         CreateLocalDummyFile(DummyFileName);
 
         LocalLocation Location = new(".");
-        var TestProjectTask = Project.CreateAsync(Location);
-        TestProjectTask.Wait();
-        IProject TestProject = TestProjectTask.Result;
+        IProject TestProject = await Project.CreateAsync(Location);
 
         _ = TestTools.DeleteFile(DummyFileName);
 

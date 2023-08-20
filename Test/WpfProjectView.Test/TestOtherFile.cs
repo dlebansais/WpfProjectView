@@ -1,18 +1,16 @@
 ﻿namespace WpfProjectView.Test;
 
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 public class TestOtherFile
 {
     [Test]
-    public void TestLoad()
+    public async Task TestLoadAsync()
     {
         FolderView.ILocation Location = TestTools.GetLocalLocation();
 
-        var TestProjectTask = Project.CreateAsync(Location);
-        TestProjectTask.Wait();
-
-        IProject TestProject = TestProjectTask.Result;
+        IProject TestProject = await Project.CreateAsync(Location);
         int OtherFileCount = 0;
 
         foreach (IFile Item in TestProject.Files)
@@ -23,7 +21,7 @@ public class TestOtherFile
                 AsOtherFile.Parse();
                 Assert.That(AsOtherFile.Content, Is.Null);
 
-                AsOtherFile.LoadAsync(TestProject.RootFolder);
+                await AsOtherFile.LoadAsync(TestProject.RootFolder);
                 Assert.That(AsOtherFile.Content, Is.Null);
 
                 AsOtherFile.Parse();

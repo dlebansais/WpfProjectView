@@ -1,18 +1,16 @@
 ﻿namespace WpfProjectView.Test;
 
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 public class TestProject
 {
     [Test]
-    public void TestCreate()
+    public async Task TestCreateAsync()
     {
         FolderView.ILocation Location = TestTools.GetLocalLocation();
 
-        var TestProjectTask = Project.CreateAsync(Location);
-        TestProjectTask.Wait();
-
-        IProject TestProject = TestProjectTask.Result;
+        IProject TestProject = await Project.CreateAsync(Location);
 
         Assert.That(TestProject, Is.Not.Null);
         Assert.That(TestProject.Location, Is.EqualTo(Location));

@@ -58,7 +58,10 @@ public static partial class XamlParser
                     context.ValueString.Add(SimpleValue.StringValue);
                     break;
                 case XamlAttributeMember Member:
-                    context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
+                    if (Member.Value is string ValueString)
+                        context.AttributeMemberList.Add($"{Member.Name}=\"{ValueString}\"");
+                    else
+                        context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
                     break;
                 case XamlAttributeElementCollection ElementCollection:
                     if (ElementCollection.IsOneLine)
@@ -182,6 +185,7 @@ public static partial class XamlParser
         string ElementName = NameWithPrefix(element.Namespace, element.Name);
 
         string AttributeListString = string.Empty;
+        string MemberString;
 
         foreach (IXamlAttribute Attribute in element.Attributes)
         {
@@ -191,10 +195,16 @@ public static partial class XamlParser
             switch (Attribute)
             {
                 case XamlAttributeDirective Directive:
-                    AttributeListString += "d";
+                    AttributeListString += "TODO";
                     break;
                 case XamlAttributeMember Member:
-                    string MemberString = $"{Member.Value}";
+                    if (Member.Value is string ValueString)
+                        MemberString = ValueString;
+                    else if (Member.Value is IXamlElement NestedElement)
+                        MemberString = OneLineElement(NestedElement);
+                    else
+                        MemberString = "TODO"; // $"{Member.Value}";
+
                     if (Member.Name != string.Empty)
                         MemberString = $"{Member.Name}=" + MemberString;
 
