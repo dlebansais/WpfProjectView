@@ -20,7 +20,7 @@ public static partial class XamlParser
         {
             PrintAttributeOnMultipleLines(context, true);
         }
-        else if (context.NamespaceList.Count == 0)
+        else if (context.IsSingleLineWithChildren)
         {
             PrintAttributeOnSameLine(context, false);
             PrintChildren(context);
@@ -98,24 +98,23 @@ public static partial class XamlParser
 
         string ElementName = NameWithPrefix(context.Element.Namespace, context.Element.Name);
 
-        string AttributeDirectiveString = string.Join(' ', context.AttributeDirectiveList);
-        if (AttributeDirectiveString != string.Empty)
-            AttributeDirectiveString = " " + AttributeDirectiveString;
+        List<string> Parts = new();
+        Parts.AddRange(context.AttributeDirectiveList);
+        Parts.AddRange(context.NamespaceList);
+        Parts.AddRange(context.AttributeMemberList.ConvertAll(item => AttributeMemberToString(context, item)));
 
-        string NamespaceString = context.NamespaceList.Count > 0 ? " " + context.NamespaceList[0] : string.Empty;
-
-        string AttributeMembers = string.Empty;
-        foreach (object Item in context.AttributeMemberList)
-            AttributeMembers += " " + AttributeMemberToString(context, Item);
+        string AttributeString = string.Empty;
+        foreach (string Part in Parts)
+            AttributeString += $" {Part}";
 
         if (context.ValueString.Count == 0)
         {
             string Termination = endTag ? "/>" : ">";
-            context.Builder.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName}{AttributeDirectiveString}{NamespaceString}{AttributeMembers}{Termination}");
+            context.Builder.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName}{AttributeString}{Termination}");
         }
         else
         {
-            context.Builder.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName}{AttributeDirectiveString}{NamespaceString}{AttributeMembers}>{context.ValueString[0]}</{ElementName}>");
+            context.Builder.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName}{AttributeString}>{context.ValueString[0]}</{ElementName}>");
         }
     }
 
@@ -123,8 +122,17 @@ public static partial class XamlParser
     {
         string ElementName = NameWithPrefix(context.Element.Namespace, context.Element.Name);
 
-        string FirstDirectiveString = (context.AttributeDirectiveList.Count > 0) ? context.AttributeDirectiveList[0] : context.NamespaceList[0];
-        string LastDirectiveString = (context.AttributeMemberList.Count > 0) ? AttributeMemberToString(context, context.AttributeMemberList[context.AttributeMemberList.Count - 1]) : context.NamespaceList[context.NamespaceList.Count - 1];
+        List<string> Parts = new();
+        Parts.AddRange(context.AttributeDirectiveList);
+        Parts.AddRange(context.NamespaceList);
+        Parts.AddRange(context.AttributeMemberList.ConvertAll(item => AttributeMemberToString(context, item)));
+
+        Debug.Assert(Parts.Count >= 2);
+
+        string FirstDirectiveString = Parts[0];
+        string LastDirectiveString = Parts[Parts.Count - 1];
+        Parts.RemoveAt(0);
+        Parts.RemoveAt(Parts.Count - 1);
 
         context.Builder.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName} {FirstDirectiveString}");
 
@@ -132,20 +140,10 @@ public static partial class XamlParser
         for (int Index = 0; Index < ElementName.Length; Index++)
             ElementIndentation += " ";
 
-        for (int Index = 1; Index < context.AttributeDirectiveList.Count; Index++)
-            context.Builder.AppendLine($"{ElementIndentation}{context.AttributeDirectiveList[Index]}");
-
-        int NamespaceStartIndex = context.AttributeDirectiveList.Count > 0 ? 0 : 1;
-        int NamespaceEndIndex = context.AttributeMemberList.Count > 0 ? context.NamespaceList.Count : context.NamespaceList.Count - 1;
-
-        for (int Index = NamespaceStartIndex; Index < NamespaceEndIndex; Index++)
-            context.Builder.AppendLine($"{ElementIndentation}{context.NamespaceList[Index]}");
-
-        for (int Index = 0; Index + 1 < context.AttributeMemberList.Count; Index++)
-            context.Builder.AppendLine($"{ElementIndentation}{context.AttributeMemberList[Index]}");
+        foreach (string Part in Parts)
+            context.Builder.AppendLine($"{ElementIndentation}{Part}");
 
         string Termination = endTag ? "/>" : ">";
-
         context.Builder.AppendLine($"{ElementIndentation}{LastDirectiveString}{Termination}");
     }
 

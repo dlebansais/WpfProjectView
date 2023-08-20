@@ -29,9 +29,9 @@ public static partial class XamlParser
         ElementName = context.ObjectName;
         context = context with { CurrentObjectName = ElementName };
 
-        ParseElementContent(context, Children, Attributes);
+        ParseElementContent(context, Children, Attributes, out bool IsMultiLine);
 
-        return new XamlElement(ElementNamespace, ElementName, Namespaces, Children, Attributes);
+        return new XamlElement(ElementNamespace, ElementName, Namespaces, Children, Attributes, IsMultiLine);
     }
 
     private static void ParseNamespaceDeclarations(XamlParsingContext context, XamlNamespaceCollection namespaces)
@@ -47,20 +47,37 @@ public static partial class XamlParser
         }
     }
 
-    private static void ParseElementContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)
+    private static void ParseElementContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes, out bool isMultiLine)
     {
+        isMultiLine = false;
+
+        int CurrentLineNumber = context.LineNumber;
+
         while (context.Read() && context.NodeType == XamlNodeType.StartMember)
         {
             if (context.Member == XamlLanguage.Initialization)
+            {
                 ParseElementMemberInitialization(context, attributes);
+            }
             else if (context.Member == XamlLanguage.UnknownContent)
+            {
                 ParseElementMemberUnknownContent(context, children, attributes);
+            }
             else if (context.Member == XamlLanguage.PositionalParameters)
+            {
                 ParseElementMemberPositionalParameter(context, attributes);
+            }
             else if (context.Member is XamlDirective AsDirective)
+            {
                 ParseElementMemberDirective(context, AsDirective, attributes);
+            }
             else
-                ParseElementMember(context, attributes);
+            {
+                ParseElementMember(context, attributes, out bool CheckMultiLine);
+
+                if (CheckMultiLine && context.LineNumber > CurrentLineNumber && attributes.Count > 1)
+                    isMultiLine = true;
+            }
         }
 
         if (context.NodeType != XamlNodeType.EndObject)
@@ -202,8 +219,10 @@ public static partial class XamlParser
             throw new NotImplementedException();
     }
 
-    private static void ParseElementMember(XamlParsingContext context, XamlAttributeCollection attributes)
+    private static void ParseElementMember(XamlParsingContext context, XamlAttributeCollection attributes, out bool checkMultiLine)
     {
+        checkMultiLine = false;
+
         if (!context.Member.IsNameValid)
             throw new NotImplementedException();
 
@@ -229,11 +248,13 @@ public static partial class XamlParser
             case XamlNodeType.Value:
                 object? AttributeValue = ParseElementMemberSimpleValue(context);
                 Attribute = new XamlAttributeMember(AttributeName, AttributeValue);
+                checkMultiLine = true;
                 break;
             case XamlNodeType.StartObject:
                 XamlElementCollection ElementCollection = ParseElementMemberObjectsValue(context);
                 bool IsOneLine = AttributeLineNumber == context.LineNumber;
                 Attribute = new XamlAttributeElementCollection(AttributeName, ElementCollection, IsOneLine);
+                checkMultiLine = IsOneLine;
                 break;
             default:
                 throw new NotImplementedException();

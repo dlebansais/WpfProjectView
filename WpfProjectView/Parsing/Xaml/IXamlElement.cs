@@ -29,4 +29,9 @@ public interface IXamlElement
     /// Gets the list of attributes.
     /// </summary>
     IXamlAttributeCollection Attributes { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the element is spanning multiple lines.
+    /// </summary>
+    bool IsMultiLine { get; }
 }
