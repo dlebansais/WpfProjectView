@@ -33,53 +33,8 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
         {
             Debug.Assert(NodeType == XamlNodeType.StartObject);
 
-            IXamlNamespace Result = null!;
-            IXamlNamespace Preferred = null!;
-
             XamlType Object = Reader.Type;
-            Type? UnderlyingType = Object.UnderlyingType;
-            string? TypeNamespace = UnderlyingType?.Namespace;
-            string? TypeAssembly = UnderlyingType?.Assembly.GetName().Name;
-
-            if (TypeAssembly == "System.Private.CoreLib")
-                TypeAssembly = "mscorlib";
-
-            foreach (IXamlNamespace Namespace in Namespaces)
-            {
-                switch (Namespace)
-                {
-                    case XamlNamespaceDefault Default:
-                        if (Object.PreferredXamlNamespace == XamlNamespaceDefault.DefaultPath)
-                            Preferred = Default;
-                        break;
-                    case XamlNamespaceExtension Extension:
-                        if (Object.PreferredXamlNamespace == XamlNamespaceExtension.ExtensionPath)
-                            Preferred = Extension;
-                        break;
-                    case XamlNamespaceLocal Local:
-                        if (Object.PreferredXamlNamespace == Local.AssemblyPath)
-                            Preferred = Local;
-                        if (Local.Namespace == TypeNamespace)
-                            Result = Namespace;
-                        break;
-                    case XamlNamespace Other:
-                        if (Object.PreferredXamlNamespace == Other.AssemblyPath)
-                            Preferred = Other;
-                        if (Other.Namespace == TypeNamespace && Other.Assembly == TypeAssembly)
-                            Result = Namespace;
-                        break;
-                }
-
-                if (Result is not null)
-                    break;
-            }
-
-            if (Result is null)
-                Result = Preferred;
-
-            Debug.Assert(Result is not null);
-
-            return Result;
+            return FindNamespaceMatch(Object.PreferredXamlNamespace, Object.UnderlyingType);
         }
     }
 
@@ -105,46 +60,8 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
         {
             Debug.Assert(NodeType == XamlNodeType.StartMember);
 
-            IXamlNamespace Result = null!;
-            IXamlNamespace Preferred = null!;
-
             XamlMember Member = Reader.Member;
-            Type? UnderlyingType = Member.UnderlyingMember?.DeclaringType;
-            string? TypeNamespace = UnderlyingType?.Namespace;
-            string? TypeAssembly = UnderlyingType?.Name;
-
-            foreach (IXamlNamespace Namespace in Namespaces)
-            {
-                switch (Namespace)
-                {
-                    case XamlNamespaceDefault Default:
-                        if (Member.PreferredXamlNamespace == XamlNamespaceDefault.DefaultPath)
-                            Preferred = Default;
-                        break;
-                    case XamlNamespaceExtension Extension:
-                        if (Member.PreferredXamlNamespace == XamlNamespaceExtension.ExtensionPath)
-                            Preferred = Extension;
-                        break;
-                    case XamlNamespaceLocal Local:
-                        if (Local.Namespace == TypeNamespace)
-                            Result = Namespace;
-                        break;
-                    case XamlNamespace Other:
-                        if (Other.Namespace == TypeNamespace && Other.Assembly == TypeAssembly)
-                            Result = Namespace;
-                        break;
-                }
-
-                if (Result is not null)
-                    break;
-            }
-
-            if (Result is null)
-                Result = Preferred;
-
-            Debug.Assert(Result is not null);
-
-            return Result;
+            return FindNamespaceMatch(Member.PreferredXamlNamespace, Member.UnderlyingMember?.DeclaringType);
         }
     }
 
@@ -172,7 +89,66 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
     public int LineNumber { get => Reader.LineNumber; }
 
     /// <summary>
+    /// Gets the reader current object name.
+    /// </summary>
+    public string? CurrentObjectName { get; init; }
+
+    /// <summary>
     /// Reads once.
     /// </summary>
     public bool Read() => Reader.Read();
+
+    /// <summary>
+    /// Finds a match between a parsed namespace and a type.
+    /// </summary>
+    /// <param name="preferredXamlNamespace">The parsed namespace.</param>
+    /// <param name="underlyingType">The type.</param>
+    public IXamlNamespace FindNamespaceMatch(string preferredXamlNamespace, Type? underlyingType)
+    {
+        string? TypeNamespace = underlyingType?.Namespace;
+        string? TypeAssembly = underlyingType?.Assembly.GetName().Name;
+
+        if (TypeAssembly == "System.Private.CoreLib")
+            TypeAssembly = "mscorlib";
+
+        IXamlNamespace Result = null!;
+        IXamlNamespace Preferred = null!;
+
+        foreach (IXamlNamespace Namespace in Namespaces)
+        {
+            switch (Namespace)
+            {
+                case XamlNamespaceDefault Default:
+                    if (preferredXamlNamespace == XamlNamespaceDefault.DefaultPath)
+                        Preferred = Default;
+                    break;
+                case XamlNamespaceExtension Extension:
+                    if (preferredXamlNamespace == XamlNamespaceExtension.ExtensionPath)
+                        Preferred = Extension;
+                    break;
+                case XamlNamespaceLocal Local:
+                    if (preferredXamlNamespace == Local.AssemblyPath)
+                        Preferred = Local;
+                    if (Local.Namespace == TypeNamespace)
+                        Result = Namespace;
+                    break;
+                case XamlNamespace Other:
+                    if (preferredXamlNamespace == Other.AssemblyPath)
+                        Preferred = Other;
+                    if (Other.Namespace == TypeNamespace && Other.Assembly == TypeAssembly)
+                        Result = Namespace;
+                    break;
+            }
+
+            if (Result is not null)
+                break;
+        }
+
+        if (Result is null)
+            Result = Preferred;
+
+        Debug.Assert(Result is not null);
+
+        return Result;
+    }
 }

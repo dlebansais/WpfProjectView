@@ -21,14 +21,14 @@ internal record XamlCodeFile(FolderView.IFile XamlSourceFile, FolderView.IFile C
     /// <inheritdoc/>
     public override async Task LoadAsync(IFolder rootFolder)
     {
-        await SourceFile.LoadAsync();
+        await XamlSourceFile.LoadAsync();
         await CodeSourceFile.LoadAsync();
     }
 
     /// <inheritdoc/>
     public override void Parse()
     {
-        XamlParsingResult = XamlParser.Parse(SourceFile.Content);
+        XamlParsingResult = XamlParser.Parse(XamlSourceFile.Content);
         SyntaxTree = CodeParser.Parse(CodeSourceFile?.Content);
     }
 }

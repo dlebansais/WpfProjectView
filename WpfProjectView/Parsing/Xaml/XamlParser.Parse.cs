@@ -1,45 +1,15 @@
 ﻿namespace WpfProjectView;
 
 using System;
-using System.IO;
 using System.Xaml;
 
 /// <summary>
 /// Implements a xaml parser.
 /// </summary>
-internal static partial class XamlParser
+public static partial class XamlParser
 {
-    /// <summary>
-    /// Parses xaml content and returns the node tree.
-    /// </summary>
-    /// <param name="content">The content to parse.</param>
-    public static IXamlParsingResult Parse(byte[]? content)
-    {
-        XamlParsingResult Result = new();
-
-        if (content is not null)
-        {
-            using MemoryStream Stream = new(content);
-            using XamlXmlReader Reader = new(Stream);
-
-            if (!Reader.Read())
-                throw new NotImplementedException();
-
-            XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
-
-            Result.Root = ParseElement(Context);
-            Print(Result.Root, 0);
-        }
-
-        return Result;
-    }
-
-    private static int Rounds = 0;
-
     private static XamlElement ParseElement(XamlParsingContext context)
     {
-        Rounds++;
-
         IXamlNamespace ElementNamespace;
         string ElementName;
         XamlNamespaceCollection Namespaces = new();
@@ -57,6 +27,7 @@ internal static partial class XamlParser
 
         ElementNamespace = context.ObjectNamespace;
         ElementName = context.ObjectName;
+        context = context with { CurrentObjectName = ElementName };
 
         ParseElementContent(context, Children, Attributes);
 
@@ -78,8 +49,6 @@ internal static partial class XamlParser
 
     private static void ParseElementContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)
     {
-        Rounds++;
-
         while (context.Read() && context.NodeType == XamlNodeType.StartMember)
         {
             if (context.Member == XamlLanguage.Initialization)
@@ -121,8 +90,6 @@ internal static partial class XamlParser
 
     private static void ParseElementMemberUnknownContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)
     {
-        Rounds++;
-
         if (!context.Read())
             throw new NotImplementedException();
 
@@ -141,16 +108,10 @@ internal static partial class XamlParser
 
     private static void ParseElementMemberUnknownContentObjects(XamlParsingContext context, XamlElementCollection children)
     {
-        Rounds++;
-
         for (; ;)
         {
             IXamlElement Child = ParseElement(context);
             children.Add(Child);
-
-            if (Rounds == 134)
-            {
-            }
 
             if (context.NodeType != XamlNodeType.EndObject)
                 throw new NotImplementedException();
@@ -167,8 +128,6 @@ internal static partial class XamlParser
 
     private static void ParseElementMemberUnknownContentSimpleValue(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        Rounds++;
-
         if (context.Value is string StringValue)
         {
             XamlAttributeSimpleValue Attribute = new(StringValue);
@@ -190,8 +149,6 @@ internal static partial class XamlParser
 
     private static void ParseElementMemberPositionalParameter(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        Rounds++;
-
         if (!context.Read())
             throw new NotImplementedException();
 
@@ -221,8 +178,6 @@ internal static partial class XamlParser
 
     private static void ParseElementMemberDirective(XamlParsingContext context, XamlDirective directive, XamlAttributeCollection attributes)
     {
-        Rounds++;
-
         if (!directive.IsNameValid)
             throw new NotImplementedException();
 
@@ -249,13 +204,20 @@ internal static partial class XamlParser
 
     private static void ParseElementMember(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        Rounds++;
-
         if (!context.Member.IsNameValid)
             throw new NotImplementedException();
 
         string AttributeName = context.Member.Name;
         int AttributeLineNumber = context.LineNumber;
+
+        string DeclaringTypeName = context.Member.DeclaringType.Name;
+        if (DeclaringTypeName != context.CurrentObjectName)
+        {
+            string DeclaringTypeNamespace = context.Member.DeclaringType.PreferredXamlNamespace;
+            IXamlNamespace DeclaringNamespace = context.FindNamespaceMatch(DeclaringTypeNamespace, context.Member.DeclaringType.UnderlyingType);
+            string DeclaringTypeString = DeclaringNamespace.Prefix == string.Empty ? DeclaringTypeName : $"{DeclaringNamespace.Prefix}:{DeclaringTypeName}";
+            AttributeName = DeclaringTypeString + "." + AttributeName;
+        }
 
         IXamlAttribute Attribute;
 
@@ -282,8 +244,6 @@ internal static partial class XamlParser
 
     private static object? ParseElementMemberSimpleValue(XamlParsingContext context)
     {
-        Rounds++;
-
         object? AttributeValue = context.Value;
 
         if (!context.Read())
@@ -306,8 +266,6 @@ internal static partial class XamlParser
 
     private static XamlElementCollection ParseElementMemberObjectsValue(XamlParsingContext context)
     {
-        Rounds++;
-
         XamlElementCollection Children = new();
 
         for (; ;)
