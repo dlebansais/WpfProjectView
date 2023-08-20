@@ -3,6 +3,6 @@
 /// <summary>
 /// Implements a xaml element attribute.
 /// </summary>
-internal record XamlAttributeMember(string Name, object? Value) : XamlAttribute(Name, Value)
+internal record XamlAttributeMember(string Name, object? Value) : IXamlAttribute
 {
 }

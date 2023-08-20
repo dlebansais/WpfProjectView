@@ -40,15 +40,17 @@ internal static partial class XamlParser
     {
         Rounds++;
 
-        string Name;
+        IXamlNamespace ElementNamespace;
+        string ElementName;
         XamlNamespaceCollection Namespaces = new();
         XamlElementCollection Children = new();
         XamlAttributeCollection Attributes = new();
 
         while (context.NodeType == XamlNodeType.NamespaceDeclaration)
         {
-            NamespaceDeclaration Namespace = context.Namespace;
-            Namespaces.Add(new XamlNamespace(Namespace.Prefix, Namespace.Namespace));
+            NamespaceDeclaration Namespace = context.NamespacePath;
+            IXamlNamespace NewNamespace = XamlNamespace.Create(Namespace.Prefix, Namespace.Namespace);
+            Namespaces.Add(NewNamespace);
 
             if (!context.Read())
                 throw new NotImplementedException();
@@ -59,12 +61,14 @@ internal static partial class XamlParser
         context = context with { Namespaces = NewNamespaces };
 
         if (context.NodeType != XamlNodeType.StartObject)
-            throw new InvalidXamlFormatException("Start object tag expected");
+            throw new InvalidXamlFormatException("Start object tag expected.");
 
-        Name = context.Type.Name;
+        ElementNamespace = context.ObjectNamespace;
+        ElementName = context.ObjectName;
+
         ParseElementContent(context, Children, Attributes);
 
-        return new XamlElement(Name, Namespaces, Children, Attributes);
+        return new XamlElement(ElementNamespace, ElementName, Namespaces, Children, Attributes);
     }
 
     private static void ParseElementContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)
@@ -100,7 +104,7 @@ internal static partial class XamlParser
         if (context.Value is not string StringValue)
             throw new NotImplementedException();
 
-        XamlAttributeMember Attribute = new(string.Empty, StringValue);
+        XamlAttributeSimpleValue Attribute = new(StringValue);
         attributes.Add(Attribute);
 
         if (!context.Read())
@@ -162,7 +166,7 @@ internal static partial class XamlParser
 
         if (context.Value is string StringValue)
         {
-            XamlAttributeMember Attribute = new(string.Empty, StringValue);
+            XamlAttributeSimpleValue Attribute = new(StringValue);
             attributes.Add(Attribute);
 
             if (!context.Read())
@@ -217,15 +221,8 @@ internal static partial class XamlParser
         if (!directive.IsNameValid)
             throw new NotImplementedException();
 
-        string AttributePrefix = string.Empty;
-        foreach (IXamlNamespace Namespace in context.Namespaces)
-            if (Namespace.AssemblyPath == directive.PreferredXamlNamespace)
-            {
-                AttributePrefix = $"{Namespace.Prefix}:";
-                break;
-            }
-
-        string AttributeName = directive.Name;
+        IXamlNamespace AttributeNamespace = context.MemberNamespace;
+        string AttributeName = context.MemberName;
 
         if (!context.Read())
             throw new NotImplementedException();
@@ -235,7 +232,7 @@ internal static partial class XamlParser
 
         object? AttributeValue = context.Value;
 
-        XamlAttributeDirective Attribute = new(AttributePrefix, AttributeName, AttributeValue);
+        XamlAttributeDirective Attribute = new(AttributeNamespace, AttributeName, AttributeValue);
         attributes.Add(Attribute);
 
         if (!context.Read())
@@ -253,7 +250,7 @@ internal static partial class XamlParser
             throw new NotImplementedException();
 
         string AttributeName = context.Member.Name;
-        XamlAttribute Attribute;
+        IXamlAttribute Attribute;
 
         if (!context.Read())
             throw new NotImplementedException();

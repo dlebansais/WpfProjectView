@@ -3,6 +3,6 @@
 /// <summary>
 /// Implements a xaml element attribute.
 /// </summary>
-internal record XamlAttributeDirective(string Prefix, string Name, object? Value) : XamlAttribute(Name, Value)
+internal record XamlAttributeDirective(IXamlNamespace Namespace, string Name, object? Value) : IXamlAttribute
 {
 }
