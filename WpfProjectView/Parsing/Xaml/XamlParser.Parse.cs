@@ -29,6 +29,8 @@ public static partial class XamlParser
         ElementName = context.ObjectName;
         context = context with { CurrentObjectName = ElementName };
 
+        context.Read();
+
         ParseElementContent(context, Children, Attributes, out bool IsMultiLine);
 
         return new XamlElement(ElementNamespace, ElementName, Namespaces, Children, Attributes, IsMultiLine);
@@ -42,8 +44,7 @@ public static partial class XamlParser
             IXamlNamespace NewNamespace = XamlNamespace.Create(Namespace.Prefix, Namespace.Namespace);
             namespaces.Add(NewNamespace);
 
-            if (!context.Read())
-                throw new NotImplementedException();
+            context.Read();
         }
     }
 
@@ -53,7 +54,7 @@ public static partial class XamlParser
 
         int CurrentLineNumber = context.LineNumber;
 
-        while (context.Read() && context.NodeType == XamlNodeType.StartMember)
+        while (context.NodeType == XamlNodeType.StartMember)
         {
             if (context.Member == XamlLanguage.Initialization)
             {
@@ -78,6 +79,8 @@ public static partial class XamlParser
                 if (CheckMultiLine && context.LineNumber > CurrentLineNumber && attributes.Count > 1)
                     isMultiLine = true;
             }
+
+            context.Read();
         }
 
         if (context.NodeType != XamlNodeType.EndObject)
@@ -86,8 +89,7 @@ public static partial class XamlParser
 
     private static void ParseElementMemberInitialization(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         if (context.NodeType != XamlNodeType.Value)
             throw new NotImplementedException();
@@ -98,8 +100,7 @@ public static partial class XamlParser
         XamlAttributeSimpleValue Attribute = new(StringValue);
         attributes.Add(Attribute);
 
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         if (context.NodeType != XamlNodeType.EndMember)
             throw new NotImplementedException();
@@ -107,8 +108,7 @@ public static partial class XamlParser
 
     private static void ParseElementMemberUnknownContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)
     {
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         switch (context.NodeType)
         {
@@ -133,8 +133,7 @@ public static partial class XamlParser
             if (context.NodeType != XamlNodeType.EndObject)
                 throw new NotImplementedException();
 
-            if (!context.Read())
-                throw new NotImplementedException();
+            context.Read();
 
             SkipIndentation(context);
 
@@ -150,8 +149,7 @@ public static partial class XamlParser
             XamlAttributeSimpleValue Attribute = new(StringValue);
             attributes.Add(Attribute);
 
-            if (!context.Read())
-                throw new NotImplementedException();
+            context.Read();
 
             if (context.NodeType != XamlNodeType.EndMember)
                 throw new NotImplementedException();
@@ -166,8 +164,7 @@ public static partial class XamlParser
 
     private static void ParseElementMemberPositionalParameter(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         object? AttributeValue;
 
@@ -186,8 +183,7 @@ public static partial class XamlParser
         XamlAttributeMember Attribute = new(string.Empty, AttributeValue);
         attributes.Add(Attribute);
 
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         if (context.NodeType != XamlNodeType.EndMember)
             throw new NotImplementedException();
@@ -201,8 +197,7 @@ public static partial class XamlParser
         IXamlNamespace AttributeNamespace = context.MemberNamespace;
         string AttributeName = context.MemberName;
 
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         if (context.NodeType != XamlNodeType.Value)
             throw new NotImplementedException();
@@ -212,8 +207,7 @@ public static partial class XamlParser
         XamlAttributeDirective Attribute = new(AttributeNamespace, AttributeName, AttributeValue);
         attributes.Add(Attribute);
 
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         if (context.NodeType != XamlNodeType.EndMember)
             throw new NotImplementedException();
@@ -240,8 +234,7 @@ public static partial class XamlParser
 
         IXamlAttribute Attribute;
 
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         switch (context.NodeType)
         {
@@ -267,8 +260,7 @@ public static partial class XamlParser
     {
         object? AttributeValue = context.Value;
 
-        if (!context.Read())
-            throw new NotImplementedException();
+        context.Read();
 
         if (context.NodeType != XamlNodeType.EndMember)
             throw new NotImplementedException();
@@ -279,10 +271,7 @@ public static partial class XamlParser
     private static void SkipIndentation(XamlParsingContext context)
     {
         if (context.NodeType == XamlNodeType.Value && context.Value is string StringValue && StringValue.Trim() == string.Empty)
-        {
-            if (!context.Read())
-                throw new NotImplementedException();
-        }
+            context.Read();
     }
 
     private static XamlElementCollection ParseElementMemberObjectsValue(XamlParsingContext context)
@@ -294,8 +283,7 @@ public static partial class XamlParser
             XamlElement Child = ParseElement(context);
             Children.Add(Child);
 
-            if (!context.Read())
-                throw new NotImplementedException();
+            context.Read();
 
             SkipIndentation(context);
 

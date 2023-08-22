@@ -20,14 +20,20 @@ public static partial class XamlParser
 
         if (content is not null)
         {
-            using MemoryStream Stream = new(content);
-            using XamlXmlReader Reader = new(Stream, new XamlXmlReaderSettings() { ProvideLineInfo = true });
+            try
+            {
+                using MemoryStream Stream = new(content);
+                using XamlXmlReader Reader = new(Stream, new XamlXmlReaderSettings() { ProvideLineInfo = true });
+                XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
 
-            if (!Reader.Read())
-                throw new NotImplementedException();
+                Context.Read();
 
-            XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
-            Result.Root = ParseElement(Context);
+                Result.Root = ParseElement(Context);
+            }
+            catch (Exception Exception)
+            {
+                throw new InvalidXamlFormatException("Invalid Xaml content.", Exception);
+            }
         }
 
         return Result;

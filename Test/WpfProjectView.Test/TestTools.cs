@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using DiffPlex.DiffBuilder;
@@ -130,6 +132,14 @@ public static class TestTools
 
         foreach (string DebugLine in debugLines)
             builder.AppendLine(DebugLine);
+    }
+
+    public static byte[] GetResourceContent(string resourceName)
+    {
+        Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
+        using Stream ResourceStream = ExecutingAssembly.GetManifestResourceStream($"WpfProjectView.Test.Resources.{resourceName}")!;
+        using BinaryReader Reader = new(ResourceStream);
+        return Reader.ReadBytes((int)ResourceStream.Length);
     }
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]

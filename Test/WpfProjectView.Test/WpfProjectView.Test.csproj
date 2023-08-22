@@ -15,6 +15,14 @@
   </ItemGroup>
 
   <ItemGroup>
+	<None Remove="Resources\empty.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<EmbeddedResource Include="Resources\empty.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="DiffPlex" Version="1.7.1" />
 	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
 	<PackageReference Include="NUnit" Version="3.13.3" />
@@ -30,6 +38,10 @@
 	<Reference Include="FolderView">
 		<HintPath>..\..\..\FolderView\FolderView\bin\x64\$(Configuration)\$(TargetFramework)\FolderView.dll</HintPath>
 	</Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
 
 </Project>
