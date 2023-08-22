@@ -14,7 +14,7 @@ public static partial class XamlParser
     /// Parses xaml content and returns the node tree.
     /// </summary>
     /// <param name="content">The content to parse.</param>
-    public static IXamlParsingResult Parse(byte[]? content)
+    public static IXamlParsingResult Parse(Stream? content)
     {
         XamlParsingResult Result = new();
 
@@ -22,8 +22,7 @@ public static partial class XamlParser
         {
             try
             {
-                using MemoryStream Stream = new(content);
-                using XamlXmlReader Reader = new(Stream, new XamlXmlReaderSettings() { ProvideLineInfo = true });
+                using XamlXmlReader Reader = new(content, new XamlXmlReaderSettings() { ProvideLineInfo = true });
                 XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
 
                 Context.Read();

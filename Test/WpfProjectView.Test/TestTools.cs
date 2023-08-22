@@ -56,10 +56,11 @@ public static class TestTools
         return CurrentDirectory!;
     }
 
-    public static string CompareXamlParingResultWithOriginalContent(byte[] content, IXamlParsingResult xamlParsingResult)
+    public static string CompareXamlParingResultWithOriginalContent(Stream content, IXamlParsingResult xamlParsingResult)
     {
-        bool HasUf8Bom = content.Length >= 3 && content[0] == 0xEF && content[1] == 0xBB && content[2] == 0xBF;
-        string ContentString = HasUf8Bom ? Encoding.UTF8.GetString(content, 3, content.Length - 3) : Encoding.UTF8.GetString(content);
+        content.Seek(0, SeekOrigin.Begin);
+        using StreamReader Reader = new StreamReader(content, Encoding.UTF8);
+        string ContentString = Reader.ReadToEnd();
         ContentString = ContentString.Trim();
 
         StringBuilder Builder = XamlParser.Print(xamlParsingResult);
@@ -134,12 +135,12 @@ public static class TestTools
             builder.AppendLine(DebugLine);
     }
 
-    public static byte[] GetResourceContent(string resourceName)
+    public static Stream GetResourceContent(string resourceName)
     {
         Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
-        using Stream ResourceStream = ExecutingAssembly.GetManifestResourceStream($"WpfProjectView.Test.Resources.{resourceName}")!;
-        using BinaryReader Reader = new(ResourceStream);
-        return Reader.ReadBytes((int)ResourceStream.Length);
+        Stream ResourceStream = ExecutingAssembly.GetManifestResourceStream($"WpfProjectView.Test.Resources.{resourceName}")!;
+
+        return ResourceStream;
     }
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]

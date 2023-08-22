@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView;
 
+using System.IO;
 using System.Threading.Tasks;
 using FolderView;
 
@@ -9,7 +10,7 @@ using FolderView;
 internal record OtherFile(FolderView.IFile SourceFile) : File(SourceFile), IOtherFile
 {
     /// <inheritdoc/>
-    public byte[]? Content { get; private set; }
+    public Stream? Content { get; private set; }
 
     /// <inheritdoc/>
     public override async Task LoadAsync(IFolder rootFolder)

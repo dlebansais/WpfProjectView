@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView;
 
+using System.IO;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,12 +14,13 @@ internal static class CodeParser
     /// Parses C# code content and returns the syntax tree.
     /// </summary>
     /// <param name="content">The content to parse.</param>
-    public static SyntaxTree? Parse(byte[]? content)
+    public static SyntaxTree? Parse(Stream? content)
     {
         if (content is null)
             return null;
 
-        string SourceCode = Encoding.UTF8.GetString(content);
+        using StreamReader Reader = new(content, Encoding.UTF8);
+        string SourceCode = Reader.ReadToEnd();
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.CSharp11, DocumentationMode.None);
 
         SyntaxTree Result = CSharpSyntaxTree.ParseText(SourceCode, Options);
