@@ -1,6 +1,7 @@
 ﻿namespace WpfProjectView;
 
 using System;
+using System.Diagnostics;
 using System.Xaml;
 
 /// <summary>
@@ -22,8 +23,7 @@ public static partial class XamlParser
         NewNamespaces.AddRange(Namespaces);
         context = context with { Namespaces = NewNamespaces };
 
-        if (context.NodeType != XamlNodeType.StartObject)
-            throw new InvalidXamlFormatException("Start object tag expected.");
+        Debug.Assert(context.NodeType == XamlNodeType.StartObject);
 
         ElementNamespace = context.ObjectNamespace;
         ElementName = context.ObjectName;
@@ -83,142 +83,152 @@ public static partial class XamlParser
             context.Read();
         }
 
-        if (context.NodeType != XamlNodeType.EndObject)
-            throw new NotImplementedException();
+        Debug.Assert(context.NodeType == XamlNodeType.EndObject);
     }
 
     private static void ParseElementMemberInitialization(XamlParsingContext context, XamlAttributeCollection attributes)
     {
         context.Read();
 
-        if (context.NodeType != XamlNodeType.Value)
-            throw new NotImplementedException();
+        Debug.Assert(context.NodeType == XamlNodeType.Value);
+        Debug.Assert(context.Value is string);
 
-        if (context.Value is not string StringValue)
-            throw new NotImplementedException();
+        string StringValue = (string)context.Value;
 
         XamlAttributeSimpleValue Attribute = new(StringValue);
         attributes.Add(Attribute);
 
         context.Read();
 
-        if (context.NodeType != XamlNodeType.EndMember)
-            throw new NotImplementedException();
+        Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
     private static void ParseElementMemberUnknownContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)
     {
         context.Read();
 
-        switch (context.NodeType)
+        XamlNodeType NodeType = context.NodeType;
+        bool IsParsed = false;
+
+        if (NodeType == XamlNodeType.Value)
         {
-            case XamlNodeType.Value:
-                ParseElementMemberUnknownContentSimpleValue(context, attributes);
-                break;
-            case XamlNodeType.StartObject:
-                ParseElementMemberUnknownContentObjects(context, children);
-                break;
-            default:
-                throw new NotImplementedException();
+            ParseElementMemberUnknownContentSimpleValue(context, attributes);
+            IsParsed = true;
         }
-    }
 
-    private static void ParseElementMemberUnknownContentObjects(XamlParsingContext context, XamlElementCollection children)
-    {
-        for (; ;)
+        if (NodeType == XamlNodeType.StartObject)
         {
-            IXamlElement Child = ParseElement(context);
-            children.Add(Child);
-
-            if (context.NodeType != XamlNodeType.EndObject)
-                throw new NotImplementedException();
-
-            context.Read();
-
-            SkipIndentation(context);
-
-            if (context.NodeType == XamlNodeType.EndMember)
-                break;
+            ParseElementMemberUnknownContentObjects(context, children);
+            IsParsed = true;
         }
+
+        Debug.Assert(IsParsed);
     }
 
     private static void ParseElementMemberUnknownContentSimpleValue(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        if (context.Value is string StringValue)
+        Debug.Assert(context.Value is string);
+
+        string StringValue = (string)context.Value;
+        XamlAttributeSimpleValue Attribute = new(StringValue);
+        attributes.Add(Attribute);
+
+        context.Read();
+
+        Debug.Assert(context.NodeType == XamlNodeType.EndMember);
+    }
+
+    private static void ParseElementMemberUnknownContentObjects(XamlParsingContext context, XamlElementCollection children)
+    {
+        do
         {
-            XamlAttributeSimpleValue Attribute = new(StringValue);
-            attributes.Add(Attribute);
+            IXamlElement Child = ParseElement(context);
+            children.Add(Child);
 
-            context.Read();
-
-            if (context.NodeType != XamlNodeType.EndMember)
-                throw new NotImplementedException();
-
-            return;
+            SkipIndentation(context);
         }
-        else
-        {
-            throw new NotImplementedException();
-        }
+        while (context.NodeType != XamlNodeType.EndMember);
     }
 
     private static void ParseElementMemberPositionalParameter(XamlParsingContext context, XamlAttributeCollection attributes)
     {
         context.Read();
 
-        object? AttributeValue;
+        object? AttributeValue = null;
+        XamlNodeType NodeType = context.NodeType;
 
-        switch (context.NodeType)
-        {
-            case XamlNodeType.Value:
-                AttributeValue = context.Value;
-                break;
-            case XamlNodeType.StartObject:
-                AttributeValue = ParseElement(context);
-                break;
-            default:
-                throw new NotImplementedException();
-        }
+        if (NodeType == XamlNodeType.Value)
+            AttributeValue = context.Value;
+
+        if (NodeType == XamlNodeType.StartObject)
+            AttributeValue = ParseElement(context);
+
+        Debug.Assert(AttributeValue is not null);
 
         XamlAttributeMember Attribute = new(string.Empty, AttributeValue);
         attributes.Add(Attribute);
 
         context.Read();
 
-        if (context.NodeType != XamlNodeType.EndMember)
-            throw new NotImplementedException();
+        Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
     private static void ParseElementMemberDirective(XamlParsingContext context, XamlDirective directive, XamlAttributeCollection attributes)
     {
-        if (!directive.IsNameValid)
-            throw new NotImplementedException();
+        Debug.Assert(directive.IsNameValid);
 
         IXamlNamespace AttributeNamespace = context.MemberNamespace;
         string AttributeName = context.MemberName;
 
         context.Read();
 
-        if (context.NodeType != XamlNodeType.Value)
-            throw new NotImplementedException();
+        XamlNodeType NodeType = context.NodeType;
+        bool IsParsed = false;
 
+        if (NodeType == XamlNodeType.Value)
+        {
+            ParseElementMemberDirectiveSimpleValue(context, AttributeNamespace, AttributeName, attributes);
+            IsParsed = true;
+        }
+
+        if (NodeType == XamlNodeType.StartObject)
+        {
+            ParseElementMemberDirectiveContentObject(context, AttributeNamespace, AttributeName, attributes);
+            IsParsed = true;
+        }
+
+        Debug.Assert(IsParsed);
+    }
+
+    private static void ParseElementMemberDirectiveSimpleValue(XamlParsingContext context, IXamlNamespace attributeNamespace, string attributeName, XamlAttributeCollection attributes)
+    {
         object? AttributeValue = context.Value;
 
-        XamlAttributeDirective Attribute = new(AttributeNamespace, AttributeName, AttributeValue);
+        XamlAttributeDirective Attribute = new(attributeNamespace, attributeName, AttributeValue);
         attributes.Add(Attribute);
 
         context.Read();
 
-        if (context.NodeType != XamlNodeType.EndMember)
-            throw new NotImplementedException();
+        Debug.Assert(context.NodeType == XamlNodeType.EndMember);
+    }
+
+    private static void ParseElementMemberDirectiveContentObject(XamlParsingContext context, IXamlNamespace attributeNamespace, string attributeName, XamlAttributeCollection attributes)
+    {
+        XamlElement Child = ParseElement(context);
+
+        XamlAttributeDirective Attribute = new(attributeNamespace, attributeName, Child);
+        attributes.Add(Attribute);
+
+        SkipIndentation(context);
+
+        Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
     private static void ParseElementMember(XamlParsingContext context, XamlAttributeCollection attributes, out bool checkMultiLine)
     {
         checkMultiLine = false;
 
-        if (!context.Member.IsNameValid)
-            throw new NotImplementedException();
+        Debug.Assert(context.Member.IsNameValid);
 
         string AttributeName = context.Member.Name;
         int AttributeLineNumber = context.LineNumber;
@@ -232,26 +242,27 @@ public static partial class XamlParser
             AttributeName = DeclaringTypeString + "." + AttributeName;
         }
 
-        IXamlAttribute Attribute;
-
         context.Read();
 
-        switch (context.NodeType)
+        IXamlAttribute? Attribute = null;
+        XamlNodeType NodeType = context.NodeType;
+
+        if (NodeType is XamlNodeType.Value)
         {
-            case XamlNodeType.Value:
-                object? AttributeValue = ParseElementMemberSimpleValue(context);
-                Attribute = new XamlAttributeMember(AttributeName, AttributeValue);
-                checkMultiLine = true;
-                break;
-            case XamlNodeType.StartObject:
-                XamlElementCollection ElementCollection = ParseElementMemberObjectsValue(context);
-                bool IsOneLine = AttributeLineNumber == context.LineNumber;
-                Attribute = new XamlAttributeElementCollection(AttributeName, ElementCollection, IsOneLine);
-                checkMultiLine = IsOneLine;
-                break;
-            default:
-                throw new NotImplementedException();
+            object? AttributeValue = ParseElementMemberSimpleValue(context);
+            Attribute = new XamlAttributeMember(AttributeName, AttributeValue);
+            checkMultiLine = true;
         }
+
+        if (NodeType is XamlNodeType.StartObject)
+        {
+            XamlElementCollection ElementCollection = ParseElementMemberObjectsValue(context);
+            bool IsOneLine = AttributeLineNumber == context.LineNumber;
+            Attribute = new XamlAttributeElementCollection(AttributeName, ElementCollection, IsOneLine);
+            checkMultiLine = IsOneLine;
+        }
+
+        Debug.Assert(Attribute is not null);
 
         attributes.Add(Attribute);
     }
@@ -262,16 +273,9 @@ public static partial class XamlParser
 
         context.Read();
 
-        if (context.NodeType != XamlNodeType.EndMember)
-            throw new NotImplementedException();
+        Debug.Assert(context.NodeType == XamlNodeType.EndMember);
 
         return AttributeValue;
-    }
-
-    private static void SkipIndentation(XamlParsingContext context)
-    {
-        if (context.NodeType == XamlNodeType.Value && context.Value is string StringValue && StringValue.Trim() == string.Empty)
-            context.Read();
     }
 
     private static XamlElementCollection ParseElementMemberObjectsValue(XamlParsingContext context)
@@ -283,17 +287,22 @@ public static partial class XamlParser
             XamlElement Child = ParseElement(context);
             Children.Add(Child);
 
-            context.Read();
-
             SkipIndentation(context);
 
             if (context.NodeType == XamlNodeType.EndMember)
                 break;
 
-            if (context.NodeType != XamlNodeType.StartObject)
-                throw new NotImplementedException();
+            Debug.Assert(context.NodeType == XamlNodeType.StartObject);
         }
 
         return Children;
+    }
+
+    private static void SkipIndentation(XamlParsingContext context)
+    {
+        context.Read();
+
+        if (context.NodeType == XamlNodeType.Value && context.Value is string StringValue && StringValue.Trim() == string.Empty)
+            context.Read();
     }
 }

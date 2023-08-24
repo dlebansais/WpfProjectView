@@ -51,7 +51,10 @@ public static partial class XamlParser
             switch (Attribute)
             {
                 case XamlAttributeDirective Directive:
-                    context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{Directive.Value}\"");
+                    if (Directive.Value is IXamlElement AsChild)
+                        context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{OneLineElement(AsChild)}\"");
+                    else
+                        context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{Directive.Value}\"");
                     break;
                 case XamlAttributeSimpleValue SimpleValue:
                     context.ValueString.Clear();

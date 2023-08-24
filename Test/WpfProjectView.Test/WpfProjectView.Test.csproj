@@ -8,6 +8,7 @@
 	<RootNamespace>WpfProjectView.Test</RootNamespace>
 	<NeutralLanguage>en-US</NeutralLanguage>
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
