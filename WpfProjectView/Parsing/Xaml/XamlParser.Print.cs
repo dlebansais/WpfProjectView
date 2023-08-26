@@ -73,9 +73,6 @@ public static partial class XamlParser
                     else
                         context.MultiLineElementCollectionAttributeList.Add(ElementCollection);
                     break;
-                case XamlAttributeNamespace Namespace:
-                    context.AttributeMemberList.Add(NamespaceToString((IXamlNamespace)Namespace.Value!));
-                    break;
             }
         }
     }
@@ -238,9 +235,6 @@ public static partial class XamlParser
                         ElementCollectionString = $"{ElementCollection.Name}=" + ElementCollectionString;
 
                     AttributeListString += ElementCollectionString;
-                    break;
-                case XamlAttributeNamespace Namespace:
-                    AttributeListString += NamespaceToString((IXamlNamespace)Namespace.Value!);
                     break;
                 default:
                     break;
