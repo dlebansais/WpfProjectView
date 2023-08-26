@@ -29,6 +29,6 @@ internal record XamlCodeFile(FolderView.IFile XamlSourceFile, FolderView.IFile C
     public override void Parse()
     {
         XamlParsingResult = XamlParser.Parse(XamlSourceFile.Content);
-        SyntaxTree = CodeParser.Parse(CodeSourceFile?.Content);
+        SyntaxTree = CodeParser.Parse(CodeSourceFile.Content);
     }
 }

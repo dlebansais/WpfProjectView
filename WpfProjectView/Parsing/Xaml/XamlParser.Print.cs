@@ -252,13 +252,14 @@ public static partial class XamlParser
 
     private static string OneLineElementAttributeElementCollection(XamlAttributeElementCollection elementCollection)
     {
-        string ElementCollectionString = string.Empty;
+        XamlElementCollection Children = elementCollection.Children;
 
-        foreach (IXamlElement Child in elementCollection.Children)
+        Debug.Assert(Children.Count > 0);
+
+        string ElementCollectionString = $"{elementCollection.Name}=";
+
+        foreach (IXamlElement Child in Children)
             ElementCollectionString += OneLineElement(Child);
-
-        if (elementCollection.Name != string.Empty)
-            ElementCollectionString = $"{elementCollection.Name}=" + ElementCollectionString;
 
         return ElementCollectionString;
     }
