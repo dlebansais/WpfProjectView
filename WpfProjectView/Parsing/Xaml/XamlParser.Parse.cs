@@ -11,92 +11,80 @@ public static partial class XamlParser
 {
     private static XamlElement ParseElement(XamlParsingContext context)
     {
-        IXamlNamespace ElementNamespace;
-        string ElementName;
-        XamlNamespaceCollection Namespaces = new();
-        XamlElementCollection Children = new();
-        XamlAttributeCollection Attributes = new();
+        XamlNamespaceCollection Namespaces = ParseNamespaceDeclarations(context);
 
-        ParseNamespaceDeclarations(ref context, Namespaces);
+        if (Namespaces.Count > 0)
+        {
+            XamlNamespaceCollection NewNamespaces = new(context.Namespaces);
+            NewNamespaces.AddRange(Namespaces);
+            context = context with { Namespaces = NewNamespaces };
+        }
 
-        Debug.Assert(context.NodeType == XamlNodeType.StartObject);
+        IXamlNamespace ElementNamespace = context.ObjectNamespace;
+        string ElementName = context.ObjectName;
 
-        ElementNamespace = context.ObjectNamespace;
-        ElementName = context.ObjectName;
         context = context with { CurrentObjectName = ElementName };
 
         context.Read();
+        Debug.Assert(context.NodeType == XamlNodeType.StartMember || context.NodeType == XamlNodeType.EndObject);
 
-        ParseElementContent(context, Children, Attributes, out bool IsMultiLine);
+        (XamlElementCollection Children, XamlAttributeCollection Attributes, bool IsMultiLine) = ParseElementContent(context);
 
-        return new XamlElement(ElementNamespace, ElementName, Namespaces, Children, Attributes, IsMultiLine);
+        return new XamlElement(Namespaces, ElementNamespace, ElementName, Children, Attributes, IsMultiLine);
     }
 
-    private static void ParseNamespaceDeclarations(ref XamlParsingContext context, XamlNamespaceCollection namespaces)
+    private static XamlNamespaceCollection ParseNamespaceDeclarations(XamlParsingContext context)
     {
+        XamlNamespaceCollection Namespaces = new();
+
         while (context.NodeType == XamlNodeType.NamespaceDeclaration)
         {
             NamespaceDeclaration Namespace = context.NamespacePath;
             IXamlNamespace NewNamespace = XamlNamespace.Create(Namespace.Prefix, Namespace.Namespace);
-            namespaces.Add(NewNamespace);
+            Namespaces.Add(NewNamespace);
 
             context.Read();
         }
 
-        if (namespaces.Count > 0)
-        {
-            XamlNamespaceCollection NewNamespaces = new(context.Namespaces);
-            NewNamespaces.AddRange(namespaces);
-            context = context with { Namespaces = NewNamespaces };
-        }
+        Debug.Assert(context.NodeType == XamlNodeType.StartObject);
+
+        return Namespaces;
     }
 
-    private static void ParseElementContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes, out bool isMultiLine)
+    private static (XamlElementCollection Children, XamlAttributeCollection Attributes, bool IsMultiLine) ParseElementContent(XamlParsingContext context)
     {
-        isMultiLine = false;
+        XamlElementCollection Children = new();
+        XamlAttributeCollection Attributes = new();
+        bool IsMultiLine = false;
 
-        int CurrentLineNumber = context.LineNumber;
+        int StartingLineNumber = context.LineNumber;
 
         while (context.NodeType == XamlNodeType.StartMember)
         {
             if (context.Member == XamlLanguage.Initialization)
-            {
-                ParseElementMemberInitialization(context, attributes);
-            }
+                ParseElementMemberInitialization(context, Attributes);
             else if (context.Member == XamlLanguage.UnknownContent)
-            {
-                ParseElementMemberUnknownContent(context, children, attributes);
-            }
+                ParseElementMemberUnknownContent(context, Children, Attributes);
             else if (context.Member == XamlLanguage.PositionalParameters)
-            {
-                ParseElementMemberPositionalParameter(context, attributes);
-            }
+                ParseElementMemberPositionalParameter(context, Attributes);
             else if (context.Member == XamlLanguage.Items)
-            {
-                ParseElementMemberUnknownContent(context, children, attributes);
-            }
+                ParseElementMemberUnknownContent(context, Children, Attributes);
             else if (context.Member is XamlDirective AsDirective)
-            {
-                ParseElementMemberDirective(context, AsDirective, attributes);
-            }
+                ParseElementMemberDirective(context, AsDirective, Attributes);
             else
-            {
-                ParseElementMember(ref context, attributes, out bool CheckMultiLine);
-
-                if (CheckMultiLine && context.LineNumber > CurrentLineNumber && attributes.Count > 1)
-                    isMultiLine = true;
-            }
+                ParseElementMember(context, Attributes, StartingLineNumber, ref IsMultiLine);
 
             context.Read();
         }
 
         Debug.Assert(context.NodeType == XamlNodeType.EndObject);
+
+        return (Children, Attributes, IsMultiLine);
     }
 
     private static void ParseElementMemberInitialization(XamlParsingContext context, XamlAttributeCollection attributes)
     {
         context.Read();
-
         Debug.Assert(context.NodeType == XamlNodeType.Value);
         Debug.Assert(context.Value is string);
 
@@ -106,7 +94,6 @@ public static partial class XamlParser
         attributes.Add(Attribute);
 
         context.Read();
-
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
@@ -141,7 +128,6 @@ public static partial class XamlParser
         attributes.Add(Attribute);
 
         context.Read();
-
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
@@ -176,7 +162,6 @@ public static partial class XamlParser
         attributes.Add(Attribute);
 
         context.Read();
-
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
@@ -215,7 +200,6 @@ public static partial class XamlParser
         attributes.Add(Attribute);
 
         context.Read();
-
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
@@ -223,17 +207,17 @@ public static partial class XamlParser
     {
         XamlElement Child = ParseElement(context);
 
-        SkipIndentation(context);
-
         XamlAttributeDirective AttributeDirective = new(attributeNamespace, attributeName, Child);
         attributes.Add(AttributeDirective);
+
+        SkipIndentation(context);
 
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
-    private static void ParseElementMember(ref XamlParsingContext context, XamlAttributeCollection attributes, out bool checkMultiLine)
+    private static void ParseElementMember(XamlParsingContext context, XamlAttributeCollection attributes, int startingLineNumber, ref bool isMultiLine)
     {
-        checkMultiLine = false;
+        bool CheckMultiLine = false;
 
         Debug.Assert(context.Member.IsNameValid);
 
@@ -259,28 +243,31 @@ public static partial class XamlParser
         {
             object? AttributeValue = ParseElementMemberSimpleValue(context);
             Attribute = new XamlAttributeMember(AttributeName, AttributeValue);
-            checkMultiLine = true;
+            CheckMultiLine = true;
         }
 
         if (NodeType == XamlNodeType.StartObject || NodeType == XamlNodeType.NamespaceDeclaration)
         {
-            XamlElementCollection ElementCollection = ParseElementMemberObjectsValue(ref context);
+            XamlElementCollection ElementCollection = ParseElementMemberObjectsValue(context);
             bool IsOneLine = AttributeLineNumber == context.LineNumber;
             Attribute = new XamlAttributeElementCollection(AttributeName, ElementCollection, IsVisible, IsOneLine);
-            checkMultiLine = IsOneLine;
+            CheckMultiLine = IsOneLine;
         }
 
         if (NodeType == XamlNodeType.GetObject)
         {
-            XamlElementCollection ElementCollection = ParseImplicitElementMemberObjectsValue(ref context);
+            XamlElementCollection ElementCollection = ParseImplicitElementMemberObjectsValue(context);
             bool IsOneLine = AttributeLineNumber == context.LineNumber;
             Attribute = new XamlAttributeElementCollection(AttributeName, ElementCollection, IsVisible, IsOneLine);
-            checkMultiLine = IsOneLine;
+            CheckMultiLine = IsOneLine;
         }
 
         Debug.Assert(Attribute is not null);
 
         attributes.Add(Attribute);
+
+        if (CheckMultiLine && context.LineNumber > startingLineNumber && attributes.Count > 1)
+            isMultiLine = true;
     }
 
     private static object? ParseElementMemberSimpleValue(XamlParsingContext context)
@@ -288,13 +275,12 @@ public static partial class XamlParser
         object? AttributeValue = context.Value;
 
         context.Read();
-
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
 
         return AttributeValue;
     }
 
-    private static XamlElementCollection ParseElementMemberObjectsValue(ref XamlParsingContext context)
+    private static XamlElementCollection ParseElementMemberObjectsValue(XamlParsingContext context)
     {
         XamlElementCollection Children = new();
 
@@ -310,17 +296,14 @@ public static partial class XamlParser
         return Children;
     }
 
-    private static XamlElementCollection ParseImplicitElementMemberObjectsValue(ref XamlParsingContext context)
+    private static XamlElementCollection ParseImplicitElementMemberObjectsValue(XamlParsingContext context)
     {
-        XamlElementCollection Children = new();
-        XamlAttributeCollection Attributes = new();
+        context.Read();
+        Debug.Assert(context.NodeType == XamlNodeType.StartMember);
+
+        (XamlElementCollection Children, _, _) = ParseElementContent(context);
 
         context.Read();
-
-        ParseElementContent(context, Children, Attributes, out _);
-
-        context.Read();
-
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
 
         return Children;

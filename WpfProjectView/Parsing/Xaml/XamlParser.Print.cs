@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Windows.Documents;
 
 /// <summary>
 /// Implements a xaml parser.
