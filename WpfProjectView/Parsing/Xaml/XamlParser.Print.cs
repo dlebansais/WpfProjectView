@@ -200,45 +200,13 @@ public static partial class XamlParser
         string ElementName = NameWithPrefix(element.Namespace, element.Name);
 
         string AttributeListString = string.Empty;
-        string MemberString;
 
         foreach (IXamlAttribute Attribute in element.Attributes)
         {
             if (AttributeListString.Length > 0)
                 AttributeListString += ", ";
 
-            switch (Attribute)
-            {
-                case XamlAttributeDirective Directive:
-                    AttributeListString += "TODO";
-                    break;
-                case XamlAttributeMember Member:
-                    if (Member.Value is string ValueString)
-                        MemberString = ValueString;
-                    else if (Member.Value is IXamlElement NestedElement)
-                        MemberString = OneLineElement(NestedElement);
-                    else
-                        MemberString = "TODO"; // $"{Member.Value}";
-
-                    if (Member.Name != string.Empty)
-                        MemberString = $"{Member.Name}=" + MemberString;
-
-                    AttributeListString += MemberString;
-                    break;
-                case XamlAttributeElementCollection ElementCollection:
-                    string ElementCollectionString = string.Empty;
-
-                    foreach (IXamlElement Child in ElementCollection.Children)
-                        ElementCollectionString += OneLineElement(Child);
-
-                    if (ElementCollection.Name != string.Empty)
-                        ElementCollectionString = $"{ElementCollection.Name}=" + ElementCollectionString;
-
-                    AttributeListString += ElementCollectionString;
-                    break;
-                default:
-                    break;
-            }
+            AttributeListString += OneLineElementAttribute(Attribute);
         }
 
         if (AttributeListString.Length > 0)
@@ -247,6 +215,52 @@ public static partial class XamlParser
         string Result = $"{{{ElementName}{AttributeListString}}}";
 
         return Result;
+    }
+
+    private static string OneLineElementAttribute(IXamlAttribute attribute)
+    {
+        string? AttributeString = null;
+
+        if (attribute is XamlAttributeMember Member)
+            AttributeString = OneLineElementAttributeMember(Member);
+
+        if (attribute is XamlAttributeElementCollection ElementCollection)
+            AttributeString = OneLineElementAttributeElementCollection(ElementCollection);
+
+        Debug.Assert(AttributeString is not null);
+
+        return AttributeString;
+    }
+
+    private static string OneLineElementAttributeMember(XamlAttributeMember member)
+    {
+        string? MemberString = null;
+
+        if (member.Value is string ValueString)
+            MemberString = ValueString;
+
+        if (member.Value is IXamlElement NestedElement)
+            MemberString = OneLineElement(NestedElement);
+
+        Debug.Assert(MemberString is not null);
+
+        if (member.Name != string.Empty)
+            MemberString = $"{member.Name}=" + MemberString;
+
+        return MemberString;
+    }
+
+    private static string OneLineElementAttributeElementCollection(XamlAttributeElementCollection elementCollection)
+    {
+        string ElementCollectionString = string.Empty;
+
+        foreach (IXamlElement Child in elementCollection.Children)
+            ElementCollectionString += OneLineElement(Child);
+
+        if (elementCollection.Name != string.Empty)
+            ElementCollectionString = $"{elementCollection.Name}=" + ElementCollectionString;
+
+        return ElementCollectionString;
     }
 
     private static string Whitespaces(int indentation)
