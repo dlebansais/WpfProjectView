@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Windows.Documents;
 
 /// <summary>
 /// Implements a xaml parser.
@@ -41,36 +42,43 @@ public static partial class XamlParser
         context.MultiLineElementCollectionAttributeList.Clear();
 
         foreach (IXamlNamespace Namespace in context.Element.Namespaces)
-            if (Namespace.Prefix == string.Empty)
-                context.NamespaceList.Add($"xmlns=\"{Namespace.AssemblyPath}\"");
-            else
-                context.NamespaceList.Add($"xmlns:{Namespace.Prefix}=\"{Namespace.AssemblyPath}\"");
+            context.NamespaceList.Add(NamespaceToString(Namespace));
 
         foreach (IXamlAttribute Attribute in context.Element.Attributes)
         {
             switch (Attribute)
             {
                 case XamlAttributeDirective Directive:
-                    if (Directive.Value is IXamlElement AsChild)
-                        context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{OneLineElement(AsChild)}\"");
+                    if (Directive.Value is IXamlElementCollection AsCollection)
+                    {
+                        string ChildString = string.Empty;
+
+                        foreach (IXamlElement Child in AsCollection)
+                            ChildString += OneLineElement(Child);
+
+                        context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{ChildString}\"");
+                    }
                     else
+                    {
                         context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{Directive.Value}\"");
+                    }
+
                     break;
                 case XamlAttributeSimpleValue SimpleValue:
                     context.ValueString.Clear();
                     context.ValueString.Add(SimpleValue.StringValue);
                     break;
                 case XamlAttributeMember Member:
-                    if (Member.Value is string ValueString)
-                        context.AttributeMemberList.Add($"{Member.Name}=\"{ValueString}\"");
-                    else
-                        context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
+                    context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
                     break;
                 case XamlAttributeElementCollection ElementCollection:
                     if (ElementCollection.IsOneLine)
                         context.AttributeMemberList.Add(ElementCollection);
                     else
                         context.MultiLineElementCollectionAttributeList.Add(ElementCollection);
+                    break;
+                case XamlAttributeNamespace Namespace:
+                    context.AttributeMemberList.Add(NamespaceToString((IXamlNamespace)Namespace.Value!));
                     break;
             }
         }
@@ -158,20 +166,31 @@ public static partial class XamlParser
         string ElementName = NameWithPrefix(context.Element.Namespace, context.Element.Name);
         List<XamlAttributeElementCollection> MultiLineElementCollectionAttributeList = context.MultiLineElementCollectionAttributeList;
         IXamlElementCollection Children = context.Element.Children;
+        int Indentation = context.Indentation + 1;
 
         foreach (XamlAttributeElementCollection ElementCollectionAttribute in MultiLineElementCollectionAttributeList)
         {
-            context.Builder.AppendLine($"{Whitespaces(context.Indentation + 1)}<{ElementName}.{ElementCollectionAttribute.Name}>");
+            bool IsVisible = ElementCollectionAttribute.IsVisible;
+
+            if (IsVisible)
+            {
+                context.Builder.AppendLine($"{Whitespaces(Indentation)}<{ElementName}.{ElementCollectionAttribute.Name}>");
+                Indentation++;
+            }
 
             IXamlElementCollection ElementCollection = ElementCollectionAttribute.Children;
 
             foreach (IXamlElement Child in ElementCollection)
             {
-                XamlPrintingContext ChildContext = new(context.Builder, Child, context.Indentation + 2);
+                XamlPrintingContext ChildContext = new(context.Builder, Child, Indentation);
                 Print(ChildContext);
             }
 
-            context.Builder.AppendLine($"{Whitespaces(context.Indentation + 1)}</{ElementName}.{ElementCollectionAttribute.Name}>");
+            if (IsVisible)
+            {
+                Indentation--;
+                context.Builder.AppendLine($"{Whitespaces(Indentation)}</{ElementName}.{ElementCollectionAttribute.Name}>");
+            }
         }
 
         foreach (IXamlElement Child in Children)
@@ -224,6 +243,9 @@ public static partial class XamlParser
 
                     AttributeListString += ElementCollectionString;
                     break;
+                case XamlAttributeNamespace Namespace:
+                    AttributeListString += NamespaceToString((IXamlNamespace)Namespace.Value!);
+                    break;
                 default:
                     break;
             }
@@ -255,5 +277,13 @@ public static partial class XamlParser
             return $"{@namespace.Prefix}:{name.Substring(0, name.Length - 9)}";
         else
             return $"{@namespace.Prefix}:{name}";
+    }
+
+    private static string NamespaceToString(IXamlNamespace @namespace)
+    {
+        if (@namespace.Prefix == string.Empty)
+            return $"xmlns=\"{@namespace.AssemblyPath}\"";
+        else
+            return $"xmlns:{@namespace.Prefix}=\"{@namespace.AssemblyPath}\"";
     }
 }

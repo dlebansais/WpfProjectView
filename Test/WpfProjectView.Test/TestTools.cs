@@ -73,7 +73,6 @@ public static class TestTools
         return PrintParsingDifferences(ContentString, PrintResultString);
     }
 
-
     public static string PrintParsingDifferences(string contentString, string printResultString)
     {
         StringBuilder Builder = new();

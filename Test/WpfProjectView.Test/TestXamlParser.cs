@@ -22,4 +22,15 @@ public class TestXamlParser
 
         Assert.That(PrintResult, Is.Empty);
     }
+
+    [Test]
+    public void TestParseComplex()
+    {
+        string ResourceName = "complex.xaml";
+        var Content = TestTools.GetResourceContent(ResourceName);
+
+        IXamlParsingResult XamlParsingResult = XamlParser.Parse(Content);
+        string ComparisonMessage = TestTools.CompareXamlParingResultWithOriginalContent(Content, XamlParsingResult);
+        Assert.That(ComparisonMessage, Is.Empty, $"{ResourceName}\r\n{ComparisonMessage}");
+    }
 }

@@ -1,5 +1,7 @@
 ﻿namespace WpfProjectView;
 
+using System.Diagnostics;
+
 /// <summary>
 /// Implements a xaml namespace in any assembly.
 /// </summary>
@@ -57,14 +59,18 @@ internal record XamlNamespace(string Prefix, string Namespace, string Assembly) 
 
         if (namespacePath == XamlNamespaceDefault.DefaultPath)
             return new XamlNamespaceDefault(prefix);
-        else if (namespacePath == XamlNamespaceExtension.ExtensionPath)
+
+        if (namespacePath == XamlNamespaceExtension.ExtensionPath)
             return new XamlNamespaceExtension(prefix);
-        else if (IsNamespaceValid && IsAssemblyEmpty)
+
+        Debug.Assert(IsNamespaceValid);
+
+        if (IsAssemblyEmpty)
             return new XamlNamespaceLocal(prefix, Namespace);
-        else if (IsNamespaceValid && IsAssemblyValid)
-            return new XamlNamespace(prefix, Namespace, Assembly);
-        else
-            throw new InvalidXamlFormatException("Invalid xmlns specification.");
+
+        Debug.Assert(IsAssemblyValid);
+
+        return new XamlNamespace(prefix, Namespace, Assembly);
     }
 
     /// <summary>

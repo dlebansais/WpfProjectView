@@ -1,0 +1,40 @@
+﻿<Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Startup="OnStartup">
+    <Application.Resources>
+        <CompositeCollection x:Key="CollapsedVisible">
+            <Visibility>Collapsed</Visibility>
+            <Visibility>Visible</Visibility>
+        </CompositeCollection>
+        <x:Array x:Key="array"
+                 xmlns:s="clr-namespace:System;assembly=mscorlib"
+                 Type="{x:Type s:Array}">
+            <x:Array Type="{x:Type s:String}">
+                <s:String>aaa1</s:String>
+                <s:String>aaa2</s:String>
+            </x:Array>
+            <x:Array Type="{x:Type s:String}">
+                <s:String>aaa9</s:String>
+                <s:String>aaa10</s:String>
+            </x:Array>
+        </x:Array>
+        <CompositeCollection x:Key="VisibleCollapsed">
+            <Visibility>Visible</Visibility>
+            <Visibility>Collapsed</Visibility>
+        </CompositeCollection>
+        <CompositeCollection x:Key="DisabledNormal"
+                             xmlns:s="clr-namespace:System;assembly=mscorlib">
+            <s:Double>0.3</s:Double>
+            <s:Double>1</s:Double>
+        </CompositeCollection>
+        <Style x:Key="{x:Type ListBoxItem}" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+        <Style x:Key="ListBoxItemStretchDragDrop" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="AllowDrop" Value="True"/>
+            <EventSetter Event="MouseMove" Handler="OnListBoxItemMouseMove"/>
+            <EventSetter Event="Drop" Handler="OnListBoxItemDrop"/>
+        </Style>
+    </Application.Resources>
+</Application>

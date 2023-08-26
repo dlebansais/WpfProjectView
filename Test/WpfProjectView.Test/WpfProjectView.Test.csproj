@@ -16,10 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
+	<None Remove="Resources\complex.xaml" />
 	<None Remove="Resources\empty.xaml" />
   </ItemGroup>
 
   <ItemGroup>
+	<EmbeddedResource Include="Resources\complex.xaml"/>
 	<EmbeddedResource Include="Resources\empty.xaml" />
   </ItemGroup>
 
@@ -39,10 +41,6 @@
 	<Reference Include="FolderView">
 		<HintPath>..\..\..\FolderView\FolderView\bin\x64\$(Configuration)\$(TargetFramework)\FolderView.dll</HintPath>
 	</Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
 
 </Project>
