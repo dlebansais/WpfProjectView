@@ -73,8 +73,6 @@ public static partial class XamlParser
             }
             else if (context.Member == XamlLanguage.Items)
             {
-                // XamlElementCollection IgnoredChildren = new();
-                // XamlAttributeCollection IgnoredAttributes = new();
                 ParseElementMemberUnknownContent(context, children, attributes);
             }
             else if (context.Member is XamlDirective AsDirective)
@@ -87,15 +85,6 @@ public static partial class XamlParser
 
                 if (CheckMultiLine && context.LineNumber > CurrentLineNumber && attributes.Count > 1)
                     isMultiLine = true;
-            }
-
-            XamlNamespaceCollection Namespaces = new();
-            ParseNamespaceDeclarations(ref context, Namespaces);
-
-            foreach (IXamlNamespace Namespace in Namespaces)
-            {
-                XamlAttributeNamespace AttributeNamespace = new(Namespace);
-                attributes.Add(AttributeNamespace);
             }
 
             context.Read();
@@ -232,18 +221,11 @@ public static partial class XamlParser
 
     private static void ParseElementMemberDirectiveContentObject(XamlParsingContext context, IXamlNamespace attributeNamespace, string attributeName, XamlAttributeCollection attributes)
     {
-        XamlElementCollection Children = new();
+        XamlElement Child = ParseElement(context);
 
-        do
-        {
-            XamlElement Child = ParseElement(context);
-            Children.Add(Child);
+        SkipIndentation(context);
 
-            SkipIndentation(context);
-        }
-        while (context.NodeType == XamlNodeType.StartObject || context.NodeType == XamlNodeType.NamespaceDeclaration);
-
-        XamlAttributeDirective AttributeDirective = new(attributeNamespace, attributeName, Children);
+        XamlAttributeDirective AttributeDirective = new(attributeNamespace, attributeName, Child);
         attributes.Add(AttributeDirective);
 
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);

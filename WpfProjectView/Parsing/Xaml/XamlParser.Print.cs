@@ -49,13 +49,9 @@ public static partial class XamlParser
             switch (Attribute)
             {
                 case XamlAttributeDirective Directive:
-                    if (Directive.Value is IXamlElementCollection AsCollection)
+                    if (Directive.Value is IXamlElement AsChild)
                     {
-                        string ChildString = string.Empty;
-
-                        foreach (IXamlElement Child in AsCollection)
-                            ChildString += OneLineElement(Child);
-
+                        string ChildString = OneLineElement(AsChild);
                         context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{ChildString}\"");
                     }
                     else
