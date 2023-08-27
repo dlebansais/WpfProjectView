@@ -40,15 +40,31 @@ public class TestXamlParser
 
         Assert.That(Root.NameWithPrefix, Is.EqualTo("Application"));
 
-        IXamlAttribute? ResourceAttribute = null;
+        IXamlAttributeElementCollection? ResourceAttribute = null;
 
         foreach (IXamlAttribute Attribute in Root.Attributes)
-            if (Attribute.Name == "Resources")
+            if (Attribute is IXamlAttributeElementCollection AttributeElementCollection && AttributeElementCollection.Name == "Resources")
             {
-                ResourceAttribute = Attribute;
+                ResourceAttribute = AttributeElementCollection;
                 break;
             }
 
         Assert.That(ResourceAttribute, Is.Not.Null);
+
+        IXamlElementCollection Children = ResourceAttribute.Children;
+
+        Assert.That(Children, Has.Count.GreaterThan(0));
+
+        foreach (IXamlElement Child in Children)
+        {
+            if (Child.Namespace.Prefix.Length > 0)
+            {
+                Assert.That(Child.NameWithPrefix, Does.StartWith($"{Child.Namespace.Prefix}:"));
+            }
+            else
+            {
+                Assert.That(Child.NameWithPrefix, Does.Not.Contain(":"));
+            }
+        }
     }
 }

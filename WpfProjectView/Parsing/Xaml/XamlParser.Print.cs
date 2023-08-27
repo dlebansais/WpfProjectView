@@ -251,7 +251,7 @@ public static partial class XamlParser
 
     private static string OneLineElementAttributeElementCollection(XamlAttributeElementCollection elementCollection)
     {
-        XamlElementCollection Children = elementCollection.Children;
+        IXamlElementCollection Children = elementCollection.Children;
 
         Debug.Assert(Children.Count > 0);
 

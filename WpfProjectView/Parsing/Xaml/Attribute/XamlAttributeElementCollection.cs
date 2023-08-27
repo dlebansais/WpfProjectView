@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Implements a xaml element attribute.
 /// </summary>
 [DebuggerDisplay("{Name,nq}")]
-internal record XamlAttributeElementCollection(string Name, XamlElementCollection Children, bool IsVisible, bool IsOneLine) : IXamlAttribute
+internal record XamlAttributeElementCollection(string Name, IXamlElementCollection Children, bool IsVisible, bool IsOneLine) : IXamlAttributeElementCollection
 {
     /// <inheritdoc/>
     public object? Value { get => Children; }
