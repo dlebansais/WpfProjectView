@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView;
 
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using FolderView;
@@ -7,6 +8,8 @@ using FolderView;
 /// <summary>
 /// Represents a file of unknown type.
 /// </summary>
+/// <inheritdoc/>
+[DebuggerDisplay("{SourceFile.Name,nq} (path: {((FolderView.Path)SourceFile.Path).Combined,nq})")]
 internal record OtherFile(FolderView.IFile SourceFile) : File(SourceFile), IOtherFile
 {
     /// <inheritdoc/>

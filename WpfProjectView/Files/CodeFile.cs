@@ -1,14 +1,16 @@
 ﻿namespace WpfProjectView;
 
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using FolderView;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 /// <summary>
 /// Represents a C# code file.
 /// </summary>
+/// <inheritdoc/>
+[DebuggerDisplay("{SourceFile.Name,nq} (path: {((FolderView.Path)SourceFile.Path).Combined,nq})")]
 internal record CodeFile(FolderView.IFile SourceFile) : File(SourceFile), ICodeFile
 {
     /// <inheritdoc/>

@@ -5,6 +5,7 @@ using System.Diagnostics;
 /// <summary>
 /// Implements a xaml namespace in any assembly.
 /// </summary>
+[DebuggerDisplay("{Prefix,nq}={AssemblyPath,nq}")]
 internal record XamlNamespace(string Prefix, string Namespace, string Assembly) : IXamlNamespace
 {
     /// <summary>

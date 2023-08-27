@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView.Test;
 
+using System.Diagnostics;
 using System.Text;
 using NUnit.Framework;
 
@@ -31,6 +32,23 @@ public class TestXamlParser
 
         IXamlParsingResult XamlParsingResult = XamlParser.Parse(Content);
         string ComparisonMessage = TestTools.CompareXamlParingResultWithOriginalContent(Content, XamlParsingResult);
+
         Assert.That(ComparisonMessage, Is.Empty, $"{ResourceName}\r\n{ComparisonMessage}");
+
+        IXamlElement? Root = XamlParsingResult.Root;
+        Debug.Assert(Root is not null);
+
+        Assert.That(Root.NameWithPrefix, Is.EqualTo("Application"));
+
+        IXamlAttribute? ResourceAttribute = null;
+
+        foreach (IXamlAttribute Attribute in Root.Attributes)
+            if (Attribute.Name == "Resources")
+            {
+                ResourceAttribute = Attribute;
+                break;
+            }
+
+        Assert.That(ResourceAttribute, Is.Not.Null);
     }
 }

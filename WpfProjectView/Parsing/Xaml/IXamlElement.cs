@@ -34,4 +34,9 @@ public interface IXamlElement
     /// Gets a value indicating whether the element is spanning multiple lines.
     /// </summary>
     bool IsMultiLine { get; }
+
+    /// <summary>
+    /// Gets the name with the namespace prefix.
+    /// </summary>
+    string NameWithPrefix { get; }
 }
