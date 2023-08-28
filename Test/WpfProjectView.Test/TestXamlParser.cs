@@ -56,15 +56,9 @@ public class TestXamlParser
         Assert.That(Children, Has.Count.GreaterThan(0));
 
         foreach (IXamlElement Child in Children)
-        {
             if (Child.Namespace.Prefix.Length > 0)
-            {
                 Assert.That(Child.NameWithPrefix, Does.StartWith($"{Child.Namespace.Prefix}:"));
-            }
             else
-            {
                 Assert.That(Child.NameWithPrefix, Does.Not.Contain(":"));
-            }
-        }
     }
 }
