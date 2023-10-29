@@ -48,11 +48,11 @@ public class TestInvalidXamlFormatException
         var DeserializedObject = (InvalidXamlFormatException)formatter.Deserialize(stream);
 
         Assert.That(DeserializedObject, Is.Not.Null);
-        Assert.That(DeserializedObject?.Message, Is.EqualTo(TestMessage));
+        Assert.That(DeserializedObject!.Message, Is.EqualTo(TestMessage));
 
-        Exception? DeserializeInnerException = DeserializedObject?.InnerException;
+        Exception? DeserializeInnerException = DeserializedObject!.InnerException;
 
         Assert.That(DeserializeInnerException, Is.Not.Null);
-        Assert.That(DeserializeInnerException?.Message, Is.EqualTo(InnerExceptionMessage));
+        Assert.That(DeserializeInnerException!.Message, Is.EqualTo(InnerExceptionMessage));
     }
 }
