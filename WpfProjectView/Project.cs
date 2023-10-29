@@ -98,4 +98,11 @@ public record Project : IProject
     {
         files.Add(newFile);
     }
+
+    /// <summary>
+    /// Links all files in the projects.
+    /// </summary>
+    public void Link()
+    {
+    }
 }
