@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView.Test;
 
+using System;
 using System.Diagnostics;
 using System.Text;
 using NUnit.Framework;
@@ -22,6 +23,12 @@ public class TestXamlParser
         string PrintResult = BuilderResult.ToString();
 
         Assert.That(PrintResult, Is.Empty);
+    }
+
+    [Test]
+    public void TestPrintInvalidResult()
+    {
+        _ = Assert.Throws<ArgumentNullException>(() => XamlParser.Print(null!));
     }
 
     [Test]

@@ -44,9 +44,12 @@ public static partial class XamlParser
     /// <param name="parsingResult">The parsing result.</param>
     public static StringBuilder Print(IXamlParsingResult parsingResult)
     {
+        if (parsingResult is null)
+            throw new ArgumentNullException(nameof(parsingResult));
+
         StringBuilder Builder = new();
 
-        if (parsingResult?.Root is not null)
+        if (parsingResult.Root is not null)
         {
             XamlPrintingContext Context = new(Builder, parsingResult.Root, Indentation: 0);
             Print(Context);
