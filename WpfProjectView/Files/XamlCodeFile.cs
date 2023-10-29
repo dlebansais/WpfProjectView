@@ -24,8 +24,8 @@ internal record XamlCodeFile(FolderView.IFile XamlSourceFile, FolderView.IFile C
     /// <inheritdoc/>
     public override async Task LoadAsync(IFolder rootFolder)
     {
-        await XamlSourceFile.LoadAsync();
-        await CodeSourceFile.LoadAsync();
+        await XamlSourceFile.LoadAsync().ConfigureAwait(false);
+        await CodeSourceFile.LoadAsync().ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

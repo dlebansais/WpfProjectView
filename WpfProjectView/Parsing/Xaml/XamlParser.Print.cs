@@ -1,7 +1,9 @@
 ﻿namespace WpfProjectView;
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 
 /// <summary>
 /// Implements a xaml parser.
@@ -116,11 +118,11 @@ public static partial class XamlParser
         if (context.ValueString.Count == 0)
         {
             string Termination = endTag ? "/>" : ">";
-            context.Builder.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName}{AttributeString}{Termination}");
+            context.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName}{AttributeString}{Termination}");
         }
         else
         {
-            context.Builder.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName}{AttributeString}>{context.ValueString[0]}</{ElementName}>");
+            context.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName}{AttributeString}>{context.ValueString[0]}</{ElementName}>");
         }
     }
 
@@ -140,17 +142,17 @@ public static partial class XamlParser
         Parts.RemoveAt(0);
         Parts.RemoveAt(Parts.Count - 1);
 
-        context.Builder.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName} {FirstDirectiveString}");
+        context.AppendLine($"{Whitespaces(context.Indentation)}<{ElementName} {FirstDirectiveString}");
 
         string ElementIndentation = Whitespaces(context.Indentation) + "  ";
         for (int Index = 0; Index < ElementName.Length; Index++)
             ElementIndentation += " ";
 
         foreach (string Part in Parts)
-            context.Builder.AppendLine($"{ElementIndentation}{Part}");
+            context.AppendLine($"{ElementIndentation}{Part}");
 
         string Termination = endTag ? "/>" : ">";
-        context.Builder.AppendLine($"{ElementIndentation}{LastDirectiveString}{Termination}");
+        context.AppendLine($"{ElementIndentation}{LastDirectiveString}{Termination}");
     }
 
     private static void PrintChildren(XamlPrintingContext context)
@@ -166,7 +168,7 @@ public static partial class XamlParser
 
             if (IsVisible)
             {
-                context.Builder.AppendLine($"{Whitespaces(Indentation)}<{ElementName}.{ElementCollectionAttribute.Name}>");
+                context.AppendLine($"{Whitespaces(Indentation)}<{ElementName}.{ElementCollectionAttribute.Name}>");
                 Indentation++;
             }
 
@@ -181,7 +183,7 @@ public static partial class XamlParser
             if (IsVisible)
             {
                 Indentation--;
-                context.Builder.AppendLine($"{Whitespaces(Indentation)}</{ElementName}.{ElementCollectionAttribute.Name}>");
+                context.AppendLine($"{Whitespaces(Indentation)}</{ElementName}.{ElementCollectionAttribute.Name}>");
             }
         }
 
@@ -191,7 +193,12 @@ public static partial class XamlParser
             Print(ChildContext);
         }
 
-        context.Builder.AppendLine($"{Whitespaces(context.Indentation)}</{ElementName}>");
+        context.AppendLine($"{Whitespaces(context.Indentation)}</{ElementName}>");
+    }
+
+    private static void AppendLine(this XamlPrintingContext context, string line)
+    {
+        _ = context.Builder.AppendLine(CultureInfo.InvariantCulture, $"{line}");
     }
 
     private static string OneLineElement(IXamlElement element)
@@ -277,7 +284,7 @@ public static partial class XamlParser
     {
         if (@namespace.Prefix == string.Empty)
             return name;
-        else if (@namespace is XamlNamespaceExtension && name.EndsWith("Extension"))
+        else if (@namespace is XamlNamespaceExtension && name.EndsWith("Extension", StringComparison.Ordinal))
             return $"{@namespace.Prefix}:{name.Substring(0, name.Length - 9)}";
         else
             return $"{@namespace.Prefix}:{name}";

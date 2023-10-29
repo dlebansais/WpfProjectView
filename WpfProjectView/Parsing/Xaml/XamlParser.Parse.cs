@@ -25,8 +25,8 @@ public static partial class XamlParser
 
         context = context with { CurrentObjectName = ElementName };
 
-        context.Read();
-        Debug.Assert(context.NodeType == XamlNodeType.StartMember || context.NodeType == XamlNodeType.EndObject);
+        _ = context.Read();
+        Debug.Assert(context.NodeType is XamlNodeType.StartMember or XamlNodeType.EndObject);
 
         (XamlElementCollection Children, XamlAttributeCollection Attributes, bool IsMultiLine) = ParseElementContent(context);
 
@@ -43,7 +43,7 @@ public static partial class XamlParser
             IXamlNamespace NewNamespace = XamlNamespace.Create(Namespace.Prefix, Namespace.Namespace);
             Namespaces.Add(NewNamespace);
 
-            context.Read();
+            _ = context.Read();
         }
 
         Debug.Assert(context.NodeType == XamlNodeType.StartObject);
@@ -74,7 +74,7 @@ public static partial class XamlParser
             else
                 ParseElementMember(context, Attributes, StartingLineNumber, ref IsMultiLine);
 
-            context.Read();
+            _ = context.Read();
         }
 
         Debug.Assert(context.NodeType == XamlNodeType.EndObject);
@@ -84,7 +84,7 @@ public static partial class XamlParser
 
     private static void ParseElementMemberInitialization(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        context.Read();
+        _ = context.Read();
         Debug.Assert(context.NodeType == XamlNodeType.Value);
         Debug.Assert(context.Value is string);
 
@@ -93,13 +93,13 @@ public static partial class XamlParser
         XamlAttributeSimpleValue Attribute = new(StringValue);
         attributes.Add(Attribute);
 
-        context.Read();
+        _ = context.Read();
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
     private static void ParseElementMemberUnknownContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)
     {
-        context.Read();
+        _ = context.Read();
 
         XamlNodeType NodeType = context.NodeType;
         bool IsParsed = false;
@@ -110,7 +110,7 @@ public static partial class XamlParser
             IsParsed = true;
         }
 
-        if (NodeType == XamlNodeType.StartObject || NodeType == XamlNodeType.NamespaceDeclaration)
+        if (NodeType is XamlNodeType.StartObject or XamlNodeType.NamespaceDeclaration)
         {
             ParseElementMemberUnknownContentObjects(context, children);
             IsParsed = true;
@@ -127,7 +127,7 @@ public static partial class XamlParser
         XamlAttributeSimpleValue Attribute = new(StringValue);
         attributes.Add(Attribute);
 
-        context.Read();
+        _ = context.Read();
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
@@ -140,12 +140,12 @@ public static partial class XamlParser
 
             SkipIndentation(context);
         }
-        while (context.NodeType == XamlNodeType.StartObject || context.NodeType == XamlNodeType.NamespaceDeclaration);
+        while (context.NodeType is XamlNodeType.StartObject or XamlNodeType.NamespaceDeclaration);
     }
 
     private static void ParseElementMemberPositionalParameter(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        context.Read();
+        _ = context.Read();
 
         object? AttributeValue = null;
         XamlNodeType NodeType = context.NodeType;
@@ -153,7 +153,7 @@ public static partial class XamlParser
         if (NodeType == XamlNodeType.Value)
             AttributeValue = context.Value;
 
-        if (NodeType == XamlNodeType.StartObject || NodeType == XamlNodeType.NamespaceDeclaration)
+        if (NodeType is XamlNodeType.StartObject or XamlNodeType.NamespaceDeclaration)
             AttributeValue = ParseElement(context);
 
         Debug.Assert(AttributeValue is not null);
@@ -161,7 +161,7 @@ public static partial class XamlParser
         XamlAttributeMember Attribute = new(string.Empty, AttributeValue);
         attributes.Add(Attribute);
 
-        context.Read();
+        _ = context.Read();
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
@@ -172,7 +172,7 @@ public static partial class XamlParser
         IXamlNamespace AttributeNamespace = context.MemberNamespace;
         string AttributeName = context.MemberName;
 
-        context.Read();
+        _ = context.Read();
 
         XamlNodeType NodeType = context.NodeType;
         bool IsParsed = false;
@@ -183,7 +183,7 @@ public static partial class XamlParser
             IsParsed = true;
         }
 
-        if (NodeType == XamlNodeType.StartObject || NodeType == XamlNodeType.NamespaceDeclaration)
+        if (NodeType is XamlNodeType.StartObject or XamlNodeType.NamespaceDeclaration)
         {
             ParseElementMemberDirectiveContentObject(context, AttributeNamespace, AttributeName, attributes);
             IsParsed = true;
@@ -199,7 +199,7 @@ public static partial class XamlParser
         XamlAttributeDirective Attribute = new(attributeNamespace, attributeName, AttributeValue);
         attributes.Add(Attribute);
 
-        context.Read();
+        _ = context.Read();
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
     }
 
@@ -234,7 +234,7 @@ public static partial class XamlParser
             AttributeName = DeclaringTypeString + "." + AttributeName;
         }
 
-        context.Read();
+        _ = context.Read();
 
         IXamlAttribute? Attribute = null;
         XamlNodeType NodeType = context.NodeType;
@@ -246,7 +246,7 @@ public static partial class XamlParser
             CheckMultiLine = true;
         }
 
-        if (NodeType == XamlNodeType.StartObject || NodeType == XamlNodeType.NamespaceDeclaration)
+        if (NodeType is XamlNodeType.StartObject or XamlNodeType.NamespaceDeclaration)
         {
             XamlElementCollection ElementCollection = ParseElementMemberObjectsValue(context);
             bool IsOneLine = AttributeLineNumber == context.LineNumber;
@@ -274,7 +274,7 @@ public static partial class XamlParser
     {
         object? AttributeValue = context.Value;
 
-        context.Read();
+        _ = context.Read();
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
 
         return AttributeValue;
@@ -291,19 +291,19 @@ public static partial class XamlParser
 
             SkipIndentation(context);
         }
-        while (context.NodeType == XamlNodeType.StartObject || context.NodeType == XamlNodeType.NamespaceDeclaration);
+        while (context.NodeType is XamlNodeType.StartObject or XamlNodeType.NamespaceDeclaration);
 
         return Children;
     }
 
     private static XamlElementCollection ParseImplicitElementMemberObjectsValue(XamlParsingContext context)
     {
-        context.Read();
+        _ = context.Read();
         Debug.Assert(context.NodeType == XamlNodeType.StartMember);
 
         (XamlElementCollection Children, _, _) = ParseElementContent(context);
 
-        context.Read();
+        _ = context.Read();
         Debug.Assert(context.NodeType == XamlNodeType.EndMember);
 
         return Children;
@@ -311,9 +311,9 @@ public static partial class XamlParser
 
     private static void SkipIndentation(XamlParsingContext context)
     {
-        context.Read();
+        _ = context.Read();
 
         if (context.NodeType == XamlNodeType.Value && context.Value is string StringValue && StringValue.Trim() == string.Empty)
-            context.Read();
+            _ = context.Read();
     }
 }

@@ -25,7 +25,7 @@ public static partial class XamlParser
                 using XamlXmlReader Reader = new(content, new XamlXmlReaderSettings() { ProvideLineInfo = true });
                 XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
 
-                Context.Read();
+                _ = Context.Read();
 
                 Result.Root = ParseElement(Context);
             }
@@ -46,7 +46,7 @@ public static partial class XamlParser
     {
         StringBuilder Builder = new();
 
-        if (parsingResult.Root is not null)
+        if (parsingResult?.Root is not null)
         {
             XamlPrintingContext Context = new(Builder, parsingResult.Root, Indentation: 0);
             Print(Context);

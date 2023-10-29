@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView;
 
+using System;
 using System.Diagnostics;
 
 /// <summary>
@@ -33,7 +34,7 @@ internal record XamlNamespace(string Prefix, string Namespace, string Assembly) 
         string Namespace;
         bool IsNamespaceValid;
 
-        if (NamespacePart.StartsWith(ClrNamespaceHeader))
+        if (NamespacePart.StartsWith(ClrNamespaceHeader, StringComparison.Ordinal))
         {
             Namespace = NamespacePart.Substring(ClrNamespaceHeader.Length);
             IsNamespaceValid = true;
@@ -47,7 +48,7 @@ internal record XamlNamespace(string Prefix, string Namespace, string Assembly) 
         string Assembly;
         bool IsAssemblyValid;
 
-        if (AssemblyPart.StartsWith(AssemblyHeader))
+        if (AssemblyPart.StartsWith(AssemblyHeader, StringComparison.Ordinal))
         {
             Assembly = AssemblyPart.Substring(AssemblyHeader.Length);
             IsAssemblyValid = true;

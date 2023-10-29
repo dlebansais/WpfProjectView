@@ -17,7 +17,7 @@ internal record XamlResourceFile(FolderView.IFile SourceFile) : File(SourceFile)
     /// <inheritdoc/>
     public override async Task LoadAsync(IFolder rootFolder)
     {
-        await SourceFile.LoadAsync();
+        await SourceFile.LoadAsync().ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

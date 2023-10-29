@@ -126,7 +126,7 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
         return Result;
     }
 
-    private bool IsNamespaceFound(IXamlNamespace candidateNamespace, string preferredXamlNamespace, string? typeNamespace, string? typeAssembly, ref IXamlNamespace preferredNamespace, out IXamlNamespace foundNamespace)
+    private static bool IsNamespaceFound(IXamlNamespace candidateNamespace, string preferredXamlNamespace, string? typeNamespace, string? typeAssembly, ref IXamlNamespace preferredNamespace, out IXamlNamespace foundNamespace)
     {
         foundNamespace = null!;
 

@@ -59,7 +59,7 @@ public static class TestTools
     public static string CompareXamlParingResultWithOriginalContent(Stream content, IXamlParsingResult xamlParsingResult)
     {
         content.Seek(0, SeekOrigin.Begin);
-        using StreamReader Reader = new StreamReader(content, Encoding.UTF8);
+        using StreamReader Reader = new(content, Encoding.UTF8);
         string ContentString = Reader.ReadToEnd();
         ContentString = ContentString.Trim();
 

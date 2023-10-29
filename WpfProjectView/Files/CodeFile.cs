@@ -19,7 +19,7 @@ internal record CodeFile(FolderView.IFile SourceFile) : File(SourceFile), ICodeF
     /// <inheritdoc/>
     public override async Task LoadAsync(IFolder rootFolder)
     {
-        await SourceFile.LoadAsync();
+        await SourceFile.LoadAsync().ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

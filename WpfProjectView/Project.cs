@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView;
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -14,20 +15,18 @@ public record Project : IProject
     /// <summary>
     /// Initializes a new instance of the <see cref="Project"/> class.
     /// </summary>
-    private Project(ILocation location, List<IFile> files)
+    private Project()
     {
-        Location = location;
-        Files = files;
     }
 
     /// <inheritdoc/>
-    public ILocation Location { get; }
+    public required ILocation Location { get; init; }
 
     /// <inheritdoc/>
     public required IFolder RootFolder { get; init; }
 
     /// <inheritdoc/>
-    public IReadOnlyList<IFile> Files { get; }
+    public required IReadOnlyList<IFile> Files { get; init; }
 
     /// <summary>
     /// Returns an instance of <see cref="Project"/> for the provided location.
@@ -37,10 +36,10 @@ public record Project : IProject
     {
         List<IFile> Files = new();
 
-        IFolder RootFolder = await Path.RootFolderFromAsync(location);
+        IFolder RootFolder = await Path.RootFolderFromAsync(location).ConfigureAwait(false);
         FillFileList(RootFolder, Files);
 
-        Project Result = new Project(location, Files) { RootFolder = RootFolder };
+        Project Result = new() { Location = location, RootFolder = RootFolder, Files = Files };
 
         return Result;
     }
@@ -53,9 +52,9 @@ public record Project : IProject
 
         // Split files in 3 categories.
         foreach (var Item in folder.Files)
-            if (Item.Path.Name.EndsWith(".xaml"))
+            if (Item.Path.Name.EndsWith(".xaml", StringComparison.Ordinal))
                 XamlFileList.Add(Item);
-            else if (Item.Path.Name.EndsWith(".cs"))
+            else if (Item.Path.Name.EndsWith(".cs", StringComparison.Ordinal))
                 CodeFileList.Add(Item);
             else
                 OtherFileList.Add(Item);
@@ -74,8 +73,8 @@ public record Project : IProject
         {
             XamlCodeFileList.Add(Item.DotXaml);
 
-            XamlFileList.Remove(Item.DotXaml);
-            CodeFileList.Remove(Item.DotCs);
+            _ = XamlFileList.Remove(Item.DotXaml);
+            _ = CodeFileList.Remove(Item.DotCs);
         }
 
         // Finally fill the list of files.
@@ -99,10 +98,12 @@ public record Project : IProject
         files.Add(newFile);
     }
 
+    /*
     /// <summary>
     /// Links all files in the projects.
     /// </summary>
     public void Link()
     {
     }
+    */
 }

@@ -11,7 +11,7 @@ public class TestXamlParser
     {
         var Content = TestTools.GetResourceContent("empty.xaml");
 
-        Assert.Throws<InvalidXamlFormatException>(() => XamlParser.Parse(Content));
+        _ = Assert.Throws<InvalidXamlFormatException>(() => XamlParser.Parse(Content));
     }
 
     [Test]

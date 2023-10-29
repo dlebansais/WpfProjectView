@@ -21,7 +21,7 @@ internal static class CodeParser
 
         using StreamReader Reader = new(content, Encoding.UTF8);
         string SourceCode = Reader.ReadToEnd();
-        CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.CSharp11, DocumentationMode.None);
+        CSharpParseOptions Options = new(LanguageVersion.CSharp11, DocumentationMode.None);
 
         SyntaxTree Result = CSharpSyntaxTree.ParseText(SourceCode, Options);
 
