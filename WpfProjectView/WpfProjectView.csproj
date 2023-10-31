@@ -63,7 +63,7 @@
 
         <PackageReference Include="Microsoft.CodeAnalysis" Version="4.7.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
-        <PackageReference Include="Octokit" Version="7.1.0" />
+        <PackageReference Include="Octokit" Version="8.1.1" />
         <PackageReference Include="FolderView-Debug" Version="1.0.3" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
         <PackageReference Include="FolderView" Version="1.0.3" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
