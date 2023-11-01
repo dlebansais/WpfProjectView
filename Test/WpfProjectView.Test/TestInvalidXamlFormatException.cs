@@ -13,9 +13,11 @@ public class TestInvalidXamlFormatException
     {
         var TestObject = new InvalidXamlFormatException();
 
+#pragma warning disable CA2201 // Do not raise reserved exception types: we just need the default message, this exception will not be raised.
         var DefaultException = new Exception();
+#pragma warning restore CA2201 // Do not raise reserved exception types
         string DefaultExceptionMessage = DefaultException.Message;
-        string ExpectedMessage = DefaultExceptionMessage.Replace(typeof(Exception).FullName!, typeof(InvalidXamlFormatException).FullName!);
+        string ExpectedMessage = DefaultExceptionMessage.Replace(typeof(Exception).FullName!, typeof(InvalidXamlFormatException).FullName!, StringComparison.InvariantCulture);
 
         Assert.That(TestObject.Message, Is.EqualTo(ExpectedMessage));
         Assert.That(TestObject.InnerException, Is.Null);
@@ -24,7 +26,7 @@ public class TestInvalidXamlFormatException
     [Test]
     public void TestStringParameterConstructor()
     {
-        string TestMessage = "xyz";
+        const string TestMessage = "xyz";
         var TestObject = new InvalidXamlFormatException(TestMessage);
 
         Assert.That(TestObject.Message, Is.EqualTo(TestMessage));
@@ -34,9 +36,11 @@ public class TestInvalidXamlFormatException
     [Test]
     public void TestSerializationConstructor()
     {
-        string InnerExceptionMessage = "InnerTest";
+        const string InnerExceptionMessage = "InnerTest";
+#pragma warning disable CA2201 // Do not raise reserved exception types: we just need the default message, this exception will not be raised.
         var InnerException = new Exception(InnerExceptionMessage);
-        string TestMessage = "Test";
+#pragma warning restore CA2201 // Do not raise reserved exception types
+        const string TestMessage = "Test";
         var TestObject = new InvalidXamlFormatException(TestMessage, InnerException);
 
         MemoryStream stream = new();

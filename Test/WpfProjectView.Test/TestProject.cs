@@ -10,7 +10,7 @@ public class TestProject
     {
         FolderView.ILocation Location = TestTools.GetLocalLocation();
 
-        IProject TestProject = await Project.CreateAsync(Location);
+        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
 
         Assert.That(TestProject, Is.Not.Null);
         Assert.That(TestProject.Location, Is.EqualTo(Location));

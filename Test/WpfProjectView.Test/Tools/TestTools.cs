@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -58,7 +60,9 @@ public static class TestTools
 
     public static string CompareXamlParingResultWithOriginalContent(Stream content, IXamlParsingResult xamlParsingResult)
     {
-        content.Seek(0, SeekOrigin.Begin);
+        Debug.Assert(content is not null);
+
+        _ = content.Seek(0, SeekOrigin.Begin);
         using StreamReader Reader = new(content, Encoding.UTF8);
         string ContentString = Reader.ReadToEnd();
         ContentString = ContentString.Trim();
@@ -80,7 +84,7 @@ public static class TestTools
         bool HasDifferences = false;
         int SimilarityCount = 0;
         int LineNumber = 1;
-        List<string> DebugLines = new();
+        Collection<string> DebugLines = new();
 
         foreach (var Line in Differences.Lines)
         {
@@ -126,12 +130,12 @@ public static class TestTools
         return Builder.ToString();
     }
 
-    public static void PrintParsingDifferences(StringBuilder builder, int lineNumber, List<string> debugLines)
+    private static void PrintParsingDifferences(StringBuilder builder, int lineNumber, Collection<string> debugLines)
     {
-        builder.AppendLine($"****** Line {lineNumber - debugLines.Count + 1}");
+        _ = builder.AppendLine(CultureInfo.InvariantCulture, $"****** Line {lineNumber - debugLines.Count + 1}");
 
         foreach (string DebugLine in debugLines)
-            builder.AppendLine(DebugLine);
+            _ = builder.AppendLine(DebugLine);
     }
 
     public static Stream GetResourceContent(string resourceName)
@@ -142,6 +146,7 @@ public static class TestTools
         return ResourceStream;
     }
 
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    public static extern bool DeleteFile(string path);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool DeleteFile(string path);
 }

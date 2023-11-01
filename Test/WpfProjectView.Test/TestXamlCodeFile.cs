@@ -10,7 +10,7 @@ public class TestXamlCodeFile
     {
         FolderView.ILocation Location = TestTools.GetLocalLocation();
 
-        IProject TestProject = await Project.CreateAsync(Location);
+        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
         int FileCount = 0;
 
         foreach (IFile Item in TestProject.Files)
@@ -34,7 +34,7 @@ public class TestXamlCodeFile
                 Assert.That(AsXamlCodeFile.XamlParsingResult.Root, Is.Null);
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Null);
 
-                await AsXamlCodeFile.LoadAsync(TestProject.RootFolder);
+                await AsXamlCodeFile.LoadAsync(TestProject.RootFolder).ConfigureAwait(false);
 
                 Assert.That(AsXamlCodeFile.XamlSourceFile, Is.Not.Null);
                 Assert.That(AsXamlCodeFile.XamlSourceFile.Content, Is.Not.Null);

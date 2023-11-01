@@ -10,7 +10,7 @@ public class TestOtherFile
     {
         FolderView.ILocation Location = TestTools.GetLocalLocation();
 
-        IProject TestProject = await Project.CreateAsync(Location);
+        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
         int OtherFileCount = 0;
 
         foreach (IFile Item in TestProject.Files)
@@ -21,7 +21,7 @@ public class TestOtherFile
                 AsOtherFile.Parse();
                 Assert.That(AsOtherFile.Content, Is.Null);
 
-                await AsOtherFile.LoadAsync(TestProject.RootFolder);
+                await AsOtherFile.LoadAsync(TestProject.RootFolder).ConfigureAwait(false);
                 Assert.That(AsOtherFile.Content, Is.Null);
 
                 AsOtherFile.Parse();

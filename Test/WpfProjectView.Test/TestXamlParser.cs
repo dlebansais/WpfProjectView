@@ -34,7 +34,7 @@ public class TestXamlParser
     [Test]
     public void TestParseComplex()
     {
-        string ResourceName = "complex.xaml";
+        const string ResourceName = "complex.xaml";
         var Content = TestTools.GetResourceContent(ResourceName);
 
         IXamlParsingResult XamlParsingResult = XamlParser.Parse(Content);

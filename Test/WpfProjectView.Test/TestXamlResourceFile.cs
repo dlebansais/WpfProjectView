@@ -12,7 +12,7 @@ public class TestXamlResourceFile
     {
         ILocation Location = TestTools.GetLocalLocation();
 
-        IProject TestProject = await Project.CreateAsync(Location);
+        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
         int XamlFileCount = 0;
 
         foreach (var Item in TestProject.Files)
@@ -31,7 +31,7 @@ public class TestXamlResourceFile
                 Assert.That(AsXamlResourceFile.XamlParsingResult, Is.Not.Null);
                 Assert.That(AsXamlResourceFile.XamlParsingResult.Root, Is.Null);
 
-                await AsXamlResourceFile.LoadAsync(TestProject.RootFolder);
+                await AsXamlResourceFile.LoadAsync(TestProject.RootFolder).ConfigureAwait(false);
 
                 Assert.That(AsXamlResourceFile.SourceFile, Is.Not.Null);
                 Assert.That(AsXamlResourceFile.SourceFile.Content, Is.Not.Null);
@@ -55,12 +55,12 @@ public class TestXamlResourceFile
     [Test]
     public async Task TestNullContentAsync()
     {
-        string DummyFileName = "dummy.xaml";
+        const string DummyFileName = "dummy.xaml";
         _ = TestTools.DeleteFile(DummyFileName);
         CreateLocalDummyFile(DummyFileName);
 
         LocalLocation Location = new(".");
-        IProject TestProject = await Project.CreateAsync(Location);
+        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
 
         _ = TestTools.DeleteFile(DummyFileName);
 
@@ -69,17 +69,17 @@ public class TestXamlResourceFile
         Assert.That(XamlFile, Is.Not.Null);
         Assert.That(XamlFile.SourceFile.Name, Is.EqualTo(DummyFileName));
 
-        Assert.ThrowsAsync<FileNotFoundException>(async () => await XamlFile.LoadAsync(TestProject.RootFolder));
+        _ = Assert.ThrowsAsync<FileNotFoundException>(async () => await XamlFile.LoadAsync(TestProject.RootFolder).ConfigureAwait(false));
 
         XamlFile.Parse();
         Assert.That(XamlFile.XamlParsingResult, Is.Not.Null);
         Assert.That(XamlFile.XamlParsingResult.Root, Is.Null);
     }
 
-    private void CreateLocalDummyFile(string fileName)
+    private static void CreateLocalDummyFile(string fileName)
     {
         using FileStream Stream = new(fileName, FileMode.Create, FileAccess.Write);
-        using BinaryWriter Writer = new BinaryWriter(Stream);
+        using BinaryWriter Writer = new(Stream);
         Writer.Write("Dummy");
     }
 }
