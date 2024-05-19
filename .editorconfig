@@ -17,6 +17,9 @@ dotnet_diagnostic.CA1716.severity = silent
 # CA1820: Test for empty strings using string length
 dotnet_diagnostic.CA1820.severity = silent
 
+# CA1846: Prefer AsSpan over Substring
+dotnet_diagnostic.CA1846.severity = silent
+
 # CA1852: Seal internal types
 dotnet_diagnostic.CA1852.severity = silent
 

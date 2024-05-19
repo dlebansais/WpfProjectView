@@ -1,21 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net7.0-windows7.0</TargetFrameworks>
-        <LangVersion>11.0</LangVersion>
+        <TargetFrameworks>net8.0-windows7.0</TargetFrameworks>
+        <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
         <Platforms>x64</Platforms>
         <UseWPF>true</UseWPF>
 
         <RootNamespace>WpfProjectView</RootNamespace>
-        <Version>1.0.2</Version>
-        <AssemblyVersion>1.0.2.2</AssemblyVersion>
-        <FileVersion>1.0.2.2</FileVersion>
+        <Version>1.0.3</Version>
+        <AssemblyVersion>1.0.3.3</AssemblyVersion>
+        <FileVersion>1.0.3.3</FileVersion>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
         <Description>Simple immutable view of a WPF project structure on disk or on the Internet</Description>
-        <Copyright>Copyright © 2023 David Le Bansais</Copyright>
+        <Copyright>Copyright © 2024 David Le Bansais</Copyright>
         <RepositoryUrl>https://github.com/dlebansais/WpfProjectView</RepositoryUrl>
 
         <NeutralLanguage>en-US</NeutralLanguage>
@@ -41,7 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.507">
+        <PackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.556">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -53,19 +53,19 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="PolySharp" Version="1.13.2">
+        <PackageReference Include="PolySharp" Version="1.14.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
 
-        <PackageReference Include="Microsoft.CodeAnalysis" Version="4.7.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
-        <PackageReference Include="Octokit" Version="8.1.1" />
-        <PackageReference Include="FolderView-Debug" Version="1.0.4" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="FolderView" Version="1.0.4" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+        <PackageReference Include="Microsoft.CodeAnalysis" Version="4.9.2" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
+        <PackageReference Include="Octokit" Version="11.0.1" />
+        <PackageReference Include="FolderView-Debug" Version="1.0.5" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="FolderView" Version="1.0.5" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(SolutionDir)'!='*Undefined*'">
