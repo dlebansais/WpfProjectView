@@ -45,7 +45,7 @@ public class TestXamlParser
         IXamlElement? Root = XamlParsingResult.Root;
         Debug.Assert(Root is not null);
 
-        Assert.That(Root.NameWithPrefix, Is.EqualTo("Application"));
+        Assert.That(Root!.NameWithPrefix, Is.EqualTo("Application"));
 
         IXamlAttributeElementCollection? ResourceAttribute = null;
 

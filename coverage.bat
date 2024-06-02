@@ -2,64 +2,73 @@
 
 setlocal
 
-set PROJECTNAME=FolderView
+call ..\Certification\set_tokens.bat
+
+set PROJECTNAME=WpfProjectView
+set TOKEN=%WPFPROJECTVIEW_CODECOV_TOKEN%
 set TESTPROJECTNAME=%PROJECTNAME%.Test
+set PLATFORM=x64
+set CONFIGURATION=Debug
+set FRAMEWORK=net8.0-windows7.0
 set RESULTFILENAME=Coverage-%PROJECTNAME%.xml
-set OPENCOVER_VERSION=4.7.1189
+set RESULTFILEPATH=".\Test\%TESTPROJECTNAME%\bin\%PLATFORM%\%CONFIGURATION%\%FRAMEWORK%\%RESULTFILENAME%"
+
+set OPENCOVER_VERSION=4.7.1221
 set OPENCOVER=OpenCover.%OPENCOVER_VERSION%
-set CODECOV_VERSION=1.12.2
-set CODECOV=Codecov.%CODECOV_VERSION%
-set NUINT_CONSOLE_VERSION=3.11.1
-set NUINT_CONSOLE=NUnit.ConsoleRunner.%NUINT_CONSOLE_VERSION%
-set FRAMEWORK=net481
+set OPENCOVER_EXE=".\packages\%OPENCOVER%\tools\OpenCover.Console.exe"
+
+set CODECOV_UPLOADER_VERSION=0.7.2
+set CODECOV_UPLOADER=CodecovUploader.%CODECOV_UPLOADER_VERSION%
+set CODECOV_UPLOADER_EXE=".\packages\%CODECOV_UPLOADER%\tools\codecov.exe"
+
+set REPORTGENERATOR_VERSION=5.2.0
+set REPORTGENERATOR=ReportGenerator.%REPORTGENERATOR_VERSION%
+set REPORTGENERATOR_EXE=".\packages\%REPORTGENERATOR%\tools\net8.0\ReportGenerator.exe"
 
 nuget install OpenCover -Version %OPENCOVER_VERSION% -OutputDirectory packages
-nuget install CodeCov -Version %CODECOV_VERSION% -OutputDirectory packages
-nuget install NUnit.ConsoleRunner -Version %NUINT_CONSOLE_VERSION% -OutputDirectory packages
+nuget install CodecovUploader -Version %CODECOV_UPLOADER_VERSION% -OutputDirectory packages
+nuget install ReportGenerator -Version %REPORTGENERATOR_VERSION% -OutputDirectory packages
 
-if not exist ".\packages\%OPENCOVER%\tools\OpenCover.Console.exe" goto error_console1
-if not exist ".\packages\%CODECOV%\tools\codecov.exe" goto error_console2
-if not exist ".\packages\%NUINT_CONSOLE%\tools\nunit3-console.exe" goto error_console3
-
-call ..\Certification\set_tokens.bat
+if '%TOKEN%' == '' goto error_console1
+if not exist %OPENCOVER_EXE% goto error_console2
+if not exist %CODECOV_UPLOADER_EXE% goto error_console3
+if not exist %REPORTGENERATOR_EXE% goto error_console4
 
 if exist ".\Test\%TESTPROJECTNAME%\publish" rd /S /Q ".\Test\%TESTPROJECTNAME%\publish"
 
-rem dotnet build ./%PROJECTNAME% -c Debug -f %FRAMEWORK% /p:Platform=x64
-dotnet build ./Test/%TESTPROJECTNAME% -c Debug -f %FRAMEWORK% /p:Platform=x64
-rem dotnet publish ./Test/%TESTPROJECTNAME% -c Release -f %FRAMEWORK% /p:Platform=x64 -o ./Test/%TESTPROJECTNAME%/publish/x64/Release
-
-rem if not exist ".\Test\%TESTPROJECTNAME%\publish\x64\Debug\%TESTPROJECTNAME%.dll" goto error_not_built
-rem if not exist ".\Test\%TESTPROJECTNAME%\publish\x64\Release\%TESTPROJECTNAME%.dll" goto error_not_built
-rem copy ".\%PROJECTNAME%\bin\x64\Debug\%FRAMEWORK%\%PROJECTNAME%.dll" ".\Test\%TESTPROJECTNAME%\publish\x64\Debug\"
-rem copy ".\%PROJECTNAME%\bin\x64\Debug\%FRAMEWORK%\%PROJECTNAME%.pdb" ".\Test\%TESTPROJECTNAME%\publish\x64\Debug\"
-rem copy ".\%PROJECTNAME%\bin\x64\Release\%FRAMEWORK%\%PROJECTNAME%.dll" ".\Test\%TESTPROJECTNAME%\publish\x64\Release\"
-rem copy ".\%PROJECTNAME%\bin\x64\Release\%FRAMEWORK%\%PROJECTNAME%.pdb" ".\Test\%TESTPROJECTNAME%\publish\x64\Release\"
+dotnet build ./Test/%TESTPROJECTNAME% /p:Platform=%PLATFORM% -c %CONFIGURATION% -f %FRAMEWORK%
 
 if exist .\Test\%TESTPROJECTNAME%\*.log del .\Test\%TESTPROJECTNAME%\*.log
-if exist .\Test\%TESTPROJECTNAME%\obj\x64\Debug\%RESULTFILENAME% del .\Test\%TESTPROJECTNAME%\obj\x64\Debug\%RESULTFILENAME%
-rem if exist .\Test\%TESTPROJECTNAME%\obj\x64\Release\%RESULTFILENAME% del .\Test\%TESTPROJECTNAME%\obj\x64\Release\%RESULTFILENAME%
-".\packages\%OPENCOVER%\tools\OpenCover.Console.exe" -register:user -target:".\packages\%NUINT_CONSOLE%\tools\nunit3-console.exe" -targetargs:".\Test\%TESTPROJECTNAME%\bin\x64\Debug\%FRAMEWORK%\%TESTPROJECTNAME%.dll --trace=Debug --labels=Before" "-filter:+[*]* -[%TESTPROJECTNAME%*]*" -output:".\Test\%TESTPROJECTNAME%\obj\x64\Debug\%RESULTFILENAME%"
-rem ".\packages\%OPENCOVER%\tools\OpenCover.Console.exe" -register:user -target:".\packages\%NUINT_CONSOLE%\tools\nunit3-console.exe" -targetargs:".\Test\%TESTPROJECTNAME%\bin\x64\Release\%FRAMEWORK%\%TESTPROJECTNAME%.dll --trace=Debug --labels=Before" -filter:"+[%PROJECTNAME%*]* -[%TESTPROJECTNAME%*]*" -output:".\Test\%TESTPROJECTNAME%\obj\x64\Release\%RESULTFILENAME%"
-if exist .\Test\%TESTPROJECTNAME%\obj\x64\Debug\%RESULTFILENAME% .\packages\%CODECOV%\tools\codecov -f ".\Test\%TESTPROJECTNAME%\obj\x64\Debug\%RESULTFILENAME%" -t %MPFRDOTNET_CODECOV_TOKEN%
-rem if exist .\Test\%TESTPROJECTNAME%\obj\x64\Release\%RESULTFILENAME% .\packages\%CODECOV%\tools\codecov -f ".\Test\%TESTPROJECTNAME%\obj\x64\Release\%RESULTFILENAME%" -t %MPFRDOTNET_CODECOV_TOKEN%
+if exist %RESULTFILEPATH% del %RESULTFILEPATH%
+
+rem Execute tests within OpenCover.
+%OPENCOVER_EXE% -register:user -target:"C:\Program Files\dotnet\dotnet.exe" -targetargs:"test -c %CONFIGURATION% -f %FRAMEWORK% --no-build -l console;verbosity=detailed" -output:%RESULTFILEPATH% -mergeoutput
+
+if not exist %RESULTFILEPATH% goto end
+%CODECOV_UPLOADER_EXE% -f %RESULTFILEPATH% -t %TOKEN%
+%REPORTGENERATOR_EXE% -reports:%RESULTFILEPATH% -targetdir:.\CoverageReports "-assemblyfilters:+%PROJECTNAME%;+%TESTPROJECTNAME%" "-filefilters:-*.g.cs;-*Microsoft.NET.Test.Sdk.Program.cs"
 goto end
 
 :error_console1
-echo ERROR: OpenCover.Console not found.
+echo ERROR: CodeCov token not set.
 goto end
 
 :error_console2
-echo ERROR: Codecov not found.
+echo ERROR: OpenCover.Console not found.
 goto end
 
 :error_console3
-echo ERROR: nunit3-console not found.
+echo ERROR: Codecov not found.
+goto end
+
+:error_console4
+echo ERROR: ReportGenerator not found.
 goto end
 
 :error_not_built
-echo ERROR: %TESTPROJECTNAME%.dll not built (both Debug and Release are required).
+echo ERROR: %TESTPROJECTNAME%.dll not built.
 goto end
 
 :end
-del *.log
+if exist *.log del *.log
+if exist *Result*.xml del *Result*.xml

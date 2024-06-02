@@ -17,7 +17,11 @@ public class TestInvalidXamlFormatException
         var DefaultException = new Exception();
 #pragma warning restore CA2201 // Do not raise reserved exception types
         string DefaultExceptionMessage = DefaultException.Message;
+#if NET6_0_OR_GREATER
         string ExpectedMessage = DefaultExceptionMessage.Replace(typeof(Exception).FullName!, typeof(InvalidXamlFormatException).FullName!, StringComparison.InvariantCulture);
+#else
+        string ExpectedMessage = DefaultExceptionMessage.Replace(typeof(Exception).FullName!, typeof(InvalidXamlFormatException).FullName!);
+#endif
 
         Assert.That(TestObject.Message, Is.EqualTo(ExpectedMessage));
         Assert.That(TestObject.InnerException, Is.Null);

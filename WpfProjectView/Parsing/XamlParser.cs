@@ -44,7 +44,12 @@ public static partial class XamlParser
     /// <param name="parsingResult">The parsing result.</param>
     public static StringBuilder Print(IXamlParsingResult parsingResult)
     {
+#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(parsingResult);
+#else
+        if (parsingResult is null)
+            throw new ArgumentNullException(nameof(parsingResult));
+#endif
 
         StringBuilder Builder = new();
 

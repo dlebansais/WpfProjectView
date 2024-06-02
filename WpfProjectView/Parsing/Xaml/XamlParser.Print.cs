@@ -198,7 +198,11 @@ public static partial class XamlParser
 
     private static void AppendLine(this XamlPrintingContext context, string line)
     {
+#if NET6_0_OR_GREATER
         _ = context.Builder.AppendLine(CultureInfo.InvariantCulture, $"{line}");
+#else
+        _ = context.Builder.AppendLine($"{line}");
+#endif
     }
 
     private static string OneLineElement(IXamlElement element)
@@ -235,7 +239,7 @@ public static partial class XamlParser
 
         Debug.Assert(AttributeString is not null);
 
-        return AttributeString;
+        return AttributeString!;
     }
 
     private static string OneLineElementAttributeMember(XamlAttributeMember member)
@@ -253,7 +257,7 @@ public static partial class XamlParser
         if (member.Name != string.Empty)
             MemberString = $"{member.Name}=" + MemberString;
 
-        return MemberString;
+        return MemberString!;
     }
 
     private static string OneLineElementAttributeElementCollection(XamlAttributeElementCollection elementCollection)

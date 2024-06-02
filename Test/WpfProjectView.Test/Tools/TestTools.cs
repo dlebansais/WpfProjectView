@@ -37,20 +37,23 @@ public static class TestTools
             string? ParentFolder = System.IO.Path.GetDirectoryName(CurrentDirectory);
             string? FileName = System.IO.Path.GetFileName(CurrentDirectory);
 
-            switch (FileName)
+            List<string?> KnownFolderNames = new()
             {
-                case "net7.0":
-                case "net7.0-windows7.0":
-                case "Debug":
-                case "Release":
-                case "x64":
-                case "bin":
-                    CurrentDirectory = ParentFolder;
-                    continue;
-                default:
-                    Continue = false;
-                    break;
-            }
+                "net481",
+                "net7.0",
+                "net7.0-windows7.0",
+                "net8.0",
+                "net8.0-windows7.0",
+                "Debug",
+                "Release",
+                "x64",
+                "bin",
+            };
+
+            if (KnownFolderNames.Contains(FileName))
+                CurrentDirectory = ParentFolder;
+            else
+                Continue = false;
         }
 
         Debug.Assert(CurrentDirectory is not null);
@@ -62,7 +65,7 @@ public static class TestTools
     {
         Debug.Assert(content is not null);
 
-        _ = content.Seek(0, SeekOrigin.Begin);
+        _ = content!.Seek(0, SeekOrigin.Begin);
         using StreamReader Reader = new(content, Encoding.UTF8);
         string ContentString = Reader.ReadToEnd();
         ContentString = ContentString.Trim();
@@ -132,7 +135,11 @@ public static class TestTools
 
     private static void PrintParsingDifferences(StringBuilder builder, int lineNumber, Collection<string> debugLines)
     {
+#if NET6_0_OR_GREATER
         _ = builder.AppendLine(CultureInfo.InvariantCulture, $"****** Line {lineNumber - debugLines.Count + 1}");
+#else
+        _ = builder.AppendLine($"****** Line {lineNumber - debugLines.Count + 1}");
+#endif
 
         foreach (string DebugLine in debugLines)
             _ = builder.AppendLine(DebugLine);

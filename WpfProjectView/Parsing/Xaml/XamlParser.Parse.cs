@@ -264,7 +264,7 @@ public static partial class XamlParser
 
         Debug.Assert(Attribute is not null);
 
-        attributes.Add(Attribute);
+        attributes.Add(Attribute!);
 
         if (CheckMultiLine && context.LineNumber > startingLineNumber && attributes.Count > 1)
             isMultiLine = true;

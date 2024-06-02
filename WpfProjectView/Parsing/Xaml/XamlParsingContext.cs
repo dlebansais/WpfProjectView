@@ -123,7 +123,7 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
 
         Debug.Assert(Result is not null);
 
-        return Result;
+        return Result!;
     }
 
     private static bool IsNamespaceFound(IXamlNamespace candidateNamespace, string preferredXamlNamespace, string? typeNamespace, string? typeAssembly, ref IXamlNamespace preferredNamespace, out IXamlNamespace foundNamespace)
