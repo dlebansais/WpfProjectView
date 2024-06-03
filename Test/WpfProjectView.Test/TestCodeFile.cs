@@ -20,6 +20,8 @@ public class TestCodeFile
             {
                 CodeFileCount++;
 
+                Assert.That(AsCodeFile.Path, Is.Not.Null);
+
                 AsCodeFile.Parse();
                 Assert.That(AsCodeFile.SyntaxTree, Is.Null);
 

@@ -61,7 +61,10 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
             Debug.Assert(NodeType == XamlNodeType.StartMember);
 
             XamlMember Member = Reader.Member;
-            return FindNamespaceMatch(Member.PreferredXamlNamespace, Member.UnderlyingMember?.DeclaringType);
+
+            Debug.Assert(Member.UnderlyingMember is null);
+
+            return FindNamespaceMatch(Member.PreferredXamlNamespace, null);
         }
     }
 
@@ -143,8 +146,8 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
             case XamlNamespaceLocal Local:
                 if (preferredXamlNamespace == Local.AssemblyPath)
                     preferredNamespace = Local;
-                if (Local.Namespace == typeNamespace)
-                    foundNamespace = candidateNamespace;
+                /*if (Local.Namespace == typeNamespace) // Couldn't find a test case.
+                    foundNamespace = candidateNamespace;*/
                 break;
             case XamlNamespace Other:
                 if (preferredXamlNamespace == Other.AssemblyPath)

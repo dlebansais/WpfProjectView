@@ -24,11 +24,21 @@
     <ItemGroup>
         <None Remove="Resources\complex.xaml" />
         <None Remove="Resources\empty.xaml" />
+        <None Remove="Resources\single1.xaml" />
+        <None Remove="Resources\single2.xaml" />
+        <None Remove="Resources\single3.xaml" />
+        <None Remove="Resources\single4.xaml" />
+        <None Remove="Resources\single5.xaml" />
     </ItemGroup>
 
     <ItemGroup>
         <EmbeddedResource Include="Resources\complex.xaml" />
         <EmbeddedResource Include="Resources\empty.xaml" />
+        <EmbeddedResource Include="Resources\single1.xaml" />
+        <EmbeddedResource Include="Resources\single2.xaml" />
+        <EmbeddedResource Include="Resources\single3.xaml" />
+        <EmbeddedResource Include="Resources\single4.xaml" />
+        <EmbeddedResource Include="Resources\single5.xaml" />
     </ItemGroup>
 
     <ItemGroup>

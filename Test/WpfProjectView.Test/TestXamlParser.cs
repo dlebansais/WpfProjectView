@@ -68,4 +68,20 @@ public class TestXamlParser
             else
                 Assert.That(Child.NameWithPrefix, Does.Not.Contain(":"));
     }
+
+    [Test]
+    [TestCase("single1.xaml")]
+    [TestCase("single2.xaml")]
+    [TestCase("single3.xaml")]
+    [TestCase("single4.xaml")]
+    [TestCase("single5.xaml")]
+    public void TestParseSingle(string resourceName)
+    {
+        var Content = TestTools.GetResourceContent(resourceName);
+
+        IXamlParsingResult XamlParsingResult = XamlParser.Parse(Content);
+        string ComparisonMessage = TestTools.CompareXamlParingResultWithOriginalContent(Content, XamlParsingResult);
+
+        Assert.That(ComparisonMessage, Is.Empty, $"{resourceName}\r\n{ComparisonMessage}");
+    }
 }

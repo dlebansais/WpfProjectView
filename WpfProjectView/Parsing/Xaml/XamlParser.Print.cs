@@ -64,6 +64,7 @@ public static partial class XamlParser
                 case XamlAttributeSimpleValue SimpleValue:
                     context.ValueString.Clear();
                     context.ValueString.Add(SimpleValue.StringValue);
+                    Debug.Assert(SimpleValue.StringValue == (string)SimpleValue.Value!);
                     break;
                 case XamlAttributeMember Member:
                     context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
@@ -90,6 +91,8 @@ public static partial class XamlParser
             string ChildString = string.Empty;
 
             IXamlElementCollection ElementCollection = ElementCollectionAttribute.Children;
+            Debug.Assert(ElementCollection == (IXamlElementCollection)ElementCollectionAttribute.Value!);
+
             foreach (IXamlElement Child in ElementCollection)
                 ChildString += OneLineElement(Child);
 

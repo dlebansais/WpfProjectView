@@ -18,6 +18,8 @@ public class TestOtherFile
             {
                 OtherFileCount++;
 
+                Assert.That(AsOtherFile.Path, Is.Not.Null);
+
                 AsOtherFile.Parse();
                 Assert.That(AsOtherFile.Content, Is.Null);
 

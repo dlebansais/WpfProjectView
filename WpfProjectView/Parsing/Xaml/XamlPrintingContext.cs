@@ -39,9 +39,9 @@ internal record XamlPrintingContext(StringBuilder Builder, IXamlElement Element,
     public bool IsFullSingleLine => !Element.IsMultiLine &&
                                     Element.Children.Count == 0 &&
                                     MultiLineElementCollectionAttributeList.Count == 0 &&
-                                    (NamespaceList.Count == 0 ||
-                                        (NamespaceList.Count == 1 && AttributeDirectiveList.Count == 0 && AttributeMemberList.Count == 0) ||
-                                        ValueString.Count > 0);
+                                       (NamespaceList.Count == 0 ||
+                                           (NamespaceList.Count == 1 &&
+                                               (ValueString.Count > 0 || AttributeMemberList.Count == 0)));
 
     /// <summary>
     /// Gets a value indicating whether the element can be printed on multiple line without children.
