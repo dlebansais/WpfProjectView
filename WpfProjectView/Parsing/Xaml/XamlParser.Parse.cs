@@ -313,7 +313,9 @@ public static partial class XamlParser
     {
         _ = context.Read();
 
-        if (context.NodeType is XamlNodeType.Value && context.Value is string StringValue && StringValue.Trim() == string.Empty)
-            _ = context.Read();
+        if (context.NodeType is not XamlNodeType.Value)
+            return;
+
+        _ = context.Read();
     }
 }
