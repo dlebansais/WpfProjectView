@@ -46,37 +46,40 @@ public static partial class XamlParser
             context.NamespaceList.Add(NamespaceToString(Namespace));
 
         foreach (IXamlAttribute Attribute in context.Element.Attributes)
-        {
-            switch (Attribute)
-            {
-                case XamlAttributeDirective Directive:
-                    if (Directive.Value is IXamlElement AsChild)
-                    {
-                        string ChildString = OneLineElement(AsChild);
-                        context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{ChildString}\"");
-                    }
-                    else
-                    {
-                        context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{Directive.Value}\"");
-                    }
+            SplitElementFieldsAttribute(context, Attribute);
+    }
 
-                    break;
-                case XamlAttributeSimpleValue SimpleValue:
-                    context.ValueString.Clear();
-                    context.ValueString.Add(SimpleValue.StringValue);
-                    bool StringValueIsValue = SimpleValue.StringValue == (string)SimpleValue.Value!;
-                    Debug.Assert(StringValueIsValue);
-                    break;
-                case XamlAttributeMember Member:
-                    context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
-                    break;
-                case XamlAttributeElementCollection ElementCollection:
-                    if (ElementCollection.IsOneLine)
-                        context.AttributeMemberList.Add(ElementCollection);
-                    else
-                        context.MultiLineElementCollectionAttributeList.Add(ElementCollection);
-                    break;
-            }
+    private static void SplitElementFieldsAttribute(XamlPrintingContext context, IXamlAttribute attribute)
+    {
+        switch (attribute)
+        {
+            case XamlAttributeDirective Directive:
+                if (Directive.Value is IXamlElement AsChild)
+                {
+                    string ChildString = OneLineElement(AsChild);
+                    context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{ChildString}\"");
+                }
+                else
+                {
+                    context.AttributeDirectiveList.Add($"{NameWithPrefix(Directive.Namespace, Directive.Name)}=\"{Directive.Value}\"");
+                }
+
+                break;
+            case XamlAttributeSimpleValue SimpleValue:
+                context.ValueString.Clear();
+                context.ValueString.Add(SimpleValue.StringValue);
+                bool StringValueIsValue = SimpleValue.StringValue == (string)SimpleValue.Value!;
+                Debug.Assert(StringValueIsValue);
+                break;
+            case XamlAttributeMember Member:
+                context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
+                break;
+            case XamlAttributeElementCollection ElementCollection:
+                if (ElementCollection.IsOneLine)
+                    context.AttributeMemberList.Add(ElementCollection);
+                else
+                    context.MultiLineElementCollectionAttributeList.Add(ElementCollection);
+                break;
         }
     }
 
