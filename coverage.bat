@@ -42,11 +42,11 @@ if exist .\Test\%TESTPROJECTNAME%\*.log del .\Test\%TESTPROJECTNAME%\*.log
 if exist %RESULTFILEPATH% del %RESULTFILEPATH%
 
 rem Execute tests within OpenCover.
-%OPENCOVER_EXE% -register:user -target:"C:\Program Files\dotnet\dotnet.exe" -targetargs:"test -c %CONFIGURATION% -f %FRAMEWORK% --no-build -l console;verbosity=detailed" -output:%RESULTFILEPATH% -mergeoutput
+%OPENCOVER_EXE% -register:user -target:"C:\Program Files\dotnet\dotnet.exe" -targetargs:"test -c %CONFIGURATION% -f %FRAMEWORK% --no-build -l console;verbosity=detailed" "-filter:+[*]* -[WpfProjectView.Test]*.TestTools" -output:%RESULTFILEPATH% -mergeoutput
 
 if not exist %RESULTFILEPATH% goto end
 %CODECOV_UPLOADER_EXE% -f %RESULTFILEPATH% -t %TOKEN%
-%REPORTGENERATOR_EXE% -reports:%RESULTFILEPATH% -targetdir:.\CoverageReports "-assemblyfilters:+%PROJECTNAME%;+%TESTPROJECTNAME%" "-filefilters:-*.g.cs;-*Microsoft.NET.Test.Sdk.Program.cs;-*TestTools.cs"
+%REPORTGENERATOR_EXE% -reports:%RESULTFILEPATH% -targetdir:.\CoverageReports "-assemblyfilters:+%PROJECTNAME%;+%TESTPROJECTNAME%" "-filefilters:-*.g.cs;-*Microsoft.NET.Test.Sdk.Program.cs"
 goto end
 
 :error_console1
