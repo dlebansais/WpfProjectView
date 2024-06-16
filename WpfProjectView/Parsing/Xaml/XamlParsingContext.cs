@@ -163,7 +163,7 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
 
         if (preferredXamlNamespace == Other.AssemblyPath)
             preferredNamespace = Other;
-        if (Other.Namespace == typeNamespace && Other.Assembly == typeAssembly)
+        if (Other.Namespace == typeNamespace && Other.AssemblyName == typeAssembly)
         {
             foundNamespace = candidateNamespace;
             return true;

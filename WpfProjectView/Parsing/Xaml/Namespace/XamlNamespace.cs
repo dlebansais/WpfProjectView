@@ -7,7 +7,7 @@ using System.Diagnostics;
 /// Implements a xaml namespace in any assembly.
 /// </summary>
 [DebuggerDisplay("{Prefix,nq}={AssemblyPath,nq}")]
-internal record XamlNamespace(string Prefix, string Namespace, string Assembly) : IXamlNamespace
+internal record XamlNamespace(string Prefix, string Namespace, string AssemblyName) : IXamlNamespace
 {
     /// <summary>
     /// The namespace header.
@@ -78,5 +78,5 @@ internal record XamlNamespace(string Prefix, string Namespace, string Assembly) 
     /// <summary>
     /// Gets the assembly path.
     /// </summary>
-    public string AssemblyPath => $"{ClrNamespaceHeader}{Namespace};{AssemblyHeader}{Assembly}";
+    public string AssemblyPath => $"{ClrNamespaceHeader}{Namespace};{AssemblyHeader}{AssemblyName}";
 }

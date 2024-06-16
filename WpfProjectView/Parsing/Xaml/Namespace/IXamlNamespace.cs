@@ -11,6 +11,16 @@ public interface IXamlNamespace
     string Prefix { get; }
 
     /// <summary>
+    /// Gets the namespace.
+    /// </summary>
+    string Namespace { get; }
+
+    /// <summary>
+    /// Gets the assembly name.
+    /// </summary>
+    string AssemblyName { get; }
+
+    /// <summary>
     /// Gets the assembly path.
     /// </summary>
     string AssemblyPath { get; }
