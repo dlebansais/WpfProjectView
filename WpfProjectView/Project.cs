@@ -13,6 +13,16 @@ using FolderView;
 public record Project : IProject
 {
     /// <summary>
+    /// Gets the empty project.
+    /// </summary>
+    public static Project Empty { get; } = new Project()
+    {
+        Location = EmptyLocation.Instance,
+        RootFolder = EmptyLocation.Root,
+        Files = new List<IFile>(),
+    };
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Project"/> class.
     /// </summary>
     private Project()

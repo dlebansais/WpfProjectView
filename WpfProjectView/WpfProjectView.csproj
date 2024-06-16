@@ -8,9 +8,9 @@
         <UseWPF>true</UseWPF>
 
         <RootNamespace>WpfProjectView</RootNamespace>
-        <Version>1.0.3</Version>
-        <AssemblyVersion>1.0.3.3</AssemblyVersion>
-        <FileVersion>1.0.3.3</FileVersion>
+        <Version>1.0.4</Version>
+        <AssemblyVersion>1.0.4.4</AssemblyVersion>
+        <FileVersion>1.0.4.4</FileVersion>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
@@ -64,8 +64,8 @@
         <PackageReference Include="Microsoft.CodeAnalysis" Version="4.9.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
         <PackageReference Include="Octokit" Version="11.0.1" />
-        <PackageReference Include="FolderView-Debug" Version="1.0.6" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="FolderView" Version="1.0.6" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+        <PackageReference Include="FolderView-Debug" Version="1.0.8" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="FolderView" Version="1.0.8" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(SolutionDir)'!='*Undefined*'">
