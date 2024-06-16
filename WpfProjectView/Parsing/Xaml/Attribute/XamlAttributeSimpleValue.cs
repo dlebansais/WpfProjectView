@@ -9,8 +9,5 @@ using System.Diagnostics;
 internal record XamlAttributeSimpleValue(string StringValue) : IXamlAttribute
 {
     /// <inheritdoc/>
-    public string Name { get; } = string.Empty;
-
-    /// <inheritdoc/>
     public object? Value { get => StringValue; }
 }

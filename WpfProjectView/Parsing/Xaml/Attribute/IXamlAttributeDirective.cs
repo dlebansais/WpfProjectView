@@ -3,10 +3,10 @@
 /// <summary>
 /// Abstraction of a xaml element attribute.
 /// </summary>
-public interface IXamlAttribute
+public interface IXamlAttributeDirective : IXamlAttribute
 {
     /// <summary>
-    /// Gets the attribute value.
+    /// Gets the namespace.
     /// </summary>
-    object? Value { get; }
+    IXamlNamespace Namespace { get; }
 }
