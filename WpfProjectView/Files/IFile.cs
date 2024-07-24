@@ -25,6 +25,11 @@ public interface IFile
     Task LoadAsync(IFolder rootFolder);
 
     /// <summary>
+    /// Gets a value indicating whether the file has been parsed.
+    /// </summary>
+    bool IsParsed { get; }
+
+    /// <summary>
     /// Parses the content.
     /// </summary>
     void Parse();

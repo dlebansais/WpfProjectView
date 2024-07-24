@@ -1,5 +1,6 @@
 ﻿namespace WpfProjectView;
 
+using System.Threading.Tasks;
 using FolderView;
 using Microsoft.CodeAnalysis;
 

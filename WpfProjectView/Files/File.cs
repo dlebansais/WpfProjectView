@@ -15,5 +15,8 @@ internal abstract record File(FolderView.IFile SourceFile) : IFile
     public abstract Task LoadAsync(IFolder rootFolder);
 
     /// <inheritdoc/>
+    public abstract bool IsParsed { get; }
+
+    /// <inheritdoc/>
     public abstract void Parse();
 }

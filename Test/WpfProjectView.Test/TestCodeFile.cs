@@ -10,9 +10,9 @@ public class TestCodeFile
     [Test]
     public async Task TestLoadAsync()
     {
-        ILocation Location = TestTools.GetLocalLocation();
+        (ILocation Location, IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 
-        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
+        IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
         int CodeFileCount = 0;
 
         foreach (var Item in TestProject.Files)
@@ -43,7 +43,7 @@ public class TestCodeFile
         CreateLocalDummyFile(DummyFileName);
 
         LocalLocation Location = new(".");
-        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
+        IProject TestProject = await Project.CreateAsync(Location, FolderView.Path.Empty).ConfigureAwait(false);
         
         _ = TestTools.DeleteFile(DummyFileName);
 

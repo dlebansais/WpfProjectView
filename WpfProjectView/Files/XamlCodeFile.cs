@@ -29,6 +29,9 @@ internal record XamlCodeFile(FolderView.IFile XamlSourceFile, FolderView.IFile C
     }
 
     /// <inheritdoc/>
+    public override bool IsParsed { get => XamlParsingResult is not null && SyntaxTree is not null; }
+
+    /// <inheritdoc/>
     public override void Parse()
     {
         XamlParsingResult = XamlParser.Parse(XamlSourceFile.Content);

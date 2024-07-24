@@ -9,9 +9,10 @@ public class TestProject
     [Test]
     public async Task TestCreateAsync()
     {
-        ILocation Location = TestTools.GetLocalLocation();
+        (ILocation Location, IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 
-        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
+        IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
+        await TestProject.LinkAsync().ConfigureAwait(false);
 
         Assert.That(TestProject, Is.Not.Null);
         Assert.That(TestProject.Location, Is.EqualTo(Location));

@@ -18,13 +18,13 @@ public static class TestTools
     private const string ProjectRepositoryName = "PgCompletionist";
     private const string ProjectName = "PgCompletionist";
 
-    public static ILocation GetLocalLocation()
+    public static (ILocation, IPath) GetLocalLocationAndPathToProject()
     {
         string ProjectRootPath = GetExecutingProjectRootPath();
-        string TestProjectRootPath = @$"{ProjectRootPath}\..\..\..\{ProjectRepositoryName}\{ProjectName}";
+        string TestProjectRootPath = @$"{ProjectRootPath}\..\..\..\{ProjectRepositoryName}";
         LocalLocation Location = new(TestProjectRootPath);
 
-        return Location;
+        return (Location, new FolderView.Path(new List<string>(), ProjectName));
     }
 
     private static string GetExecutingProjectRootPath()

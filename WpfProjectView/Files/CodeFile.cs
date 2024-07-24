@@ -23,6 +23,9 @@ internal record CodeFile(FolderView.IFile SourceFile) : File(SourceFile), ICodeF
     }
 
     /// <inheritdoc/>
+    public override bool IsParsed { get => SyntaxTree is not null; }
+
+    /// <inheritdoc/>
     public override void Parse()
     {
         SyntaxTree = CodeParser.Parse(SourceFile.Content);

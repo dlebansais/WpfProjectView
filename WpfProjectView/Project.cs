@@ -3,8 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using Contracts;
 using FolderView;
+using NuGet.Configuration;
+using SlnExplorer;
 
 /// <summary>
 /// Represents a project.
@@ -20,6 +24,7 @@ public record Project : IProject
         Location = EmptyLocation.Instance,
         RootFolder = EmptyLocation.Root,
         Files = new List<IFile>(),
+        PathToExternalDlls = new List<string>(),
     };
 
     /// <summary>
@@ -38,20 +43,125 @@ public record Project : IProject
     /// <inheritdoc/>
     public required IReadOnlyList<IFile> Files { get; init; }
 
+    /// <inheritdoc/>
+    public required IReadOnlyList<string> PathToExternalDlls { get; init; }
+
     /// <summary>
     /// Returns an instance of <see cref="Project"/> for the provided location.
     /// </summary>
-    /// <param name="location">The project location.</param>
-    public static async Task<Project> CreateAsync(ILocation location)
+    /// <param name="location">The solution location.</param>
+    /// <param name="pathToProject">The project location.</param>
+    public static async Task<Project> CreateAsync(ILocation location, IPath pathToProject)
     {
+        Contract.RequireNotNull(location, out ILocation Location);
+        Contract.RequireNotNull(pathToProject, out IPath PathToProject);
+
         List<IFile> Files = new();
 
-        IFolder RootFolder = await Path.RootFolderFromAsync(location).ConfigureAwait(false);
-        FillFileList(RootFolder, Files);
+        IFolder SolutionFolder = await Path.RootFolderFromAsync(Location).ConfigureAwait(false);
+        bool IsSolutionFound = TryGetSolutionFile(SolutionFolder, out FolderView.IFile SolutionFile);
+        Contract.Assert(IsSolutionFound);
 
-        Project Result = new() { Location = location, RootFolder = RootFolder, Files = Files };
+        IFolder NewRootFolder = ReferenceEquals(Path.Empty, PathToProject) ? SolutionFolder : Path.GetRelativeFolder(SolutionFolder, PathToProject);
+        FillFileList(NewRootFolder, Files);
+        List<string> PathToExternalDlls = GetPathToExternalDlls(Location, PathToProject, SolutionFile, Files);
+
+        Project Result = new() { Location = Location, RootFolder = NewRootFolder, Files = Files, PathToExternalDlls = PathToExternalDlls };
 
         return Result;
+    }
+
+    private static List<string> GetPathToExternalDlls(ILocation location, IPath pathToProject, FolderView.IFile solutionFile, List<IFile> files)
+    {
+        List<string> PathToExternalDlls = new();
+
+        string SolutionFullPath = location.GetAbsolutePath(solutionFile.Path);
+        Solution Solution = new(SolutionFullPath);
+
+        if (TryFindProject(location, pathToProject, Solution, files, out IReadOnlyList<PackageReference> NugetReferences, out IReadOnlyList<string> ProjectReferences))
+        {
+            foreach (string ProjItem in ProjectReferences)
+            {
+                foreach (var OtherProj in Solution.ProjectList)
+                    if (OtherProj.ProjectName == ProjItem)
+                    {
+                        string ProjectRefRootPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(SolutionFullPath)!, OtherProj.RelativePath);
+                        string ProjectRefPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProjectRefRootPath)!, "bin", "x64", "Debug", "net48", $"{ProjItem}.dll");
+                        PathToExternalDlls.Add(ProjectRefPath);
+                    }
+            }
+
+            ISettings settings = Settings.LoadDefaultSettings(null);
+            string nugetPath = SettingsUtility.GetGlobalPackagesFolder(settings);
+
+            foreach (PackageReference PackageReference in NugetReferences)
+            {
+                if (PackageReference.Name.EndsWith("-Debug", StringComparison.Ordinal))
+                    continue;
+
+                string PackagePath = System.IO.Path.Combine(nugetPath, PackageReference.Name, PackageReference.Version, "lib", "net481");
+                if (System.IO.Directory.Exists(PackagePath))
+                {
+                    foreach (string DllFile in System.IO.Directory.GetFiles(PackagePath, "*.dll"))
+                    {
+                        PathToExternalDlls.Add(DllFile);
+                    }
+                }
+            }
+        }
+
+        return PathToExternalDlls;
+    }
+
+    private static bool TryFindProject(ILocation location, IPath pathToProject, Solution solution, List<IFile> files, out IReadOnlyList<PackageReference> nugetReferences, out IReadOnlyList<string> projectReferences)
+    {
+        foreach (var Item in solution.ProjectList)
+        {
+            string RelativePath = Item.RelativePath;
+
+            foreach (IFile File in files)
+                if (File is IOtherFile OtherFile)
+                    if (OtherFile.Path.Name.EndsWith(".csproj", StringComparison.Ordinal))
+                    {
+                        List<string> AllAncestors = new(pathToProject.Ancestors) { pathToProject.Name };
+                        bool IsSameRelativeFolder = OtherFile.Path.Ancestors.SequenceEqual(AllAncestors);
+                        if (IsSameRelativeFolder)
+                        {
+                            string ProjectPath = location.GetAbsolutePath(OtherFile.Path);
+                            Item.LoadDetails(ProjectPath);
+
+                            nugetReferences = Item.PackageReferenceList;
+                            projectReferences = Item.ProjectReferences;
+                            return true;
+                        }
+                    }
+        }
+
+        nugetReferences = null!;
+        projectReferences = null!;
+        return false;
+    }
+
+    private static bool TryGetSolutionFile(IFolder folder, out FolderView.IFile solutionFile)
+    {
+        foreach (var Item in folder.Files)
+            if (Item.Path.Name.EndsWith(".sln", StringComparison.Ordinal))
+            {
+                solutionFile = Item;
+                return true;
+            }
+
+        List<string> IgnoredFolders = new() { "bin", "obj" };
+        bool IsRootFolder = folder.IsRoot;
+
+        // Proceed with sub-folders recursively.
+        foreach (IFolder Item in folder.Folders)
+            if (!IsRootFolder || !IgnoredFolders.Contains(Item.Name))
+                if (TryGetSolutionFile(Item, out solutionFile))
+                    return true;
+
+        solutionFile = null!;
+        return false;
     }
 
     private static void FillFileList(IFolder folder, List<IFile> files)
@@ -108,12 +218,17 @@ public record Project : IProject
         files.Add(newFile);
     }
 
-    /*
-    /// <summary>
-    /// Links all files in the projects.
-    /// </summary>
-    public void Link()
+    /// <inheritdoc/>
+    public async Task LinkAsync()
     {
+        foreach (IFile Item in Files)
+            if (!Item.IsParsed)
+            {
+                await Item.LoadAsync(RootFolder).ConfigureAwait(false);
+                Item.Parse();
+            }
+
+        Linker Linker = new(this);
+        await Linker.LinkAsync().ConfigureAwait(false);
     }
-    */
 }

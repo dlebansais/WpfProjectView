@@ -22,6 +22,9 @@ internal record OtherFile(FolderView.IFile SourceFile) : File(SourceFile), IOthe
     }
 
     /// <inheritdoc/>
+    public override bool IsParsed { get => Content is not null; }
+
+    /// <inheritdoc/>
     public override void Parse()
     {
         Content = SourceFile.Content;

@@ -8,9 +8,9 @@ public class TestXamlCodeFile
     [Test]
     public async Task TestLoadAsync()
     {
-        FolderView.ILocation Location = TestTools.GetLocalLocation();
+        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 
-        IProject TestProject = await Project.CreateAsync(Location).ConfigureAwait(false);
+        IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
         int FileCount = 0;
 
         foreach (IFile Item in TestProject.Files)

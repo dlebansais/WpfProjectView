@@ -21,6 +21,9 @@ internal record XamlResourceFile(FolderView.IFile SourceFile) : File(SourceFile)
     }
 
     /// <inheritdoc/>
+    public override bool IsParsed { get => XamlParsingResult is not null && XamlParsingResult.Root is not null; }
+
+    /// <inheritdoc/>
     public override void Parse()
     {
         XamlParsingResult = XamlParser.Parse(SourceFile.Content);
