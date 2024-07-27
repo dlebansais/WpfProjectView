@@ -1,9 +1,5 @@
 ﻿namespace WpfProjectView;
 
-using System;
-using System.Reflection;
-using Microsoft.CodeAnalysis;
-
 /// <summary>
 /// Represents a type describing the property of a type.
 /// </summary>

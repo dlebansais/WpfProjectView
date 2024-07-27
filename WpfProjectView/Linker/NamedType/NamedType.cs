@@ -48,7 +48,7 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
     /// </summary>
     /// <param name="name">The property name.</param>
     /// <param name="namedAttachedProperty">The property upon return.</param>
-    public bool TryGetAttachedProperty(string name, out NamedAttachedProperty namedAttachedProperty)
+    public bool TryFindAttachedProperty(string name, out NamedAttachedProperty namedAttachedProperty)
     {
         string Setter = $"Set{name}";
 

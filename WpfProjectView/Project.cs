@@ -228,7 +228,7 @@ public record Project : IProject
                 Item.Parse();
             }
 
-        Linker Linker = new(this);
+        XamlLinker Linker = new(this);
         await Linker.LinkAsync().ConfigureAwait(false);
     }
 }
