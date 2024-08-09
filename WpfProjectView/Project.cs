@@ -59,12 +59,11 @@ public record Project : IProject
         List<IFile> Files = new();
 
         IFolder SolutionFolder = await Path.RootFolderFromAsync(Location).ConfigureAwait(false);
-        bool IsSolutionFound = TryGetSolutionFile(SolutionFolder, out FolderView.IFile SolutionFile);
-        Contract.Assert(IsSolutionFound);
-
         IFolder NewRootFolder = ReferenceEquals(Path.Empty, PathToProject) ? SolutionFolder : Path.GetRelativeFolder(SolutionFolder, PathToProject);
         FillFileList(NewRootFolder, Files);
-        List<string> PathToExternalDlls = GetPathToExternalDlls(Location, PathToProject, SolutionFile, Files);
+
+        bool IsSolutionFound = TryGetSolutionFile(SolutionFolder, out FolderView.IFile SolutionFile);
+        List<string> PathToExternalDlls = IsSolutionFound ? GetPathToExternalDlls(Location, PathToProject, SolutionFile, Files) : new();
 
         Project Result = new() { Location = Location, RootFolder = NewRootFolder, Files = Files, PathToExternalDlls = PathToExternalDlls };
 
@@ -216,19 +215,5 @@ public record Project : IProject
         where T : File
     {
         files.Add(newFile);
-    }
-
-    /// <inheritdoc/>
-    public async Task LinkAsync()
-    {
-        foreach (IFile Item in Files)
-            if (!Item.IsParsed)
-            {
-                await Item.LoadAsync(RootFolder).ConfigureAwait(false);
-                Item.Parse();
-            }
-
-        XamlLinker Linker = new(this);
-        await Linker.LinkAsync().ConfigureAwait(false);
     }
 }

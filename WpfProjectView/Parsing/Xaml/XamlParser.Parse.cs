@@ -30,7 +30,7 @@ public static partial class XamlParser
 
         (XamlElementCollection Children, XamlAttributeCollection Attributes, bool IsMultiLine) = ParseElementContent(context);
 
-        return new XamlElement(Namespaces, ElementNamespace, ElementName, Children, Attributes, IsMultiLine);
+        return new XamlElement(Namespaces, ElementNamespace, ElementName, Children, Attributes, IsMultiLine, context.Reader.LineNumber, context.Reader.LinePosition);
     }
 
     private static XamlNamespaceCollection ParseNamespaceDeclarations(XamlParsingContext context)

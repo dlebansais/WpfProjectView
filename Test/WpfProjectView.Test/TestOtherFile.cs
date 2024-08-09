@@ -3,6 +3,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
+[TestFixture]
 public class TestOtherFile
 {
     [Test]

@@ -3,6 +3,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
+[TestFixture, Order(0)]
 public class TestXamlCodeFile
 {
     [Test]
@@ -51,6 +52,11 @@ public class TestXamlCodeFile
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Not.Null);
 
                 string ComparisonMessage = TestTools.CompareXamlParingResultWithOriginalContent(AsXamlCodeFile.XamlSourceFile.Content, AsXamlCodeFile.XamlParsingResult);
+
+                if (ComparisonMessage != string.Empty)
+                {
+                }
+
                 Assert.That(ComparisonMessage, Is.Empty, $"{AsXamlCodeFile.XamlSourceFile.Name}\r\n{ComparisonMessage}");
             }
 

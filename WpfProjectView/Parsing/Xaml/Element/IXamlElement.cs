@@ -39,4 +39,14 @@ public interface IXamlElement
     /// Gets the name with the namespace prefix.
     /// </summary>
     string NameWithPrefix { get; }
+
+    /// <summary>
+    /// Gets the line number where the element can be found.
+    /// </summary>
+    int LineNumber { get; }
+
+    /// <summary>
+    /// Gets the position where the element can be found in the line.
+    /// </summary>
+    int LinePosition { get; }
 }

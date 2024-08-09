@@ -7,7 +7,7 @@ using System.Xaml;
 /// <summary>
 /// Implements a context for the xaml parser.
 /// </summary>
-internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection Namespaces)
+internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection Namespaces) : IDisposable
 {
     /// <summary>
     /// Gets the reader node type.
@@ -172,5 +172,11 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
             foundNamespace = null!;
             return false;
         }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        ((IDisposable)Reader).Dispose();
     }
 }

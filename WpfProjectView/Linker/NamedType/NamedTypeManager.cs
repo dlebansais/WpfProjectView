@@ -21,22 +21,12 @@ public class NamedTypeManager
     /// <summary>
     /// Fills the list of types from code files and DLLs they reference.
     /// </summary>
-    /// <param name="files">The list of C# code files.</param>
+    /// <param name="parsedSyntaxTrees">The list of C# syntax trees.</param>
     /// <param name="pathToExternalDlls">The list of path to referenced DLLs.</param>
-    public async Task FillCodeTypes(IReadOnlyList<IFile> files, IReadOnlyList<string> pathToExternalDlls)
+    public async Task FillCodeTypes(IList<SyntaxTree> parsedSyntaxTrees, IReadOnlyList<string> pathToExternalDlls)
     {
-        Contract.RequireNotNull(files, out IReadOnlyList<IFile> Files);
+        Contract.RequireNotNull(parsedSyntaxTrees, out List<SyntaxTree> ParsedSyntaxTrees);
         Contract.RequireNotNull(pathToExternalDlls, out IReadOnlyList<string> PathToExternalDlls);
-
-        List<SyntaxTree> ParsedSyntaxTrees = new();
-
-        foreach (IFile Item in Files)
-        {
-            if (Item is IXamlCodeFile AsXamlCodeFile && AsXamlCodeFile.SyntaxTree is SyntaxTree CodeBehindSyntaxTree)
-                ParsedSyntaxTrees.Add(CodeBehindSyntaxTree);
-            else if (Item is ICodeFile AsCodeFile && AsCodeFile.SyntaxTree is SyntaxTree OtherCodeSyntaxTree)
-                ParsedSyntaxTrees.Add(OtherCodeSyntaxTree);
-        }
 
         Dictionary<SyntaxTree, IEnumerable<SyntaxNode>> SyntaxTreeTable = new();
         foreach (SyntaxTree Item in ParsedSyntaxTrees)

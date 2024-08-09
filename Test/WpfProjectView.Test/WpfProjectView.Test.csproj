@@ -53,10 +53,12 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
 
         <PackageReference Include="DiffPlex" Version="1.7.2" />
         <PackageReference Include="SoapFormatter" Version="1.1.9" />
+        <PackageReference Include="dlebansais.NUnit.ApplicationDomain-Debug" Version="4.1.0" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="dlebansais.NUnit.ApplicationDomain" Version="4.1.0" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
 
     <ItemGroup>

@@ -10,13 +10,13 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Implements a linker that resolve types in Xaml files.
 /// </summary>
-internal class XamlLinker
+public class XamlLinker
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="XamlLinker"/> class.
     /// </summary>
     /// <param name="project">The project to link.</param>
-    public XamlLinker(Project project)
+    public XamlLinker(IProject project)
     {
         Project = project;
     }
@@ -24,18 +24,52 @@ internal class XamlLinker
     /// <summary>
     /// Gets the project to link.
     /// </summary>
-    public Project Project { get; }
+    public IProject Project { get; }
+
+    /// <summary>
+    /// Gets the list of errors reported by <see cref="LinkAsync"/>.
+    /// </summary>
+    public IReadOnlyList<XamlLinkerError> Errors { get => InternalErrors.AsReadOnly(); }
 
     /// <summary>
     /// Links the XAML and C# sources.
     /// </summary>
     public async Task LinkAsync()
     {
-        await TypeManager.FillCodeTypes(Project.Files, Project.PathToExternalDlls).ConfigureAwait(false);
+        InternalErrors.Clear();
+
+        List<SyntaxTree> ParsedSyntaxTrees = new();
+        int UnparsedCount = 0;
+
+        foreach (IFile Item in Project.Files)
+            if (Item is IXamlCodeFile AsXamlCodeFile)
+            {
+                if (AsXamlCodeFile.SyntaxTree is SyntaxTree CodeBehindSyntaxTree)
+                    ParsedSyntaxTrees.Add(CodeBehindSyntaxTree);
+                else
+                    UnparsedCount++;
+            }
+            else if (Item is ICodeFile AsCodeFile)
+            {
+                if (AsCodeFile.SyntaxTree is SyntaxTree OtherCodeSyntaxTree)
+                    ParsedSyntaxTrees.Add(OtherCodeSyntaxTree);
+                else
+                    UnparsedCount++;
+            }
+
+        if (UnparsedCount > 0)
+        {
+            ReportError($"{UnparsedCount} file(s) found unparsed.");
+            return;
+        }
+
+        await TypeManager.FillCodeTypes(ParsedSyntaxTrees, Project.PathToExternalDlls).ConfigureAwait(false);
 
         foreach (IFile Item in Project.Files)
             if (Item is IXamlCodeFile XamlCodeFile && XamlCodeFile.XamlParsingResult?.Root is IXamlElement XamlRoot)
             {
+                LastXamlSourceFile = XamlCodeFile.XamlSourceFile;
+
                 Dictionary<string, IXamlNamespace> NamespaceTable = new();
                 ParseElement(XamlRoot, NamespaceTable);
             }
@@ -52,7 +86,7 @@ internal class XamlLinker
             ParseElementChildren(xamlElement, ElementType, namespaceTable);
         }
         else
-            throw new NotSupportedException();
+            ReportError("Failed to parse type for element.", xamlElement);
     }
 
     private void ParseElementChildren(IXamlElement xamlElement, NamedType elementType, Dictionary<string, IXamlNamespace> namespaceTable)
@@ -63,25 +97,26 @@ internal class XamlLinker
 
     private bool TryGetElementType(IXamlElement xamlElement, Dictionary<string, IXamlNamespace> namespaceTable, out NamedType elementType)
     {
-        string FullName = GetFullTypeName(xamlElement.NameWithPrefix, namespaceTable);
-
-        foreach (IXamlAttribute Attribute in xamlElement.Attributes)
-            if (Attribute is IXamlAttributeDirective AttributeDirective && AttributeDirective.Namespace is IXamlNamespaceExtension && AttributeDirective.Name == "Class")
-                if (Attribute.Value is string StringValue)
-                {
-                    FullName = StringValue;
-                    break;
-                }
-
-        if (TypeManager.TryFindWpfNamedType(FullName, out NamedType WpfNamedType))
+        if (TryGetFullTypeName(xamlElement.NameWithPrefix, namespaceTable, out string FullName))
         {
-            elementType = WpfNamedType;
-            return true;
-        }
-        else if (TypeManager.TryFindCodeType(FullName, out NamedType LocalNamedType))
-        {
-            elementType = LocalNamedType;
-            return true;
+            foreach (IXamlAttribute Attribute in xamlElement.Attributes)
+                if (Attribute is IXamlAttributeDirective AttributeDirective && AttributeDirective.Namespace is IXamlNamespaceExtension && AttributeDirective.Name == "Class")
+                    if (Attribute.Value is string StringValue)
+                    {
+                        FullName = StringValue;
+                        break;
+                    }
+
+            if (TypeManager.TryFindWpfNamedType(FullName, out NamedType WpfNamedType))
+            {
+                elementType = WpfNamedType;
+                return true;
+            }
+            else if (TypeManager.TryFindCodeType(FullName, out NamedType LocalNamedType))
+            {
+                elementType = LocalNamedType;
+                return true;
+            }
         }
 
         elementType = null!;
@@ -122,22 +157,21 @@ internal class XamlLinker
                     AddAttributeToTable(xamlElement, XamlAttribute, DefaultNamedProperty, PropertyTable);
                 }
                 else
-                    throw new NotSupportedException();
+                    ReportError($"Failed to find default property with name '{Name}'.", xamlElement);
             }
             else
-                throw new NotSupportedException();
+                ReportError("Failed to parse attribute for element.", xamlElement);
         }
     }
 
-    private static void AddAttributeToTable<TKey>(IXamlElement xamlElement, IXamlAttribute xamlAttribute, TKey key, IDictionary<TKey, object> table)
+    private void AddAttributeToTable<TKey>(IXamlElement xamlElement, IXamlAttribute xamlAttribute, TKey key, IDictionary<TKey, object> table)
     {
         if (xamlAttribute.Value is not object Value)
-            throw new NotSupportedException();
-
-        if (table.ContainsKey(key))
-            throw new NotSupportedException($"Duplicate attribute {key} within declaration of {xamlElement}.");
-
-        table[key] = Value;
+            ReportError("Error in attribute value for element.", xamlElement);
+        else if (table.ContainsKey(key))
+            ReportError($"Duplicate attribute {key} within declaration of element.", xamlElement);
+        else
+            table[key] = Value;
     }
 
     private static bool TryGetAttributeName(IXamlAttribute xamlAttribute, out string name)
@@ -225,11 +259,11 @@ internal class XamlLinker
         {
             string TypeNameWithPrefix = Splitted[0].Trim();
             string PropertyName = Splitted[1].Trim();
-            string FullTypeName = GetFullTypeName(TypeNameWithPrefix, namespaceTable);
 
-            if (TypeManager.TryFindCodeType(FullTypeName, out NamedType NamedType))
-                if (NamedType.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
-                    return true;
+            if (TryGetFullTypeName(TypeNameWithPrefix, namespaceTable, out string FullTypeName))
+                if (TypeManager.TryFindCodeType(FullTypeName, out NamedType NamedType))
+                    if (NamedType.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
+                        return true;
         }
 
         namedAttachedProperty = null!;
@@ -309,7 +343,7 @@ internal class XamlLinker
     /// </summary>
     /// <param name="xamlAttribute">The attribute.</param>
     /// <param name="stringValue">The string value upon return.</param>
-    private static bool TryGetAttributeValueAsString(IXamlAttribute xamlAttribute, out string stringValue)
+    private bool TryGetAttributeValueAsString(IXamlAttribute xamlAttribute, out string stringValue)
     {
         if (xamlAttribute?.Value is string Value)
         {
@@ -334,7 +368,11 @@ internal class XamlLinker
             Child = AsElementList[0];
         }
         else
-            throw new NotSupportedException($"Attribute value of type {xamlAttribute?.Value?.GetType()} is not supported.");
+        {
+            ReportError($"Attribute value of type {xamlAttribute?.Value?.GetType()} is not supported.");
+            stringValue = string.Empty;
+            return false;
+        }
 
         if (Child.Children.Count != 0)
         {
@@ -376,7 +414,7 @@ internal class XamlLinker
         return Members.Any();
     }
 
-    private static string GetFullTypeName(string typeNameWithPrefix, Dictionary<string, IXamlNamespace> namespaceTable)
+    private static bool TryGetFullTypeName(string typeNameWithPrefix, Dictionary<string, IXamlNamespace> namespaceTable, out string fullTypeName)
     {
         string[] Splitted = typeNameWithPrefix.Split(':');
 
@@ -384,8 +422,11 @@ internal class XamlLinker
         {
             string TypeName = Splitted[0];
 
-            if (WpfTypeManager.TryFindType(TypeName, out string FullTypeName))
-                return FullTypeName;
+            if (WpfTypeManager.TryFindType(TypeName, out string FullWpfTypeName))
+            {
+                fullTypeName = FullWpfTypeName;
+                return true;
+            }
         }
         else
         {
@@ -394,13 +435,29 @@ internal class XamlLinker
 
             if (namespaceTable.TryGetValue(Prefix, out IXamlNamespace? XamlNamespace))
             {
-                string FullTypeName = XamlNamespace.Namespace + "." + TypeName;
-                return FullTypeName;
+                fullTypeName = XamlNamespace.Namespace + "." + TypeName;
+                return true;
             }
         }
 
-        throw new NotSupportedException();
+        fullTypeName = null!;
+        return false;
+    }
+
+    private void ReportError(string message, IXamlElement xamlElement)
+    {
+        if (xamlElement.LineNumber > 0)
+            ReportError(message + $" Line {xamlElement.LineNumber}, Position {xamlElement.LinePosition}.");
+        else
+            ReportError(message);
+    }
+
+    private void ReportError(string message)
+    {
+        InternalErrors.Add(new XamlLinkerError(message));
     }
 
     private readonly NamedTypeManager TypeManager = new();
+    private readonly List<XamlLinkerError> InternalErrors = new();
+    private FolderView.IFile? LastXamlSourceFile;
 }

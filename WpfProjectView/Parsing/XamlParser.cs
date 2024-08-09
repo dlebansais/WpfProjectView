@@ -23,7 +23,7 @@ public static partial class XamlParser
             try
             {
                 using XamlXmlReader Reader = new(content, new XamlXmlReaderSettings() { ProvideLineInfo = true });
-                XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
+                using XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
 
                 _ = Context.Read();
 

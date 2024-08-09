@@ -7,7 +7,7 @@ using System.Diagnostics;
 /// </summary>
 /// <inheritdoc/>
 [DebuggerDisplay("{NameWithPrefix,nq}")]
-internal record XamlElement(IXamlNamespaceCollection Namespaces, IXamlNamespace Namespace, string Name, IXamlElementCollection Children, IXamlAttributeCollection Attributes, bool IsMultiLine) : IXamlElement
+internal record XamlElement(IXamlNamespaceCollection Namespaces, IXamlNamespace Namespace, string Name, IXamlElementCollection Children, IXamlAttributeCollection Attributes, bool IsMultiLine, int LineNumber, int LinePosition) : IXamlElement
 {
     /// <summary>
     /// Gets the name with the namespace prefix.

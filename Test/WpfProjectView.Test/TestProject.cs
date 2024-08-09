@@ -1,18 +1,17 @@
 ﻿namespace WpfProjectView.Test;
 
 using System.Threading.Tasks;
-using FolderView;
 using NUnit.Framework;
 
+[TestFixture]
 public class TestProject
 {
     [Test]
     public async Task TestCreateAsync()
     {
-        (ILocation Location, IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
+        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 
         IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
-        await TestProject.LinkAsync().ConfigureAwait(false);
 
         Assert.That(TestProject, Is.Not.Null);
         Assert.That(TestProject.Location, Is.EqualTo(Location));
@@ -29,7 +28,7 @@ public class TestProject
         IProject TestProject = Project.Empty;
 
         Assert.That(TestProject, Is.Not.Null);
-        Assert.That(TestProject.Location, Is.EqualTo(EmptyLocation.Instance));
+        Assert.That(TestProject.Location, Is.EqualTo(FolderView.EmptyLocation.Instance));
         Assert.That(TestProject.Files, Is.Not.Null);
         Assert.That(TestProject.Files, Is.Empty);
 

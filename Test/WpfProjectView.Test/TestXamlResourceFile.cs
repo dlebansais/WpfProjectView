@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FolderView;
 using NUnit.Framework;
 
+[TestFixture, Order(0)]
 public class TestXamlResourceFile
 {
     [Test]
