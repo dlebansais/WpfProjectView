@@ -85,7 +85,7 @@ public record Project : IProject
                     if (OtherProj.ProjectName == ProjItem)
                     {
                         string ProjectRefRootPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(SolutionFullPath)!, OtherProj.RelativePath);
-                        string ProjectRefPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProjectRefRootPath)!, "bin", "x64", "Debug", "net48", $"{ProjItem}.dll");
+                        string ProjectRefPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProjectRefRootPath)!, "bin", "x64", "Debug", "net481", $"{ProjItem}.dll");
                         PathToExternalDlls.Add(ProjectRefPath);
                     }
             }
