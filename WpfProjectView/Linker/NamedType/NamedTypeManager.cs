@@ -36,7 +36,21 @@ public class NamedTypeManager
             SyntaxTreeTable.Add(TreeRoot.SyntaxTree, Nodes);
         }
 
-        const string RuntimePath = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8.1\{0}.dll";
+        const string RuntimeDirectoryBase = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework";
+        string RuntimeDirectory = string.Empty;
+
+        Console.WriteLine(typeof(string).Assembly.Location);
+
+        foreach (string FileName in System.IO.Directory.GetDirectories(RuntimeDirectoryBase))
+        {
+            Console.WriteLine(FileName);
+
+            if (!FileName.EndsWith(".X", StringComparison.Ordinal))
+                RuntimeDirectory = FileName;
+        }
+
+        string RuntimePath = RuntimeDirectory + @"\{0}.dll";
+        Console.WriteLine(RuntimePath);
 
         List<MetadataReference> DefaultReferences = new()
         {
