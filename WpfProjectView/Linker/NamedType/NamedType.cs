@@ -24,16 +24,24 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
     {
         if (FromGetType is not null)
         {
+            Console.WriteLine($"property {name} from {FromGetType.Name}");
+
             if (FromGetType.GetProperty(name) is PropertyInfo PropertyInfo)
             {
+                Console.WriteLine(name);
+
                 namedProperty = new NamedProperty(name, PropertyInfo, null);
                 return true;
             }
         }
         else if (FromTypeSymbol is not null)
         {
+            Console.WriteLine($"property {name} from {FromTypeSymbol.Name}");
+
             if (GetAllMemberSymbols().OfType<IPropertySymbol>().FirstOrDefault(symbol => symbol.Name == name) is IPropertySymbol PropertySymbol)
             {
+                Console.WriteLine(name);
+
                 namedProperty = new NamedProperty(name, null, PropertySymbol);
                 return true;
             }
