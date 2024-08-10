@@ -97,6 +97,8 @@ public class XamlLinker
 
     private bool TryGetElementType(IXamlElement xamlElement, Dictionary<string, IXamlNamespace> namespaceTable, out NamedType elementType)
     {
+        Console.WriteLine("Parsing " + xamlElement.NameWithPrefix);
+
         if (TryGetFullTypeName(xamlElement.NameWithPrefix, namespaceTable, out string FullName))
         {
             foreach (IXamlAttribute Attribute in xamlElement.Attributes)
@@ -104,16 +106,19 @@ public class XamlLinker
                     if (Attribute.Value is string StringValue)
                     {
                         FullName = StringValue;
+                        Console.WriteLine("FullName " + FullName);
                         break;
                     }
 
             if (TypeManager.TryFindWpfNamedType(FullName, out NamedType WpfNamedType))
             {
+                Console.WriteLine("WpfNamedType " + WpfNamedType.FullName);
                 elementType = WpfNamedType;
                 return true;
             }
             else if (TypeManager.TryFindCodeType(FullName, out NamedType LocalNamedType))
             {
+                Console.WriteLine("CodeType " + LocalNamedType.FullName);
                 elementType = LocalNamedType;
                 return true;
             }
@@ -447,15 +452,15 @@ public class XamlLinker
     private void ReportError(string message, IXamlElement xamlElement)
     {
         if (xamlElement.LineNumber > 0)
-            ReportError(message + $" Line {xamlElement.LineNumber}, Position {xamlElement.LinePosition}.");
+            ReportError(message + $" Name: {xamlElement.NameWithPrefix}, Line {xamlElement.LineNumber}, Position {xamlElement.LinePosition}.");
         else
-            ReportError(message);
+            ReportError(message + $" Name: {xamlElement.NameWithPrefix}.");
     }
 
     private void ReportError(string message)
     {
         if (LastXamlSourceFile is not null)
-            message += $" (File: {LastXamlSourceFile.Path})";
+            message += $" (File: {string.Join("/", LastXamlSourceFile.Path.Ancestors)}/{LastXamlSourceFile.Name})";
 
         InternalErrors.Add(new XamlLinkerError(message));
     }
