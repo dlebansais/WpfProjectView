@@ -1,7 +1,9 @@
 ﻿namespace WpfProjectView;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xaml;
 
@@ -22,7 +24,7 @@ public static partial class XamlParser
         {
             try
             {
-                using XamlXmlReader Reader = new(content, new XamlXmlReaderSettings() { ProvideLineInfo = true });
+                using XamlXmlReader Reader = new(content, new XamlSchemaContext(new List<Assembly>()), new XamlXmlReaderSettings() { ProvideLineInfo = true });
                 using XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
 
                 _ = Context.Read();

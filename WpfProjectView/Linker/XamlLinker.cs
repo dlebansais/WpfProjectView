@@ -268,8 +268,6 @@ public class XamlLinker
 
     private bool TryGetAttachedProperty(string fullPropertyName, Dictionary<string, IXamlNamespace> namespaceTable, out NamedAttachedProperty namedAttachedProperty)
     {
-        Console.WriteLine($"Attached property {fullPropertyName}");
-
         string[] Splitted = fullPropertyName.Split('.');
         if (Splitted.Length == 2)
         {
@@ -277,15 +275,9 @@ public class XamlLinker
             string PropertyName = Splitted[1].Trim();
 
             if (TryGetFullTypeName(TypeNameWithPrefix, namespaceTable, out string FullTypeName))
-            {
-                Console.WriteLine($"Full name {FullTypeName}");
                 if (TypeManager.TryFindCodeType(FullTypeName, out NamedType NamedType))
-                {
-                    Console.WriteLine($"Type is {NamedType.FullName}");
                     if (NamedType.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
                         return true;
-                }
-            }
         }
 
         namedAttachedProperty = null!;

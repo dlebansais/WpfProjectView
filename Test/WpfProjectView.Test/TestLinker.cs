@@ -3,9 +3,10 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
+[TestFixture, Order(0)]
 public class TestLinker
 {
-    [Test, RunInApplicationDomain, Order(1000)]
+    [Test]
     public async Task TestLinkAsync()
     {
         (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();

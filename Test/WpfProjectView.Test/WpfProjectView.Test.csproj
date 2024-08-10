@@ -57,8 +57,6 @@
 
         <PackageReference Include="DiffPlex" Version="1.7.2" />
         <PackageReference Include="SoapFormatter" Version="1.1.9" />
-        <PackageReference Include="dlebansais.NUnit.ApplicationDomain-Debug" Version="4.1.0" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="dlebansais.NUnit.ApplicationDomain" Version="4.1.0" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
 
     <!-- Required to compile PgCompletionist test files: these packages are added to the global cache -->
