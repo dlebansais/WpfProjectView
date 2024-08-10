@@ -61,10 +61,15 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
     public bool TryFindAttachedProperty(string name, out NamedAttachedProperty namedAttachedProperty)
     {
         string Setter = $"Set{name}";
+#pragma warning disable CA1307
 
         if (FromGetType is not null)
         {
             Console.WriteLine($"attached property {name} from type {FromGetType.Name}");
+
+            foreach (MethodInfo Item in FromGetType.GetMethods())
+                if (Item.Name.Contains(name))
+                    Console.WriteLine($"Setter candidate method: {Item.Name}");
 
             if (FromGetType.GetMethod(Setter) is MethodInfo MethodInfo)
             {
@@ -73,13 +78,14 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
                 namedAttachedProperty = new NamedAttachedProperty(name, MethodInfo, null);
                 return true;
             }
-
-            foreach (MethodInfo Item in FromGetType.GetMethods())
-                Console.WriteLine($"Setter candidate: {Item}");
         }
         else if (FromTypeSymbol is not null)
         {
             Console.WriteLine($"attached property {name} from symbol {FromTypeSymbol.Name}");
+
+            foreach (IMethodSymbol Item in GetAllMemberSymbols().OfType<IMethodSymbol>())
+                if (Item.Name.Contains(name))
+                    Console.WriteLine($"Setter candidate symbol: {Item}");
 
             if (GetAllMemberSymbols().OfType<IMethodSymbol>().FirstOrDefault(symbol => symbol.Name == Setter) is IMethodSymbol MethodSymbol)
             {
@@ -88,9 +94,6 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
                 namedAttachedProperty = new NamedAttachedProperty(name, null, MethodSymbol);
                 return true;
             }
-
-            foreach (IMethodSymbol Item in GetAllMemberSymbols().OfType<IMethodSymbol>())
-                Console.WriteLine($"Setter candidate: {Item}");
         }
         else
             Console.WriteLine($"attached property {name} from no type");
