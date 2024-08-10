@@ -3,11 +3,11 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-[TestFixture, Order(0)]
+[TestFixture, Order(5)]
 public class TestXamlCodeFile
 {
     [Test]
-    public async Task TestLoadAsync()
+    public async Task TestLoadXamlAsync()
     {
         (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 

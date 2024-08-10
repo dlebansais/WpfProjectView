@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using FolderView;
 using NUnit.Framework;
 
-[TestFixture]
+[TestFixture, Order(1)]
 public class TestCodeFile
 {
     [Test]
-    public async Task TestLoadAsync()
+    public async Task TestLoadCodeAsync()
     {
         (ILocation Location, IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 

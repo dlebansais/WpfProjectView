@@ -60,8 +60,7 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
     /// <param name="namedAttachedProperty">The property upon return.</param>
     public bool TryFindAttachedProperty(string name, out NamedAttachedProperty namedAttachedProperty)
     {
-        string Setter1 = $"Set{name}";
-        string Setter2 = $"{name}.set";
+        string Setter = $"Set{name}";
 #pragma warning disable CA1307
 
         if (FromGetType is not null)
@@ -72,18 +71,11 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
                 if (Item.Name.Contains(name))
                     Console.WriteLine($"Setter candidate method: {Item.Name}");
 
-            if (FromGetType.GetMethod(Setter1) is MethodInfo MethodInfo1)
+            if (FromGetType.GetMethod(Setter) is MethodInfo MethodInfo)
             {
                 Console.WriteLine(name);
 
-                namedAttachedProperty = new NamedAttachedProperty(name, MethodInfo1, null);
-                return true;
-            }
-            else if (FromGetType.GetMethod(Setter2) is MethodInfo MethodInfo2)
-            {
-                Console.WriteLine(name);
-
-                namedAttachedProperty = new NamedAttachedProperty(name, MethodInfo2, null);
+                namedAttachedProperty = new NamedAttachedProperty(name, MethodInfo, null);
                 return true;
             }
         }
@@ -95,18 +87,11 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
                 if (Item.Name.Contains(name))
                     Console.WriteLine($"Setter candidate symbol: {Item}");
 
-            if (GetAllMemberSymbols().OfType<IMethodSymbol>().FirstOrDefault(symbol => symbol.Name == Setter1) is IMethodSymbol MethodSymbol1)
+            if (GetAllMemberSymbols().OfType<IMethodSymbol>().FirstOrDefault(symbol => symbol.Name == Setter) is IMethodSymbol MethodSymbol)
             {
                 Console.WriteLine(name);
 
-                namedAttachedProperty = new NamedAttachedProperty(name, null, MethodSymbol1);
-                return true;
-            }
-            else if (GetAllMemberSymbols().OfType<IMethodSymbol>().FirstOrDefault(symbol => symbol.Name == Setter2) is IMethodSymbol MethodSymbol2)
-            {
-                Console.WriteLine(name);
-
-                namedAttachedProperty = new NamedAttachedProperty(name, null, MethodSymbol2);
+                namedAttachedProperty = new NamedAttachedProperty(name, null, MethodSymbol);
                 return true;
             }
         }

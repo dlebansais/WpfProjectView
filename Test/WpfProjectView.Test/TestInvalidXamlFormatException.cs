@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Soap;
 using NUnit.Framework;
 
-[TestFixture]
+[TestFixture, Order(2)]
 public class TestInvalidXamlFormatException
 {
     [Test]

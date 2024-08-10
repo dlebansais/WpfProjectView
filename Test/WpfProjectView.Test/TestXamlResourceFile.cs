@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using FolderView;
 using NUnit.Framework;
 
-[TestFixture, Order(0)]
+[TestFixture, Order(7)]
 public class TestXamlResourceFile
 {
     [Test]
-    public async Task TestLoadAsync()
+    public async Task TestLoadXamlResourceAsync()
     {
         (ILocation Location, IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 

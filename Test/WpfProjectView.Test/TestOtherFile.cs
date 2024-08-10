@@ -3,11 +3,11 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-[TestFixture]
+[TestFixture, Order(3)]
 public class TestOtherFile
 {
     [Test]
-    public async Task TestLoadAsync()
+    public async Task TestLoadOtherAsync()
     {
         (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 
