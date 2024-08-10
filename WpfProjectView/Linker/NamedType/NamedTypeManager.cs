@@ -191,6 +191,7 @@ public class NamedTypeManager
             namedType = ExistingNamedType;
         else
         {
+            Console.WriteLine("Adding type symbol: " + FullName);
             namedType = new NamedType(FullName, FromGetType: null, FromTypeSymbol: typeSymbol);
             CodeTypes.Add(namedType);
         }
@@ -216,6 +217,7 @@ public class NamedTypeManager
             namedType = ExistingNamedType;
         else
         {
+            Console.WriteLine("Adding type: " + FullName);
             namedType = new NamedType(FullName, FromGetType: type, FromTypeSymbol: null);
             CodeTypes.Add(namedType);
         }

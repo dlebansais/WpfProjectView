@@ -101,18 +101,18 @@ public class XamlLinker
 
         if (TryGetFullTypeName(xamlElement.NameWithPrefix, namespaceTable, out string FullName))
         {
+            Console.WriteLine("FullName " + FullName);
+
             foreach (IXamlAttribute Attribute in xamlElement.Attributes)
                 if (Attribute is IXamlAttributeDirective AttributeDirective && AttributeDirective.Namespace is IXamlNamespaceExtension && AttributeDirective.Name == "Class")
                     if (Attribute.Value is string StringValue)
                     {
                         FullName = StringValue;
-                        Console.WriteLine("FullName " + FullName);
                         break;
                     }
 
             if (TypeManager.TryFindWpfNamedType(FullName, out NamedType WpfNamedType))
             {
-                Console.WriteLine("WpfNamedType " + WpfNamedType.FullName);
                 elementType = WpfNamedType;
                 return true;
             }
