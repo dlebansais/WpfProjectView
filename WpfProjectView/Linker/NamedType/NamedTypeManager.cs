@@ -92,7 +92,6 @@ public class NamedTypeManager
 
         foreach (string PathToExternalDll in PathToExternalDlls)
         {
-            Console.WriteLine(PathToExternalDll);
             Assembly LoadedAssembly = Assembly.LoadFile(PathToExternalDll);
             Type[] ExportedTypes = LoadedAssembly.GetExportedTypes();
             AddToCodeTypes(ExportedTypes);
@@ -192,7 +191,6 @@ public class NamedTypeManager
             namedType = ExistingNamedType;
         else
         {
-            Console.WriteLine("Adding type symbol: " + FullName);
             namedType = new NamedType(FullName, FromGetType: null, FromTypeSymbol: typeSymbol);
             CodeTypes.Add(namedType);
         }
@@ -218,11 +216,6 @@ public class NamedTypeManager
             namedType = ExistingNamedType;
         else
         {
-            if (FullName == "CustomControls.BlazorWpfCommon.BusyIndicator")
-            {
-            }
-
-            Console.WriteLine("Adding type: " + FullName);
             namedType = new NamedType(FullName, FromGetType: type, FromTypeSymbol: null);
             CodeTypes.Add(namedType);
         }
