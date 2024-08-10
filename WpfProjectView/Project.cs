@@ -34,16 +34,16 @@ public record Project : IProject
     {
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IProject.Location" />
     public required ILocation Location { get; init; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IProject.RootFolder" />
     public required IFolder RootFolder { get; init; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IProject.Files" />
     public required IReadOnlyList<IFile> Files { get; init; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IProject.PathToExternalDlls" />
     public required IReadOnlyList<string> PathToExternalDlls { get; init; }
 
     /// <summary>
@@ -85,7 +85,7 @@ public record Project : IProject
                     if (OtherProj.ProjectName == ProjItem)
                     {
                         string ProjectRefRootPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(SolutionFullPath)!, OtherProj.RelativePath);
-                        string ProjectRefPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProjectRefRootPath)!, "_bin", "_x64", "_Debug", "_net481", $"{ProjItem}.dll");
+                        string ProjectRefPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProjectRefRootPath)!, "_bin", "_x64", "_Release", "_net481", $"{ProjItem}.dll");
                         PathToExternalDlls.Add(ProjectRefPath);
                     }
             }

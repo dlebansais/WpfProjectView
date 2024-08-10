@@ -12,7 +12,7 @@ using FolderView;
 [DebuggerDisplay("{SourceFile.Name,nq} (path: {((FolderView.Path)SourceFile.Path).Combined,nq})")]
 internal record OtherFile(FolderView.IFile SourceFile) : File(SourceFile), IOtherFile
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IOtherFile.Content" />
     public Stream? Content { get; private set; }
 
     /// <inheritdoc/>

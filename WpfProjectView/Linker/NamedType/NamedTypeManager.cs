@@ -37,7 +37,6 @@ public class NamedTypeManager
         }
 
         string RuntimePath = GetRuntimePath();
-        Console.WriteLine(RuntimePath);
 
         List<MetadataReference> DefaultReferences = new()
         {

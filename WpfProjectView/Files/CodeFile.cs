@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis;
 [DebuggerDisplay("{SourceFile.Name,nq} (path: {((FolderView.Path)SourceFile.Path).Combined,nq})")]
 internal record CodeFile(FolderView.IFile SourceFile) : File(SourceFile), ICodeFile
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ICodeFile.SyntaxTree" />
     public SyntaxTree? SyntaxTree { get; private set; }
 
     /// <inheritdoc/>
