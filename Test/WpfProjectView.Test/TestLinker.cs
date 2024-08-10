@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 public class TestLinker
 {
-    [Test]
+    [Test, RunInApplicationDomain]
     public async Task TestLinkAsync()
     {
         (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();

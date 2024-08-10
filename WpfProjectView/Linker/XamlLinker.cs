@@ -454,6 +454,9 @@ public class XamlLinker
 
     private void ReportError(string message)
     {
+        if (LastXamlSourceFile is not null)
+            message += $" (File: {LastXamlSourceFile.Path})";
+
         InternalErrors.Add(new XamlLinkerError(message));
     }
 
