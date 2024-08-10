@@ -21,7 +21,7 @@ public static class TestTools
     public static (ILocation, IPath) GetLocalLocationAndPathToProject()
     {
         string ProjectRootPath = GetExecutingProjectRootPath();
-        string TestProjectRootPath = @$"{ProjectRootPath}\..\..\..\{ProjectRepositoryName}";
+        string TestProjectRootPath = @$"{ProjectRootPath}\..\{ProjectRepositoryName}";
         LocalLocation Location = new(TestProjectRootPath);
 
         return (Location, new FolderView.Path(new List<string>(), ProjectName));

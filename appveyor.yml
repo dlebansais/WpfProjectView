@@ -55,11 +55,6 @@ after_build:
   - echo Version is "%VERSION_TAG%"
 
 before_test:
-  - git clone https://github.com/dlebansais/PgCompletionist.git ../PgCompletionist
-  - mkdir "../PgCompletionist/PgCompletionist/bin"
-  - dir > ../PgCompletionist/PgCompletionist/bin/dummyfile.txt
-  - mkdir "../PgCompletionist/PgCompletionist/obj"
-  - dir > ../PgCompletionist/PgCompletionist/obj/dummyfile.txt
   - nuget install OpenCover -Version %opencover_version% -OutputDirectory packages
   - nuget install CodecovUploader -Version %codecov_uploader_version% -OutputDirectory packages
   - nuget install ReportGenerator -Version %report_generator_version% -OutputDirectory packages
