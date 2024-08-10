@@ -36,20 +36,7 @@ public class NamedTypeManager
             SyntaxTreeTable.Add(TreeRoot.SyntaxTree, Nodes);
         }
 
-        const string RuntimeDirectoryBase = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework";
-        string RuntimeDirectory = string.Empty;
-
-        Console.WriteLine(typeof(string).Assembly.Location);
-
-        foreach (string FileName in System.IO.Directory.GetDirectories(RuntimeDirectoryBase))
-        {
-            Console.WriteLine(FileName);
-
-            if (!FileName.EndsWith(".X", StringComparison.Ordinal))
-                RuntimeDirectory = FileName;
-        }
-
-        string RuntimePath = RuntimeDirectory + @"\{0}.dll";
+        string RuntimePath = GetRuntimePath();
         Console.WriteLine(RuntimePath);
 
         List<MetadataReference> DefaultReferences = new()
@@ -110,6 +97,37 @@ public class NamedTypeManager
             Type[] ExportedTypes = LoadedAssembly.GetExportedTypes();
             AddToCodeTypes(ExportedTypes);
         }
+    }
+
+    private static string GetRuntimePath()
+    {
+        const string RuntimeDirectoryBase = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework";
+        string RuntimeDirectory = string.Empty;
+
+        foreach (string FolderPath in System.IO.Directory.GetDirectories(RuntimeDirectoryBase))
+            if (IsValidRuntimeDirectory(FolderPath))
+                if (string.Compare(FolderPath, RuntimeDirectory, StringComparison.OrdinalIgnoreCase) > 0)
+                    RuntimeDirectory = FolderPath;
+
+        string RuntimePath = RuntimeDirectory + @"\{0}.dll";
+
+        return RuntimePath;
+    }
+
+    private static bool IsValidRuntimeDirectory(string folderPath)
+    {
+        string FolderName = System.IO.Path.GetFileName(folderPath);
+        const string Prefix = "v";
+
+        if (!FolderName.StartsWith(Prefix, StringComparison.Ordinal))
+            return false;
+
+        string[] Parts = FolderName.Substring(Prefix.Length).Split('.');
+        foreach (string Part in Parts)
+            if (!int.TryParse(Part, out _))
+                return false;
+
+        return true;
     }
 
     /// <summary>
