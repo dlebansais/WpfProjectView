@@ -46,6 +46,8 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
                 return true;
             }
         }
+        else
+            Console.WriteLine($"property {name} from no type");
 
         namedProperty = null!;
         return false;
