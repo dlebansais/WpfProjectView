@@ -92,13 +92,16 @@ public record Project : IProject
 
             ISettings settings = Settings.LoadDefaultSettings(null);
             string nugetPath = SettingsUtility.GetGlobalPackagesFolder(settings);
+            Console.WriteLine(nugetPath);
 
             foreach (PackageReference PackageReference in NugetReferences)
             {
+                Console.WriteLine(PackageReference.Name);
                 if (PackageReference.Name.EndsWith("-Debug", StringComparison.Ordinal))
                     continue;
 
                 string PackagePath = System.IO.Path.Combine(nugetPath, PackageReference.Name, PackageReference.Version, "lib", "net481");
+                Console.WriteLine(PackagePath);
                 if (System.IO.Directory.Exists(PackagePath))
                 {
                     foreach (string DllFile in System.IO.Directory.GetFiles(PackagePath, "*.dll"))
