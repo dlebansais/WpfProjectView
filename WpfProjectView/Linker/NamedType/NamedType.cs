@@ -24,7 +24,7 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
     {
         if (FromGetType is not null)
         {
-            Console.WriteLine($"property {name} from {FromGetType.Name}");
+            Console.WriteLine($"property {name} from type {FromGetType.Name}");
 
             if (FromGetType.GetProperty(name) is PropertyInfo PropertyInfo)
             {
@@ -36,7 +36,7 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
         }
         else if (FromTypeSymbol is not null)
         {
-            Console.WriteLine($"property {name} from {FromTypeSymbol.Name}");
+            Console.WriteLine($"property {name} from symbol {FromTypeSymbol.Name}");
 
             if (GetAllMemberSymbols().OfType<IPropertySymbol>().FirstOrDefault(symbol => symbol.Name == name) is IPropertySymbol PropertySymbol)
             {
@@ -64,20 +64,36 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
 
         if (FromGetType is not null)
         {
+            Console.WriteLine($"attached property {name} from type {FromGetType.Name}");
+
             if (FromGetType.GetMethod(Setter) is MethodInfo MethodInfo)
             {
+                Console.WriteLine(name);
+
                 namedAttachedProperty = new NamedAttachedProperty(name, MethodInfo, null);
                 return true;
             }
+
+            foreach (MethodInfo Item in FromGetType.GetMethods())
+                Console.WriteLine($"Setter candidate: {Item}");
         }
         else if (FromTypeSymbol is not null)
         {
+            Console.WriteLine($"attached property {name} from symbol {FromTypeSymbol.Name}");
+
             if (GetAllMemberSymbols().OfType<IMethodSymbol>().FirstOrDefault(symbol => symbol.Name == Setter) is IMethodSymbol MethodSymbol)
             {
+                Console.WriteLine(name);
+
                 namedAttachedProperty = new NamedAttachedProperty(name, null, MethodSymbol);
                 return true;
             }
+
+            foreach (IMethodSymbol Item in GetAllMemberSymbols().OfType<IMethodSymbol>())
+                Console.WriteLine($"Setter candidate: {Item}");
         }
+        else
+            Console.WriteLine($"attached property {name} from no type");
 
         namedAttachedProperty = null!;
         return false;
