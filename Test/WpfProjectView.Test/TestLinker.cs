@@ -3,7 +3,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-[TestFixture, Order(0)]
+[TestFixture]
 public class TestLinker
 {
     [Test]

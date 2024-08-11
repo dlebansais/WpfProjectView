@@ -16,6 +16,7 @@ public static partial class XamlParser
     /// Parses xaml content and returns the node tree.
     /// </summary>
     /// <param name="content">The content to parse.</param>
+    /// <exception cref="InvalidXamlFormatException">The Xaml content of <paramref name="content"/> is invalid.</exception>
     public static IXamlParsingResult Parse(Stream? content)
     {
         XamlParsingResult Result = new();
@@ -24,7 +25,7 @@ public static partial class XamlParser
         {
             try
             {
-                using XamlXmlReader Reader = new(content, new XamlSchemaContext(new List<Assembly>()), new XamlXmlReaderSettings() { ProvideLineInfo = true });
+                using XamlXmlReader Reader = new(content, new(new List<Assembly>()), new XamlXmlReaderSettings() { ProvideLineInfo = true });
                 using XamlParsingContext Context = new(Reader, new XamlNamespaceCollection());
 
                 _ = Context.Read();

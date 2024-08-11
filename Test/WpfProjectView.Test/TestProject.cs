@@ -3,7 +3,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-[TestFixture, Order(4)]
+[TestFixture]
 public class TestProject
 {
     [Test]

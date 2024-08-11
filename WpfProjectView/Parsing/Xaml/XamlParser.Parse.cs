@@ -61,9 +61,7 @@ public static partial class XamlParser
 
         while (context.NodeType is XamlNodeType.StartMember)
         {
-            if (context.Member == XamlLanguage.Initialization)
-                ParseElementMemberInitialization(context, Attributes);
-            else if (context.Member == XamlLanguage.UnknownContent)
+            if (context.Member == XamlLanguage.UnknownContent)
                 ParseElementMemberUnknownContent(context, Children, Attributes);
             else if (context.Member == XamlLanguage.PositionalParameters)
                 ParseElementMemberPositionalParameter(context, Attributes);
@@ -80,21 +78,6 @@ public static partial class XamlParser
         Debug.Assert(context.NodeType is XamlNodeType.EndObject);
 
         return (Children, Attributes, IsMultiLine);
-    }
-
-    private static void ParseElementMemberInitialization(XamlParsingContext context, XamlAttributeCollection attributes)
-    {
-        _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.Value);
-        Debug.Assert(context.Value is string);
-
-        string StringValue = (string)context.Value;
-
-        XamlAttributeSimpleValue Attribute = new(StringValue);
-        attributes.Add(Attribute);
-
-        _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.EndMember);
     }
 
     private static void ParseElementMemberUnknownContent(XamlParsingContext context, XamlElementCollection children, XamlAttributeCollection attributes)

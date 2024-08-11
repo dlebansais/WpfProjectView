@@ -3,7 +3,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-[TestFixture, Order(5)]
+[TestFixture]
 public class TestXamlCodeFile
 {
     [Test]
@@ -34,6 +34,7 @@ public class TestXamlCodeFile
                 Assert.That(AsXamlCodeFile.XamlParsingResult, Is.Not.Null);
                 Assert.That(AsXamlCodeFile.XamlParsingResult.Root, Is.Null);
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Null);
+                Assert.That(AsXamlCodeFile.IsParsed, Is.False);
 
                 await AsXamlCodeFile.LoadAsync(TestProject.RootFolder).ConfigureAwait(false);
 
@@ -50,6 +51,7 @@ public class TestXamlCodeFile
                 Assert.That(AsXamlCodeFile.XamlParsingResult, Is.Not.Null);
                 Assert.That(AsXamlCodeFile.XamlParsingResult.Root, Is.Not.Null);
                 Assert.That(AsXamlCodeFile.SyntaxTree, Is.Not.Null);
+                Assert.That(AsXamlCodeFile.IsParsed, Is.True);
 
                 string ComparisonMessage = TestTools.CompareXamlParingResultWithOriginalContent(AsXamlCodeFile.XamlSourceFile.Content, AsXamlCodeFile.XamlParsingResult);
 

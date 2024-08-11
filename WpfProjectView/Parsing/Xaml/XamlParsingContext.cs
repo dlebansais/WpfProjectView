@@ -111,66 +111,39 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
         string? TypeNamespace = underlyingType?.Namespace;
         string? TypeAssembly = underlyingType?.Assembly.GetName().Name;
 
-        if (TypeAssembly == "System.Private.CoreLib")
-            TypeAssembly = "mscorlib";
-
-        IXamlNamespace Result = null!;
         IXamlNamespace Preferred = null!;
 
         foreach (IXamlNamespace Namespace in Namespaces)
-            if (IsNamespaceFound(Namespace, preferredXamlNamespace, TypeNamespace, TypeAssembly, ref Preferred, out Result))
-                break;
+            UpdatePreferredNamespace(Namespace, preferredXamlNamespace, TypeNamespace, TypeAssembly, ref Preferred);
 
-        if (Result is null)
-            Result = Preferred;
+        Debug.Assert(Preferred is not null);
 
-        Debug.Assert(Result is not null);
-
-        return Result!;
+        return Preferred!;
     }
 
-    private static bool IsNamespaceFound(IXamlNamespace candidateNamespace, string preferredXamlNamespace, string? typeNamespace, string? typeAssembly, ref IXamlNamespace preferredNamespace, out IXamlNamespace foundNamespace)
+    private static void UpdatePreferredNamespace(IXamlNamespace candidateNamespace, string preferredXamlNamespace, string? typeNamespace, string? typeAssembly, ref IXamlNamespace preferredNamespace)
     {
         if (candidateNamespace is XamlNamespaceDefault Default)
         {
             if (preferredXamlNamespace == XamlNamespaceDefault.DefaultPath)
                 preferredNamespace = Default;
-
-            foundNamespace = null!;
-            return false;
         }
         else if (candidateNamespace is XamlNamespaceExtension Extension)
         {
             if (preferredXamlNamespace == XamlNamespaceExtension.ExtensionPath)
                 preferredNamespace = Extension;
-
-            foundNamespace = null!;
-            return false;
         }
         else if (candidateNamespace is XamlNamespaceLocal Local)
         {
             if (preferredXamlNamespace == Local.AssemblyPath)
                 preferredNamespace = Local;
-            /*if (Local.Namespace == typeNamespace) // Couldn't find a test case.
-                foundNamespace = candidateNamespace;*/
-
-            foundNamespace = null!;
-            return false;
-        }
-
-        XamlNamespace Other = (XamlNamespace)candidateNamespace;
-
-        if (preferredXamlNamespace == Other.AssemblyPath)
-            preferredNamespace = Other;
-        if (Other.Namespace == typeNamespace && Other.AssemblyName == typeAssembly)
-        {
-            foundNamespace = candidateNamespace;
-            return true;
         }
         else
         {
-            foundNamespace = null!;
-            return false;
+            XamlNamespace Other = (XamlNamespace)candidateNamespace;
+
+            if (preferredXamlNamespace == Other.AssemblyPath)
+                preferredNamespace = Other;
         }
     }
 

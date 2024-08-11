@@ -2,7 +2,6 @@
 
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Contracts;
 using FolderView;
 using Microsoft.CodeAnalysis;
 
@@ -30,15 +29,7 @@ internal record XamlCodeFile(FolderView.IFile XamlSourceFile, FolderView.IFile C
     }
 
     /// <inheritdoc/>
-    public override bool IsParsed
-    {
-        get
-        {
-            Contract.Assert((XamlParsingResult is null) == (SyntaxTree is null));
-
-            return XamlParsingResult is not null;
-        }
-    }
+    public override bool IsParsed => XamlParsingResult is not null && SyntaxTree is not null;
 
     /// <inheritdoc/>
     public override void Parse()

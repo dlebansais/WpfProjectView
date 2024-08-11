@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using NUnit.Framework;
 
-[TestFixture, Order(6)]
+[TestFixture]
 public class TestXamlParser
 {
     [Test]

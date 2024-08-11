@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FolderView;
 using NUnit.Framework;
 
-[TestFixture, Order(1)]
+[TestFixture]
 public class TestCodeFile
 {
     [Test]
