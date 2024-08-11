@@ -66,8 +66,8 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
         <PackageReference Include="Octokit" Version="13.0.1" />
         <PackageReference Include="NuGet.Configuration" Version="6.10.1" />
-        <PackageReference Include="FolderView-Debug" Version="1.0.9" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="FolderView" Version="1.0.9" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+        <PackageReference Include="FolderView-Debug" Version="1.0.10" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="FolderView" Version="1.0.10" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
         <PackageReference Include="VisualStudioSolutionExplorer-Debug" Version="1.4.2" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
         <PackageReference Include="VisualStudioSolutionExplorer" Version="1.4.2" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>

@@ -14,11 +14,12 @@ public class TestLinker
         IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
 
         foreach (IFile Item in TestProject.Files)
-            if (!Item.IsParsed)
-            {
-                await Item.LoadAsync(TestProject.RootFolder).ConfigureAwait(false);
-                Item.Parse();
-            }
+        {
+            Assert.That(!Item.IsParsed);
+
+            await Item.LoadAsync(TestProject.RootFolder).ConfigureAwait(false);
+            Item.Parse();
+        }
 
         XamlLinker Linker = new(TestProject);
         await Linker.LinkAsync().ConfigureAwait(false);

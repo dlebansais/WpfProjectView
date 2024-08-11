@@ -2,6 +2,7 @@
 
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Contracts;
 using FolderView;
 
 /// <summary>
@@ -21,7 +22,15 @@ internal record XamlResourceFile(FolderView.IFile SourceFile) : File(SourceFile)
     }
 
     /// <inheritdoc />
-    public override bool IsParsed { get => XamlParsingResult is not null && XamlParsingResult.Root is not null; }
+    public override bool IsParsed
+    {
+        get
+        {
+            Contract.Assert(XamlParsingResult is null || XamlParsingResult.Root is not null);
+
+            return XamlParsingResult is not null;
+        }
+    }
 
     /// <inheritdoc />
     public override void Parse()
