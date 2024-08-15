@@ -27,6 +27,18 @@ public static class TestTools
         return (Location, new FolderView.Path(new List<string>(), ProjectName));
     }
 
+    private const string InvalidProjectRepositoryName = "InvalidSolution";
+    private const string InvalidProjectName = "InvalidSolution";
+
+    public static (ILocation, IPath) GetLocalLocationAndPathToInvalidProject()
+    {
+        string ProjectRootPath = GetExecutingProjectRootPath();
+        string TestProjectRootPath = @$"{ProjectRootPath}\..\{InvalidProjectRepositoryName}";
+        LocalLocation Location = new(TestProjectRootPath);
+
+        return (Location, new FolderView.Path(new List<string>(), InvalidProjectName));
+    }
+
     private static string GetExecutingProjectRootPath()
     {
         string? CurrentDirectory = Environment.CurrentDirectory;

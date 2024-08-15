@@ -36,4 +36,18 @@ public class TestProject
         Assert.That(OtherProject, Is.EqualTo(TestProject));
         Assert.That(OtherProject.Equals(TestProject), Is.True);
     }
+
+    [Test]
+    public async Task TestNotExisting()
+    {
+        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToInvalidProject();
+
+        IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
+
+        Assert.That(TestProject, Is.Not.Null);
+        Assert.That(TestProject.Location, Is.EqualTo(Location));
+        Assert.That(TestProject.Files, Is.Not.Null);
+        Assert.That(TestProject.Files, Has.Count.EqualTo(1));
+        Assert.That(TestProject.PathToExternalDlls, Is.Empty);
+    }
 }

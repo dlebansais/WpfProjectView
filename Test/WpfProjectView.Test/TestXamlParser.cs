@@ -10,7 +10,15 @@ using NUnit.Framework;
 public class TestXamlParser
 {
     [Test]
-    public async Task TestParseEmpty()
+    public void TestParseEmpty1()
+    {
+        var Content = TestTools.GetResourceContent("empty.xaml");
+
+        _ = Assert.Throws<InvalidXamlFormatException>(() => XamlParser.Parse(Content));
+    }
+
+    [Test]
+    public async Task TestParseEmpty2()
     {
         (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 
