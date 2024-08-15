@@ -47,7 +47,7 @@ public class TestProject
         Assert.That(TestProject, Is.Not.Null);
         Assert.That(TestProject.Location, Is.EqualTo(Location));
         Assert.That(TestProject.Files, Is.Not.Null);
-        Assert.That(TestProject.Files, Has.Count.EqualTo(2));
+        Assert.That(TestProject.Files, Has.Count.EqualTo(3));
         Assert.That(TestProject.PathToExternalDlls, Is.Empty);
     }
 }

@@ -224,10 +224,9 @@ public record Project : IProject
         where T : class
     {
         List<string> IgnoredFolders = new() { "bin", "obj" };
-        bool IsRootFolder = folder.IsRoot;
 
         foreach (IFolder Item in folder.Folders)
-            if (!IsRootFolder || !IgnoredFolders.Contains(Item.Name))
+            if (!IgnoredFolders.Contains(Item.Name))
             {
                 (bool Stop, T Result) = predicate(Item);
                 if (Stop)
