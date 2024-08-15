@@ -17,7 +17,7 @@ public class TestXamlResourceFile
         int XamlFileCount = 0;
 
         foreach (var Item in TestProject.Files)
-            if (Item is IXamlResourceFile AsXamlResourceFile)
+            if (Item is IXamlResourceFile AsXamlResourceFile && AsXamlResourceFile.Path.Name != "Empty.xaml")
             {
                 XamlFileCount++;
 

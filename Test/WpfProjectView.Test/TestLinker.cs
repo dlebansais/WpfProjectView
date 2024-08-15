@@ -15,10 +15,18 @@ public class TestLinker
 
         foreach (IFile Item in TestProject.Files)
         {
+            if (Item.Path.Name == "Empty.xaml")
+                continue;
+
             Assert.That(!Item.IsParsed);
 
             await Item.LoadAsync(TestProject.RootFolder).ConfigureAwait(false);
+
+            Assert.That(!Item.IsParsed);
+
             Item.Parse();
+
+            Assert.That(Item.IsParsed);
         }
 
         XamlLinker Linker = new(TestProject);

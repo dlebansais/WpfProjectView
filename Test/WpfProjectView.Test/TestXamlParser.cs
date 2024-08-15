@@ -3,17 +3,28 @@
 using System;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 [TestFixture]
 public class TestXamlParser
 {
     [Test]
-    public void TestParseEmpty()
+    public async Task TestParseEmpty()
     {
-        var Content = TestTools.GetResourceContent("empty.xaml");
+        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProject();
 
-        _ = Assert.Throws<InvalidXamlFormatException>(() => XamlParser.Parse(Content));
+        IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
+
+        foreach (IFile Item in TestProject.Files)
+        {
+            if (Item.Path.Name == "Empty.xaml")
+            {
+                Item.Parse();
+
+                Assert.That(!Item.IsParsed);
+            }
+        }
     }
 
     [Test]
