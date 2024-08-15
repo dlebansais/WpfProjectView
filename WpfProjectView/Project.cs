@@ -85,7 +85,7 @@ public record Project : IProject
                     if (OtherProj.ProjectName == ProjItem)
                     {
                         string ProjectRefRootPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(SolutionFullPath)!, OtherProj.RelativePath);
-                        string ProjectRefPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProjectRefRootPath)!, "_bin", "_x64", "_Release", "_net481", $"{ProjItem}.dll");
+                        string ProjectRefPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProjectRefRootPath)!, "bin", "x64", "Release", "net481", $"{ProjItem}.dll");
                         PathToExternalDlls.Add(ProjectRefPath);
                     }
             }
@@ -155,13 +155,13 @@ public record Project : IProject
         bool IsRootFolder = folder.IsRoot;
 
         // Proceed with sub-folders recursively.
-        foreach (IFolder Item in folder.Folders)
-            if (!IsRootFolder || !IgnoredFolders.Contains(Item.Name))
-                if (TryGetSolutionFile(Item, out solutionFile))
-                    return true;
+        (bool IsFound, solutionFile) = BrowseFolder(folder, (IFolder item) =>
+        {
+            bool IsFound = TryGetSolutionFile(item, out FolderView.IFile SolutionFile);
+            return (IsFound, SolutionFile);
+        });
 
-        solutionFile = null!;
-        return false;
+        return IsFound;
     }
 
     private static void FillFileList(IFolder folder, List<IFile> files)
@@ -207,14 +207,33 @@ public record Project : IProject
         bool IsRootFolder = folder.IsRoot;
 
         // Proceed with sub-folders recursively.
-        foreach (IFolder Item in folder.Folders)
-            if (!IsRootFolder || !IgnoredFolders.Contains(Item.Name))
-                FillFileList(Item, files);
+        _ = BrowseFolder(folder, (IFolder item) =>
+        {
+            FillFileList(item, files);
+            return (false, default(object)!);
+        });
     }
 
     private static void FillFileList<T>(T newFile, List<IFile> files)
         where T : File
     {
         files.Add(newFile);
+    }
+
+    private static (bool Stop, T Result) BrowseFolder<T>(IFolder folder, Func<IFolder, (bool Stop, T Result)> predicate)
+        where T : class
+    {
+        List<string> IgnoredFolders = new() { "bin", "obj" };
+        bool IsRootFolder = folder.IsRoot;
+
+        foreach (IFolder Item in folder.Folders)
+            if (!IsRootFolder || !IgnoredFolders.Contains(Item.Name))
+            {
+                (bool Stop, T Result) = predicate(Item);
+                if (Stop)
+                    return (true, Result);
+            }
+
+        return (false, default(T)!);
     }
 }
