@@ -50,4 +50,17 @@ public class TestProject
         Assert.That(TestProject.Files, Has.Count.EqualTo(3));
         Assert.That(TestProject.PathToExternalDlls, Is.Empty);
     }
+
+    [Test]
+    public async Task TestSolutionSameFolder()
+    {
+        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProjectWithSolutionSameFolder();
+
+        IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
+
+        Assert.That(TestProject, Is.Not.Null);
+        Assert.That(TestProject.Location, Is.EqualTo(Location));
+        Assert.That(TestProject.Files, Is.Not.Null);
+        Assert.That(TestProject.Files, Has.Count.EqualTo(2));
+    }
 }

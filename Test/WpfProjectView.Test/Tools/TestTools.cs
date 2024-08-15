@@ -39,6 +39,17 @@ public static class TestTools
         return (Location, new FolderView.Path(new List<string>(), InvalidProjectName));
     }
 
+    private const string SolutionSameFolderRepositoryName = "SolutionSameFolder";
+
+    public static (ILocation, IPath) GetLocalLocationAndPathToProjectWithSolutionSameFolder()
+    {
+        string ProjectRootPath = GetExecutingProjectRootPath();
+        string TestProjectRootPath = @$"{ProjectRootPath}\..\{SolutionSameFolderRepositoryName}";
+        LocalLocation Location = new(TestProjectRootPath);
+
+        return (Location, new FolderView.Path(new List<string>(), ProjectName));
+    }
+
     private static string GetExecutingProjectRootPath()
     {
         string? CurrentDirectory = Environment.CurrentDirectory;
