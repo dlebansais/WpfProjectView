@@ -15,39 +15,24 @@ using FolderView;
 
 public static class TestTools
 {
-    private const string ProjectRepositoryName = "PgCompletionist";
-    private const string ProjectName = "PgCompletionist";
+    public const string ProjectRepositoryName = "PgCompletionist";
+    public const string ProjectName = "PgCompletionist";
+    public const string InvalidProjectRepositoryName = "InvalidSolution";
+    public const string InvalidProjectName = "InvalidSolution";
+    public const string SolutionSameFolderRepositoryName = "SolutionSameFolder";
 
     public static (ILocation, IPath) GetLocalLocationAndPathToProject()
     {
-        string ProjectRootPath = GetExecutingProjectRootPath();
-        string TestProjectRootPath = @$"{ProjectRootPath}\..\{ProjectRepositoryName}";
-        LocalLocation Location = new(TestProjectRootPath);
-
-        return (Location, new FolderView.Path(new List<string>(), ProjectName));
+        return GetLocalLocationAndPath(ProjectRepositoryName, ProjectName);
     }
 
-    private const string InvalidProjectRepositoryName = "InvalidSolution";
-    private const string InvalidProjectName = "InvalidSolution";
-
-    public static (ILocation, IPath) GetLocalLocationAndPathToInvalidProject()
+    public static (ILocation, IPath) GetLocalLocationAndPath(string repositoryName, string projectName)
     {
         string ProjectRootPath = GetExecutingProjectRootPath();
-        string TestProjectRootPath = @$"{ProjectRootPath}\..\{InvalidProjectRepositoryName}";
+        string TestProjectRootPath = @$"{ProjectRootPath}\..\{repositoryName}";
         LocalLocation Location = new(TestProjectRootPath);
 
-        return (Location, new FolderView.Path(new List<string>(), InvalidProjectName));
-    }
-
-    private const string SolutionSameFolderRepositoryName = "SolutionSameFolder";
-
-    public static (ILocation, IPath) GetLocalLocationAndPathToProjectWithSolutionSameFolder()
-    {
-        string ProjectRootPath = GetExecutingProjectRootPath();
-        string TestProjectRootPath = @$"{ProjectRootPath}\..\{SolutionSameFolderRepositoryName}";
-        LocalLocation Location = new(TestProjectRootPath);
-
-        return (Location, new FolderView.Path(new List<string>(), ProjectName));
+        return (Location, new FolderView.Path(new List<string>(), projectName));
     }
 
     private static string GetExecutingProjectRootPath()

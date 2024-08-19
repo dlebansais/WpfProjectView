@@ -40,7 +40,7 @@ public class TestProject
     [Test]
     public async Task TestNotExisting()
     {
-        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToInvalidProject();
+        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPath(TestTools.InvalidProjectRepositoryName, TestTools.InvalidProjectName);
 
         IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
 
@@ -54,7 +54,7 @@ public class TestProject
     [Test]
     public async Task TestSolutionSameFolder()
     {
-        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPathToProjectWithSolutionSameFolder();
+        (FolderView.ILocation Location, FolderView.IPath PathToProject) = TestTools.GetLocalLocationAndPath(TestTools.SolutionSameFolderRepositoryName, TestTools.ProjectName);
 
         IProject TestProject = await Project.CreateAsync(Location, PathToProject).ConfigureAwait(false);
 

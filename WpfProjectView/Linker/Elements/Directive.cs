@@ -36,6 +36,11 @@ public record Directive(string Name)
     private static readonly Directive NameDirective = new("Name");
 
     /// <summary>
+    /// The Key directive.
+    /// </summary>
+    private static readonly Directive KeyDirective = new("Key");
+
+    /// <summary>
     /// The Subclass directive.
     /// </summary>
     private static readonly Directive SubclassDirective = new("Subclass");
@@ -55,6 +60,7 @@ public record Directive(string Name)
         DeferLoadStrategyDirective,
         FieldModifierDirective,
         NameDirective,
+        KeyDirective,
         SubclassDirective,
         UidDirective,
     };

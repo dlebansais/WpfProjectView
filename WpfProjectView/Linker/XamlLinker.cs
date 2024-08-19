@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Markup;
@@ -66,13 +67,27 @@ public class XamlLinker
         await TypeManager.FillCodeTypes(ParsedSyntaxTrees, Project.PathToExternalDlls).ConfigureAwait(false);
 
         foreach (IFile Item in Project.Files)
-            if (Item is IXamlCodeFile XamlCodeFile && XamlCodeFile.XamlParsingResult?.Root is IXamlElement XamlRoot)
+        {
+            IXamlElement? XamlRoot = null;
+
+            if (Item is IXamlCodeFile XamlCodeFile && XamlCodeFile.XamlParsingResult?.Root is IXamlElement NonResourceXamlRoot)
             {
                 LastXamlSourceFile = XamlCodeFile.XamlSourceFile;
+                XamlRoot = NonResourceXamlRoot;
+            }
 
+            if (Item is IXamlResourceFile XamlResourceFile && XamlResourceFile.XamlParsingResult?.Root is IXamlElement ResourceXamlRoot)
+            {
+                LastXamlSourceFile = XamlResourceFile.SourceFile;
+                XamlRoot = ResourceXamlRoot;
+            }
+
+            if (XamlRoot is not null)
+            {
                 Dictionary<string, IXamlNamespace> NamespaceTable = new();
                 ParseElement(XamlRoot, NamespaceTable);
             }
+        }
     }
 
     private void ParseElement(IXamlElement xamlElement, Dictionary<string, IXamlNamespace> namespaceTable)
@@ -100,12 +115,20 @@ public class XamlLinker
         if (TryGetFullTypeName(xamlElement.NameWithPrefix, namespaceTable, out string FullName))
         {
             foreach (IXamlAttribute Attribute in xamlElement.Attributes)
-                if (Attribute is IXamlAttributeDirective AttributeDirective && AttributeDirective.Namespace is IXamlNamespaceExtension && AttributeDirective.Name == "Class")
-                    if (Attribute.Value is string StringValue)
+                if (Attribute is IXamlAttributeDirective AttributeDirective)
+                {
+                    IXamlNamespaceExtension? AttributeNamespace = AttributeDirective.Namespace as IXamlNamespaceExtension;
+                    Debug.Assert(AttributeNamespace is not null);
+
+                    if (AttributeDirective.Name == "Class")
                     {
-                        FullName = StringValue;
+                        string? StringValue = Attribute.Value as string;
+                        Debug.Assert(StringValue is not null);
+
+                        FullName = StringValue!;
                         break;
                     }
+                }
 
             if (TypeManager.TryFindWpfNamedType(FullName, out NamedType WpfNamedType))
             {
