@@ -84,7 +84,7 @@ public class XamlLinker
 
             if (XamlRoot is not null)
             {
-                if (LastXamlSourceFile?.Name == "Local3.xaml")
+                if (LastXamlSourceFile?.Name == "Local6.xaml")
                 {
                 }
 
@@ -184,25 +184,29 @@ public class XamlLinker
                     AddAttributeToTable(xamlElement, XamlAttribute, DefaultNamedProperty, PropertyTable);
                 }
                 else
-                    ReportError($"Failed to find default property with name '{Name}'.", xamlElement);
+                    ReportError($"Failed to find default property with name '{Name}' and value '{AttributeToString(XamlAttribute)}'.", xamlElement);
             }
             else
-                ReportError($"Failed to parse attribute for element.", xamlElement);
+                ReportError($"Failed to parse attribute {AttributeToString(XamlAttribute)} for element.", xamlElement);
         }
     }
 
     private static string AttributeToString(IXamlAttribute attribute)
     {
+        string? Result = null;
+
         if (attribute is IXamlAttributeDirective DirectiveAttribute)
-            return $"{DirectiveAttribute.Namespace.Prefix}:{DirectiveAttribute.Name}";
-        else if (attribute is IXamlAttributeMember MemberAttribute)
-            return MemberAttribute.Name;
-        else if (attribute is IXamlAttributeElementCollection ElementCollectionAttribute)
-            return $"{ElementCollectionAttribute.Name} ({ElementCollectionAttribute.Children.Count} children)";
-        else if (attribute is IXamlAttributeSimpleValue SimpleValueAttribute)
-            return $"(no name, value type is {SimpleValueAttribute.Value?.GetType().Name})";
-        else
-            return string.Empty;
+            Result = $"{DirectiveAttribute.Namespace.Prefix}:{DirectiveAttribute.Name}";
+        if (attribute is IXamlAttributeMember MemberAttribute)
+            Result = MemberAttribute.Name;
+        if (attribute is IXamlAttributeElementCollection ElementCollectionAttribute)
+            Result = $"{ElementCollectionAttribute.Name} ({ElementCollectionAttribute.Children.Count} children)";
+        if (attribute is IXamlAttributeSimpleValue SimpleValueAttribute)
+            Result = $"(no name, value type is {SimpleValueAttribute.Value?.GetType().Name})";
+
+        Debug.Assert(Result is not null);
+
+        return Result!;
     }
 
     private void AddAttributeToTable<TKey>(IXamlElement xamlElement, IXamlAttribute xamlAttribute, TKey key, IDictionary<TKey, object> table)

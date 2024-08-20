@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Implements a xaml element attribute.
 /// </summary>
 [DebuggerDisplay("{StringValue,nq}")]
-internal record XamlAttributeSimpleValue(string StringValue) : IXamlAttribute
+internal record XamlAttributeSimpleValue(string StringValue) : IXamlAttributeSimpleValue
 {
     /// <inheritdoc/>
     public object? Value { get => StringValue; }
