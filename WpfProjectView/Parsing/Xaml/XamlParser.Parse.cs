@@ -155,8 +155,6 @@ public static partial class XamlParser
         IXamlNamespace AttributeNamespace = context.MemberNamespace;
         string AttributeName = context.MemberName;
 
-        Debug.Assert(AttributeNamespace is IXamlNamespaceExtension);
-
         _ = context.Read();
 
         XamlNodeType NodeType = context.NodeType;

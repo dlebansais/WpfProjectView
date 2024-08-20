@@ -84,6 +84,10 @@ public class XamlLinker
 
             if (XamlRoot is not null)
             {
+                if (LastXamlSourceFile?.Name == "Local3.xaml")
+                {
+                }
+
                 Dictionary<string, IXamlNamespace> NamespaceTable = new();
                 ParseElement(XamlRoot, NamespaceTable);
             }
@@ -117,16 +121,16 @@ public class XamlLinker
             foreach (IXamlAttribute Attribute in xamlElement.Attributes)
                 if (Attribute is IXamlAttributeDirective AttributeDirective)
                 {
-                    IXamlNamespaceExtension? AttributeNamespace = AttributeDirective.Namespace as IXamlNamespaceExtension;
-                    Debug.Assert(AttributeNamespace is not null);
-
-                    if (AttributeDirective.Name == "Class")
+                    if (AttributeDirective.Namespace is IXamlNamespaceExtension)
                     {
-                        string? StringValue = Attribute.Value as string;
-                        Debug.Assert(StringValue is not null);
+                        if (AttributeDirective.Name == "Class")
+                        {
+                            string? StringValue = Attribute.Value as string;
+                            Debug.Assert(StringValue is not null);
 
-                        FullName = StringValue!;
-                        break;
+                            FullName = StringValue!;
+                            break;
+                        }
                     }
                 }
 
@@ -470,11 +474,11 @@ public class XamlLinker
             string Prefix = Splitted[0];
             string TypeName = Splitted[1];
 
-            if (namespaceTable.TryGetValue(Prefix, out IXamlNamespace? XamlNamespace))
-            {
-                fullTypeName = XamlNamespace.Namespace + "." + TypeName;
-                return true;
-            }
+            Debug.Assert(namespaceTable.ContainsKey(Prefix));
+
+            IXamlNamespace XamlNamespace = namespaceTable[Prefix];
+            fullTypeName = XamlNamespace.Namespace + "." + TypeName;
+            return true;
         }
 
         fullTypeName = null!;
