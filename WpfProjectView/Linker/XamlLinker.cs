@@ -84,7 +84,7 @@ public class XamlLinker
 
             if (XamlRoot is not null)
             {
-                if (LastXamlSourceFile?.Name == "Local6.xaml")
+                if (LastXamlSourceFile?.Name == "Local9.xaml")
                 {
                 }
 
@@ -209,38 +209,14 @@ public class XamlLinker
         return Result!;
     }
 
-    private void AddAttributeToTable<TKey>(IXamlElement xamlElement, IXamlAttribute xamlAttribute, TKey key, IDictionary<TKey, object> table)
+    private static void AddAttributeToTable<TKey>(IXamlElement xamlElement, IXamlAttribute xamlAttribute, TKey key, IDictionary<TKey, object> table)
     {
-        if (xamlAttribute.Value is not object Value)
-            ReportError("Error in attribute value for element.", xamlElement);
-        else if (table.ContainsKey(key))
-            ReportError($"Duplicate attribute {key} within declaration of element.", xamlElement);
-        else
-            table[key] = Value;
-    }
+        object? Value = xamlAttribute.Value;
+        Debug.Assert(Value is not null);
 
-    private static bool TryGetAttributeName(IXamlAttribute xamlAttribute, out string name)
-    {
-        if (xamlAttribute is IXamlAttributeMember AttributeMember)
-        {
-            name = AttributeMember.Name;
-            return true;
-        }
-        else if (xamlAttribute is IXamlAttributeDirective AttributeDirective)
-        {
-            name = $"{AttributeDirective.Namespace.Prefix}:{AttributeDirective.Name}";
-            return true;
-        }
-        else if (xamlAttribute is IXamlAttributeElementCollection AttributeElementCollection)
-        {
-            name = AttributeElementCollection.Name;
-            return true;
-        }
-        else
-        {
-            name = string.Empty;
-            return false;
-        }
+        Debug.Assert(!table.ContainsKey(key));
+
+        table[key] = Value!;
     }
 
     private static bool TryGetDirective(IXamlAttribute xamlAttribute, out Directive directive)
@@ -331,40 +307,57 @@ public class XamlLinker
 
     private static bool HasDefaultAttributeName(NamedType namedType, out string contentPropertyName)
     {
-        if (namedType.FromGetType is Type ElementType)
-            return HasDefaultAttributeName(ElementType, out contentPropertyName);
-        else if (namedType.FromTypeSymbol is INamedTypeSymbol NamedTypeSymbol)
-            return HasDefaultAttributeName(NamedTypeSymbol, out contentPropertyName);
-
         contentPropertyName = string.Empty;
-        return false;
+
+        bool Result = false;
+        bool IsHandled = false;
+
+        if (namedType.FromGetType is Type ElementType)
+        {
+            Result = HasDefaultAttributeName(ElementType, out contentPropertyName);
+            IsHandled = true;
+        }
+
+        if (namedType.FromTypeSymbol is INamedTypeSymbol NamedTypeSymbol)
+        {
+            Result = HasDefaultAttributeName(NamedTypeSymbol, out contentPropertyName);
+            IsHandled = true;
+        }
+
+        Debug.Assert(IsHandled);
+
+        return Result;
     }
 
     private static bool HasDefaultAttributeName(Type elementType, out string contentPropertyName)
     {
+        contentPropertyName = string.Empty;
+
+        bool Result = false;
         object[] CustomAttributes = elementType.GetCustomAttributes(false);
 
         foreach (object Attribute in CustomAttributes)
             if (Attribute is ContentPropertyAttribute ContentPropertyAttribute)
             {
                 contentPropertyName = ContentPropertyAttribute.Name;
-                return true;
+                Result = true;
             }
 
-        contentPropertyName = string.Empty;
-        return false;
+        return Result;
     }
 
     private static bool HasDefaultAttributeName(INamedTypeSymbol namedTypeSymbol, out string contentPropertyName)
     {
+        contentPropertyName = string.Empty;
+
+        bool Result = false;
         var CustomAttributes = namedTypeSymbol.GetAttributes();
 
         foreach (AttributeData AttributeData in CustomAttributes)
             if (AttributeData.AttributeClass?.Name == nameof(ContentPropertyAttribute))
-                return HasDefaultAttributeName(AttributeData, out contentPropertyName);
+                Result = HasDefaultAttributeName(AttributeData, out contentPropertyName);
 
-        contentPropertyName = string.Empty;
-        return false;
+        return Result;
     }
 
     private static bool HasDefaultAttributeName(AttributeData attributeData, out string contentPropertyName)
@@ -372,11 +365,11 @@ public class XamlLinker
         if (attributeData.ConstructorArguments.Length == 1)
         {
             TypedConstant Argument = attributeData.ConstructorArguments.First();
-            if (Argument.Value is string StringArgument)
-            {
-                contentPropertyName = StringArgument;
-                return true;
-            }
+            contentPropertyName = $"{Argument.Value}";
+            return true;
+        }
+        else
+        {
         }
 
         contentPropertyName = string.Empty;
@@ -457,6 +450,30 @@ public class XamlLinker
     {
         var Members = typeSymbol.GetMembers();
         return Members.Any();
+    }
+
+    private static bool TryGetAttributeName(IXamlAttribute xamlAttribute, out string name)
+    {
+        if (xamlAttribute is IXamlAttributeMember AttributeMember)
+        {
+            name = AttributeMember.Name;
+            return true;
+        }
+        else if (xamlAttribute is IXamlAttributeDirective AttributeDirective)
+        {
+            name = $"{AttributeDirective.Namespace.Prefix}:{AttributeDirective.Name}";
+            return true;
+        }
+        else if (xamlAttribute is IXamlAttributeElementCollection AttributeElementCollection)
+        {
+            name = AttributeElementCollection.Name;
+            return true;
+        }
+        else
+        {
+            name = string.Empty;
+            return false;
+        }
     }
 
     private static bool TryGetFullTypeName(string typeNameWithPrefix, Dictionary<string, IXamlNamespace> namespaceTable, out string fullTypeName)

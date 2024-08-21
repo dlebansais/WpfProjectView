@@ -1,8 +1,10 @@
 ﻿namespace PgCompletionist;
 
+using System.Diagnostics;
 using System.Windows.Markup;
 
 [ContentProperty("None")]
-public class InvalidControl
+[DebuggerDisplay("None")]
+public class InvalidControl0
 {
 }

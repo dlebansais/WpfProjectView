@@ -1,5 +1,5 @@
 ﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:local="clr-namespace:PgCompletionist">
-    <local:InvalidControl0>Test</local:InvalidControl0>
+    <local:InvalidControl1>Test</local:InvalidControl1>
 </Window>

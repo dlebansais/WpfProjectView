@@ -1,8 +1,6 @@
 ﻿namespace WpfProjectView;
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Windows.Forms;
 
 /// <summary>
 /// Represents a directive for a XAML element.
