@@ -30,7 +30,8 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
                 return true;
             }
         }
-        else if (FromTypeSymbol is not null)
+
+        if (FromTypeSymbol is not null)
         {
             if (GetAllMemberSymbols().OfType<IPropertySymbol>().FirstOrDefault(symbol => symbol.Name == name) is IPropertySymbol PropertySymbol)
             {
@@ -51,7 +52,6 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
     public bool TryFindAttachedProperty(string name, out NamedAttachedProperty namedAttachedProperty)
     {
         string Setter = $"Set{name}";
-#pragma warning disable CA1307
 
         if (FromGetType is not null)
         {
@@ -61,7 +61,8 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
                 return true;
             }
         }
-        else if (FromTypeSymbol is not null)
+
+        if (FromTypeSymbol is not null)
         {
             if (GetAllMemberSymbols().OfType<IMethodSymbol>().FirstOrDefault(symbol => symbol.Name == Setter) is IMethodSymbol MethodSymbol)
             {
@@ -89,7 +90,8 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
                 return true;
             }
         }
-        else if (FromTypeSymbol is not null)
+
+        if (FromTypeSymbol is not null)
         {
             if (GetAllMemberSymbols().OfType<IEventSymbol>().FirstOrDefault(symbol => symbol.Name == name) is IEventSymbol EventSymbol)
             {

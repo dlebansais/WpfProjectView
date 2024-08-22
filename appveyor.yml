@@ -31,8 +31,8 @@ before_build:
   - nuget install GitCommitId -DependencyVersion Highest -OutputDirectory packages
 
 configuration:
-  - Release
   - Debug
+  - Release
 
 build:
   project: $(APPVEYOR_PROJECT_NAME).sln
