@@ -118,8 +118,7 @@ public class NamedTypeManager
         string FolderName = System.IO.Path.GetFileName(folderPath);
         const string Prefix = "v";
 
-        if (!FolderName.StartsWith(Prefix, StringComparison.Ordinal))
-            return false;
+        Debug.Assert(FolderName.StartsWith(Prefix, StringComparison.Ordinal));
 
         string[] Parts = FolderName.Substring(Prefix.Length).Split('.');
         foreach (string Part in Parts)

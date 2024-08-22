@@ -171,16 +171,19 @@ public class XamlLinker
             {
                 AddAttributeToTable(xamlElement, XamlAttribute, NamedAttachedProperty, AttachedPropertyTable);
             }
-            else if (HasDefaultAttributeName(elementType, out string ContentPropertyName))
+            else if (XamlAttribute is IXamlAttributeSimpleValue AttributeSimpleValue)
             {
-                string Name = ContentPropertyName;
-
-                if (elementType.TryGetProperty(Name, out NamedProperty DefaultNamedProperty))
+                if (HasDefaultAttributeName(elementType, out string ContentPropertyName))
                 {
-                    AddAttributeToTable(xamlElement, XamlAttribute, DefaultNamedProperty, PropertyTable);
+                    string Name = ContentPropertyName;
+
+                    if (elementType.TryGetProperty(Name, out NamedProperty DefaultNamedProperty))
+                    {
+                        AddAttributeToTable(xamlElement, AttributeSimpleValue, DefaultNamedProperty, PropertyTable);
+                    }
+                    else
+                        ReportError($"Failed to find default property with name '{Name}' and value '{AttributeToString(XamlAttribute)}'.", xamlElement);
                 }
-                else
-                    ReportError($"Failed to find default property with name '{Name}' and value '{AttributeToString(XamlAttribute)}'.", xamlElement);
             }
             else
                 ReportError($"Failed to parse attribute {AttributeToString(XamlAttribute)} for element.", xamlElement);
@@ -278,9 +281,18 @@ public class XamlLinker
             string PropertyName = Splitted[1].Trim();
 
             if (TryGetFullTypeName(TypeNameWithPrefix, namespaceTable, out string FullTypeName))
-                if (TypeManager.TryFindCodeType(FullTypeName, out NamedType NamedType))
-                    if (NamedType.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
+            {
+                NamedType? ParsedNamedType = null;
+
+                if (TypeManager.TryFindCodeType(FullTypeName, out NamedType ExistingNamedType))
+                    ParsedNamedType = ExistingNamedType;
+                else if (TypeManager.TryFindWpfNamedType(FullTypeName, out NamedType WpfNamedType))
+                    ParsedNamedType = WpfNamedType;
+
+                if (ParsedNamedType is not null)
+                    if (ParsedNamedType.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
                         return true;
+            }
         }
 
         namedAttachedProperty = null!;
