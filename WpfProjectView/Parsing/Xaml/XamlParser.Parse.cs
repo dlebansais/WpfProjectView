@@ -202,8 +202,6 @@ public static partial class XamlParser
     {
         bool CheckMultiLine = false;
 
-        Debug.Assert(context.Member.IsNameValid);
-
         string AttributeName = context.Member.Name;
         int AttributeLineNumber = context.LineNumber;
         bool IsVisible = context.Member.SerializationVisibility == DesignerSerializationVisibility.Visible;

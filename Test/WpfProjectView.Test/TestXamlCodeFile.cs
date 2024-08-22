@@ -55,10 +55,6 @@ public class TestXamlCodeFile
 
                 string ComparisonMessage = TestTools.CompareXamlParingResultWithOriginalContent(AsXamlCodeFile.XamlSourceFile.Content, AsXamlCodeFile.XamlParsingResult);
 
-                if (ComparisonMessage != string.Empty)
-                {
-                }
-
                 Assert.That(ComparisonMessage, Is.Empty, $"{AsXamlCodeFile.XamlSourceFile.Name}\r\n{ComparisonMessage}");
             }
 

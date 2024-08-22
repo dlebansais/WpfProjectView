@@ -84,10 +84,6 @@ public class XamlLinker
 
             if (XamlRoot is not null)
             {
-                if (LastXamlSourceFile?.Name == "Local9.xaml")
-                {
-                }
-
                 Dictionary<string, IXamlNamespace> NamespaceTable = new();
                 ParseElement(XamlRoot, NamespaceTable);
             }
