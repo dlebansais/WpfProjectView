@@ -77,15 +77,33 @@ public class TestLinker
     }
 
     [Test]
-    public void TestEmptyAttachecProperty()
+    public void TestEmptyRecords()
     {
         Type TestType = typeof(XamlLinker);
         NamedType NewNamedType = new(TestType.Name, TestType, null);
         Element NewElement = new(NewNamedType, null, new List<Directive>(), new List<Property>(), new List<Event>(), new List<Element>());
-        AttachedProperty NewAttachedProperty = new(NewElement, TestType);
 
+        AttachedProperty NewAttachedProperty = new(NewElement, TestType);
         AttachedProperty OtherAttachedProperty = NewAttachedProperty with { };
         Assert.That(OtherAttachedProperty, Is.EqualTo(NewAttachedProperty));
         Assert.That(OtherAttachedProperty.Equals(NewAttachedProperty), Is.True);
+
+        NamedEvent NewNamedEvent = new("test", null, null);
+        Event NewEvent = new(NewNamedEvent, NewElement, IsAttached: false, new EventHandler(TestEventHandler));
+        Event OtherEvent = NewEvent with { };
+        Assert.That(OtherEvent, Is.EqualTo(NewEvent));
+        Assert.That(OtherEvent.Equals(NewEvent), Is.True);
+
+        TestEventHandler(null, EventArgs.Empty);
+
+        NamedProperty NewNamedProperty = new("test", null, null);
+        Property NewProperty = new(NewNamedProperty, NewElement, string.Empty);
+        Property OtherProperty = NewProperty with { };
+        Assert.That(OtherProperty, Is.EqualTo(NewProperty));
+        Assert.That(OtherProperty.Equals(NewProperty), Is.True);
+    }
+
+    private static void TestEventHandler(object? sender, EventArgs args)
+    {
     }
 }

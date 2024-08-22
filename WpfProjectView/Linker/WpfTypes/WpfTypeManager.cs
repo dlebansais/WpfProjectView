@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,8 +46,14 @@ public static class WpfTypeManager
             if (!IsValidWpfType(Item))
                 continue;
 
-            if (Item.Namespace is string TypeNamespace && WpfNamespaces.Contains(TypeNamespace) && !WpfTypeNames.Contains(Item.Name))
+            Debug.Assert(Item.Namespace is not null);
+            string TypeNamespace = Item.Namespace!;
+
+            if (WpfNamespaces.Contains(TypeNamespace))
+            {
+                Debug.Assert(!WpfTypeNames.Contains(Item.Name));
                 WpfTypeNames.Add(Item.Name);
+            }
         }
 
         WpfTypeNames.Sort();
@@ -75,9 +82,6 @@ public static class WpfTypeManager
                 HasParameterlessConstructor = true;
 
         if (t.IsClass && !HasParameterlessConstructor)
-            return false;
-
-        if (t.BaseType == typeof(MulticastDelegate))
             return false;
 
         if (typeof(Attribute).IsAssignableFrom(t))
