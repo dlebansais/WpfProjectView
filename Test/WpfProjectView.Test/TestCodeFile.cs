@@ -41,7 +41,7 @@ public class TestCodeFile
     {
         const string DummyFileName = "dummy.cs";
         _ = TestTools.DeleteFile(DummyFileName);
-        CreateLocalDummyFile(DummyFileName);
+        TestTools.CreateLocalDummyFile(DummyFileName);
 
         LocalLocation Location = new(".");
         IProject TestProject = await Project.CreateAsync(Location, FolderView.Path.Empty).ConfigureAwait(false);
@@ -57,12 +57,5 @@ public class TestCodeFile
 
         CodeFile.Parse();
         Assert.That(CodeFile.SyntaxTree, Is.Null);
-    }
-
-    private static void CreateLocalDummyFile(string fileName)
-    {
-        using FileStream Stream = new(fileName, FileMode.Create, FileAccess.Write);
-        using BinaryWriter Writer = new(Stream);
-        Writer.Write("Dummy");
     }
 }

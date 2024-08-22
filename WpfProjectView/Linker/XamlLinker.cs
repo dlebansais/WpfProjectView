@@ -354,8 +354,13 @@ public class XamlLinker
         var CustomAttributes = namedTypeSymbol.GetAttributes();
 
         foreach (AttributeData AttributeData in CustomAttributes)
-            if (AttributeData.AttributeClass?.Name == nameof(ContentPropertyAttribute))
+        {
+            INamedTypeSymbol? AttributeClass = AttributeData.AttributeClass;
+            Debug.Assert(AttributeClass is not null);
+
+            if (AttributeClass!.Name == nameof(ContentPropertyAttribute))
                 Result = HasDefaultAttributeName(AttributeData, out contentPropertyName);
+        }
 
         return Result;
     }
@@ -368,112 +373,9 @@ public class XamlLinker
             contentPropertyName = $"{Argument.Value}";
             return true;
         }
-        else
-        {
-        }
 
         contentPropertyName = string.Empty;
         return false;
-    }
-
-    /// <summary>
-    /// Tries to get the value of an attribute as a string.
-    /// </summary>
-    /// <param name="xamlAttribute">The attribute.</param>
-    /// <param name="stringValue">The string value upon return.</param>
-    private bool TryGetAttributeValueAsString(IXamlAttribute xamlAttribute, out string stringValue)
-    {
-        if (xamlAttribute?.Value is string Value)
-        {
-            stringValue = Value;
-            return true;
-        }
-
-        IXamlElement Child;
-
-        if (xamlAttribute?.Value is IXamlElement AsElement)
-        {
-            Child = AsElement;
-        }
-        else if (xamlAttribute?.Value is IList<IXamlElement> AsElementList)
-        {
-            if (AsElementList.Count != 1)
-            {
-                stringValue = string.Empty;
-                return false;
-            }
-
-            Child = AsElementList[0];
-        }
-        else
-        {
-            ReportError($"Attribute value of type {xamlAttribute?.Value?.GetType()} is not supported.");
-            stringValue = string.Empty;
-            return false;
-        }
-
-        if (Child.Children.Count != 0)
-        {
-            stringValue = string.Empty;
-            return false;
-        }
-
-        string ChildName = Child.NameWithPrefix;
-
-        if (ChildName.EndsWith("Extension", StringComparison.Ordinal))
-            ChildName = ChildName.Substring(0, ChildName.Length - 9);
-
-        string AttributeList = string.Empty;
-
-        foreach (IXamlAttribute ChildAttribute in Child.Attributes)
-        {
-            if (AttributeList.Length > 0)
-                AttributeList += ", ";
-
-            if (TryGetAttributeName(ChildAttribute, out string ChildAttributeName) && ChildAttributeName.Length > 0)
-                AttributeList += $"{ChildAttributeName}=";
-
-            if (!TryGetAttributeValueAsString(ChildAttribute, out string ChildAttributeValue))
-            {
-                stringValue = string.Empty;
-                return false;
-            }
-
-            AttributeList += ChildAttributeValue;
-        }
-
-        stringValue = $"{{{ChildName} {AttributeList}}}";
-        return true;
-    }
-
-    private static bool IsValidTypeSymbol(INamedTypeSymbol typeSymbol)
-    {
-        var Members = typeSymbol.GetMembers();
-        return Members.Any();
-    }
-
-    private static bool TryGetAttributeName(IXamlAttribute xamlAttribute, out string name)
-    {
-        if (xamlAttribute is IXamlAttributeMember AttributeMember)
-        {
-            name = AttributeMember.Name;
-            return true;
-        }
-        else if (xamlAttribute is IXamlAttributeDirective AttributeDirective)
-        {
-            name = $"{AttributeDirective.Namespace.Prefix}:{AttributeDirective.Name}";
-            return true;
-        }
-        else if (xamlAttribute is IXamlAttributeElementCollection AttributeElementCollection)
-        {
-            name = AttributeElementCollection.Name;
-            return true;
-        }
-        else
-        {
-            name = string.Empty;
-            return false;
-        }
     }
 
     private static bool TryGetFullTypeName(string typeNameWithPrefix, Dictionary<string, IXamlNamespace> namespaceTable, out string fullTypeName)
@@ -508,10 +410,7 @@ public class XamlLinker
 
     private void ReportError(string message, IXamlElement xamlElement)
     {
-        if (xamlElement.LineNumber > 0)
-            ReportError(message + $" Name: {xamlElement.NameWithPrefix}, Line {xamlElement.LineNumber}, Position {xamlElement.LinePosition}.");
-        else
-            ReportError(message + $" Name: {xamlElement.NameWithPrefix}.");
+        ReportError(message + $" Name: {xamlElement.NameWithPrefix}, Line {xamlElement.LineNumber}, Position {xamlElement.LinePosition}.");
     }
 
     private void ReportError(string message)

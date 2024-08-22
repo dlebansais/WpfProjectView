@@ -164,4 +164,11 @@ public static class TestTools
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static extern bool DeleteFile(string path);
+
+    public static void CreateLocalDummyFile(string fileName)
+    {
+        using FileStream Stream = new(fileName, FileMode.Create, FileAccess.Write);
+        using BinaryWriter Writer = new(Stream);
+        Writer.Write("Dummy");
+    }
 }

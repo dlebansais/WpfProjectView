@@ -1,5 +1,7 @@
 ﻿namespace WpfProjectView.Test;
 
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -72,5 +74,18 @@ public class TestLinker
         await Linker.LinkAsync().ConfigureAwait(false);
 
         Assert.That(Linker.Errors, Is.Not.Empty);
+    }
+
+    [Test]
+    public void TestEmptyAttachecProperty()
+    {
+        Type TestType = typeof(XamlLinker);
+        NamedType NewNamedType = new(TestType.Name, TestType, null);
+        Element NewElement = new(NewNamedType, null, new List<Directive>(), new List<Property>(), new List<Event>(), new List<Element>());
+        AttachedProperty NewAttachedProperty = new(NewElement, TestType);
+
+        AttachedProperty OtherAttachedProperty = NewAttachedProperty with { };
+        Assert.That(OtherAttachedProperty, Is.EqualTo(NewAttachedProperty));
+        Assert.That(OtherAttachedProperty.Equals(NewAttachedProperty), Is.True);
     }
 }

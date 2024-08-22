@@ -58,7 +58,7 @@ public class TestXamlResourceFile
     {
         const string DummyFileName = "dummy.xaml";
         _ = TestTools.DeleteFile(DummyFileName);
-        CreateLocalDummyFile(DummyFileName);
+        TestTools.CreateLocalDummyFile(DummyFileName);
 
         LocalLocation Location = new(".");
         IProject TestProject = await Project.CreateAsync(Location, FolderView.Path.Empty).ConfigureAwait(false);
@@ -75,12 +75,5 @@ public class TestXamlResourceFile
         XamlFile.Parse();
         Assert.That(XamlFile.XamlParsingResult, Is.Not.Null);
         Assert.That(XamlFile.XamlParsingResult.Root, Is.Null);
-    }
-
-    private static void CreateLocalDummyFile(string fileName)
-    {
-        using FileStream Stream = new(fileName, FileMode.Create, FileAccess.Write);
-        using BinaryWriter Writer = new(Stream);
-        Writer.Write("Dummy");
     }
 }
