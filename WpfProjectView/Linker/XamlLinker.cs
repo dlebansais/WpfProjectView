@@ -284,10 +284,10 @@ public class XamlLinker
             {
                 NamedType? ParsedNamedType = null;
 
-                if (TypeManager.TryFindCodeType(FullTypeName, out NamedType ExistingNamedType))
-                    ParsedNamedType = ExistingNamedType;
-                else if (TypeManager.TryFindWpfNamedType(FullTypeName, out NamedType WpfNamedType))
+                if (TypeManager.TryFindWpfNamedType(FullTypeName, out NamedType WpfNamedType))
                     ParsedNamedType = WpfNamedType;
+                else if (TypeManager.TryFindCodeType(FullTypeName, out NamedType ExistingNamedType))
+                    ParsedNamedType = ExistingNamedType;
 
                 Debug.Assert(ParsedNamedType is not null);
 
