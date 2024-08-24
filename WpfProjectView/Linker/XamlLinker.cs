@@ -289,9 +289,10 @@ public class XamlLinker
                 else if (TypeManager.TryFindWpfNamedType(FullTypeName, out NamedType WpfNamedType))
                     ParsedNamedType = WpfNamedType;
 
-                if (ParsedNamedType is not null)
-                    if (ParsedNamedType.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
-                        return true;
+                Debug.Assert(ParsedNamedType is not null);
+
+                if (ParsedNamedType!.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
+                    return true;
             }
         }
 
