@@ -106,7 +106,9 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
 
     private IEnumerable<ISymbol> GetAllMemberSymbols()
     {
-        AllMemberSymbols = AllMemberSymbols ?? FromTypeSymbol?.GetBaseTypesAndThis()?.SelectMany(n => n.GetMembers());
+        Debug.Assert(FromTypeSymbol is not null);
+
+        AllMemberSymbols = AllMemberSymbols ?? FromTypeSymbol!.GetBaseTypesAndThis().SelectMany(n => n.GetMembers());
 
         Debug.Assert(AllMemberSymbols is not null);
         return AllMemberSymbols!;
