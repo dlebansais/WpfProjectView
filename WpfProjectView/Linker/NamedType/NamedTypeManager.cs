@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows;
 using Contracts;
@@ -103,14 +104,26 @@ public class NamedTypeManager
         const string RuntimeDirectoryBase = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework";
         string RuntimeDirectory = string.Empty;
 
-        foreach (string FolderPath in System.IO.Directory.GetDirectories(RuntimeDirectoryBase))
+        foreach (string FolderPath in GetRuntimeDirectories(RuntimeDirectoryBase))
             if (IsValidRuntimeDirectory(FolderPath))
-                if (string.Compare(FolderPath, RuntimeDirectory, StringComparison.OrdinalIgnoreCase) > 0)
-                    RuntimeDirectory = FolderPath;
+                RuntimeDirectory = FolderPath;
 
         string RuntimePath = RuntimeDirectory + @"\{0}.dll";
 
         return RuntimePath;
+    }
+
+    private static List<string> GetRuntimeDirectories(string runtimeDirectoryBase)
+    {
+        List<string> Directories = System.IO.Directory.GetDirectories(runtimeDirectoryBase).ToList();
+        Directories.Sort(CompareIgnoreCase);
+
+        return Directories;
+    }
+
+    private static int CompareIgnoreCase(string s1, string s2)
+    {
+        return string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsValidRuntimeDirectory(string folderPath)
