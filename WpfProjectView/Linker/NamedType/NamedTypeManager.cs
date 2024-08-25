@@ -159,7 +159,13 @@ public class NamedTypeManager
             WpfTypes = WpfAssemblies.Where(a => !a.IsDynamic).SelectMany(a => a.GetTypes());
         }
 
-        Type? WpfType = WpfTypes.FirstOrDefault(t => t.FullName is string FullName && FullName.Equals(name, StringComparison.Ordinal));
+        Type? WpfType = WpfTypes.FirstOrDefault(type =>
+        {
+            Debug.Assert(type.FullName is not null);
+            string FullName = type.FullName!;
+
+            return FullName.Equals(name, StringComparison.Ordinal);
+        });
 
         if (WpfType is Type ExistingWpfType)
         {

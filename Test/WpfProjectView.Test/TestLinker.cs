@@ -83,6 +83,10 @@ public class TestLinker
         NamedType NewNamedType = new(TestType.Name, TestType, null);
         Element NewElement = new(NewNamedType, null, new List<Directive>(), new List<Property>(), new List<Event>(), new List<Element>());
 
+        NamedType OtherNamedType = NewNamedType with { };
+        Assert.That(OtherNamedType, Is.EqualTo(NewNamedType));
+        Assert.That(OtherNamedType.Equals(NewNamedType), Is.True);
+
         AttachedProperty NewAttachedProperty = new(NewElement, TestType);
         AttachedProperty OtherAttachedProperty = NewAttachedProperty with { };
         Assert.That(OtherAttachedProperty, Is.EqualTo(NewAttachedProperty));

@@ -70,8 +70,14 @@ public class XamlLinker
         {
             IXamlElement? XamlRoot = null;
 
-            if (Item is IXamlCodeFile XamlCodeFile && XamlCodeFile.XamlParsingResult?.Root is IXamlElement NonResourceXamlRoot)
+            if (Item is IXamlCodeFile XamlCodeFile)
             {
+                Debug.Assert(XamlCodeFile.XamlParsingResult is not null);
+                IXamlParsingResult XamlParsingResult = XamlCodeFile.XamlParsingResult!;
+
+                Debug.Assert(XamlParsingResult.Root is not null);
+                IXamlElement NonResourceXamlRoot = XamlParsingResult.Root!;
+
                 LastXamlSourceFile = XamlCodeFile.XamlSourceFile;
                 XamlRoot = NonResourceXamlRoot;
             }
@@ -201,7 +207,12 @@ public class XamlLinker
         if (attribute is IXamlAttributeElementCollection ElementCollectionAttribute)
             Result = $"{ElementCollectionAttribute.Name} ({ElementCollectionAttribute.Children.Count} children)";
         if (attribute is IXamlAttributeSimpleValue SimpleValueAttribute)
-            Result = $"(no name, value type is {SimpleValueAttribute.Value?.GetType().Name})";
+        {
+            Debug.Assert(SimpleValueAttribute.Value is not null);
+            object Value = SimpleValueAttribute.Value!;
+
+            Result = $"(no name, value type is {Value.GetType().Name})";
+        }
 
         Debug.Assert(Result is not null);
 
@@ -282,13 +293,12 @@ public class XamlLinker
 
             if (TryGetFullTypeName(TypeNameWithPrefix, namespaceTable, out string FullTypeName))
             {
-                NamedType? ParsedNamedType = null;
+                // Add the WPF if not already known.
+                _ = TypeManager.TryFindWpfNamedType(FullTypeName, out _);
 
-                if (TypeManager.TryFindWpfNamedType(FullTypeName, out NamedType WpfNamedType))
-                    ParsedNamedType = WpfNamedType;
-                else if (TypeManager.TryFindCodeType(FullTypeName, out NamedType ExistingNamedType))
-                    ParsedNamedType = ExistingNamedType;
-
+                // Now get the type.
+                bool IsTypeFound = TypeManager.TryFindCodeType(FullTypeName, out NamedType ParsedNamedType);
+                Debug.Assert(IsTypeFound);
                 Debug.Assert(ParsedNamedType is not null);
 
                 if (ParsedNamedType!.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
