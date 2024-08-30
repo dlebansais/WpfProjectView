@@ -8,6 +8,8 @@ using System.Diagnostics;
 [DebuggerDisplay("{StringValue,nq}")]
 internal record XamlAttributeSimpleValue(string StringValue) : IXamlAttributeSimpleValue
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the attribute value.
+    /// </summary>
     public object? Value { get => StringValue; }
 }

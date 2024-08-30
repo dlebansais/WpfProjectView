@@ -8,17 +8,24 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents a Xaml file with code behind.
 /// </summary>
-/// <inheritdoc/>
+/// <param name="XamlSourceFile">The Xaml source file.</param>
+/// <param name="CodeSourceFile">The code behind file.</param>
 [DebuggerDisplay("{XamlSourceFile.Name,nq}[.cs] (path: {((FolderView.Path)XamlSourceFile.Path).Combined,nq}[.cs])")]
 internal record XamlCodeFile(FolderView.IFile XamlSourceFile, FolderView.IFile CodeSourceFile) : File(XamlSourceFile), IXamlCodeFile
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the code behind file.
+    /// </summary>
     public IPath CodeBehindPath { get; } = CodeSourceFile.Path;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the Xaml file parsing result.
+    /// </summary>
     public IXamlParsingResult? XamlParsingResult { get; private set; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the code behind file parsing result.
+    /// </summary>
     public SyntaxTree? SyntaxTree { get; private set; }
 
     /// <inheritdoc/>

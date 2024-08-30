@@ -6,6 +6,7 @@ using FolderView;
 /// <summary>
 /// Represents a file.
 /// </summary>
+/// <param name="SourceFile">The source file.</param>
 internal abstract record File(FolderView.IFile SourceFile) : IFile
 {
     /// <inheritdoc/>
