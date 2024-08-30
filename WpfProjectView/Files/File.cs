@@ -9,15 +9,15 @@ using FolderView;
 /// <param name="SourceFile">The source file.</param>
 internal abstract record File(FolderView.IFile SourceFile) : IFile
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IFile.Path"/>
     public IPath Path => SourceFile.Path;
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IFile.LoadAsync(IFolder)"/>
     public abstract Task LoadAsync(IFolder rootFolder);
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IFile.IsParsed"/>
     public abstract bool IsParsed { get; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IFile.Parse"/>
     public abstract void Parse();
 }
