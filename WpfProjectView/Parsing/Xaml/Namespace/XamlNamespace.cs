@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using Contracts;
 
 /// <summary>
 /// Implements a xaml namespace in any assembly.
@@ -65,12 +66,12 @@ internal record XamlNamespace(string Prefix, string Namespace, string AssemblyNa
         if (namespacePath == XamlNamespaceExtension.ExtensionPath)
             return new XamlNamespaceExtension(prefix);
 
-        Debug.Assert(IsNamespaceValid);
+        Contract.Assert(IsNamespaceValid);
 
         if (IsAssemblyEmpty)
             return new XamlNamespaceLocal(prefix, Namespace);
 
-        Debug.Assert(IsAssemblyValid);
+        Contract.Assert(IsAssemblyValid);
 
         return new XamlNamespace(prefix, Namespace, Assembly);
     }

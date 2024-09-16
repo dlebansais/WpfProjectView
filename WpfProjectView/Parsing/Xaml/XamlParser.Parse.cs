@@ -3,6 +3,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Xaml;
+using Contracts;
 
 /// <summary>
 /// Implements a xaml parser.
@@ -26,7 +27,7 @@ public static partial class XamlParser
         context = context with { CurrentObjectName = ElementName };
 
         _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.StartMember || context.NodeType is XamlNodeType.EndObject);
+        Contract.Assert(context.NodeType is XamlNodeType.StartMember || context.NodeType is XamlNodeType.EndObject);
 
         (XamlElementCollection Children, XamlAttributeCollection Attributes, bool IsMultiLine) = ParseElementContent(context);
 
@@ -46,7 +47,7 @@ public static partial class XamlParser
             _ = context.Read();
         }
 
-        Debug.Assert(context.NodeType is XamlNodeType.StartObject);
+        Contract.Assert(context.NodeType is XamlNodeType.StartObject);
 
         return Namespaces;
     }
@@ -75,7 +76,7 @@ public static partial class XamlParser
             _ = context.Read();
         }
 
-        Debug.Assert(context.NodeType is XamlNodeType.EndObject);
+        Contract.Assert(context.NodeType is XamlNodeType.EndObject);
 
         return (Children, Attributes, IsMultiLine);
     }
@@ -99,19 +100,19 @@ public static partial class XamlParser
             IsParsed = true;
         }
 
-        Debug.Assert(IsParsed);
+        Contract.Assert(IsParsed);
     }
 
     private static void ParseElementMemberUnknownContentSimpleValue(XamlParsingContext context, XamlAttributeCollection attributes)
     {
-        Debug.Assert(context.Value is string);
+        Contract.Assert(context.Value is string);
 
         string StringValue = (string)context.Value;
         XamlAttributeSimpleValue Attribute = new(StringValue);
         attributes.Add(Attribute);
 
         _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.EndMember);
+        Contract.Assert(context.NodeType is XamlNodeType.EndMember);
     }
 
     private static void ParseElementMemberUnknownContentObjects(XamlParsingContext context, XamlElementCollection children)
@@ -139,18 +140,18 @@ public static partial class XamlParser
         if (NodeType is XamlNodeType.StartObject or XamlNodeType.NamespaceDeclaration)
             AttributeValue = ParseElement(context);
 
-        Debug.Assert(AttributeValue is not null);
+        Contract.Assert(AttributeValue is not null);
 
         XamlAttributeMember Attribute = new(string.Empty, AttributeValue);
         attributes.Add(Attribute);
 
         _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.EndMember);
+        Contract.Assert(context.NodeType is XamlNodeType.EndMember);
     }
 
     private static void ParseElementMemberDirective(XamlParsingContext context, XamlDirective directive, XamlAttributeCollection attributes)
     {
-        Debug.Assert(directive.IsNameValid);
+        Contract.Assert(directive.IsNameValid);
 
         IXamlNamespace AttributeNamespace = context.MemberNamespace;
         string AttributeName = context.MemberName;
@@ -172,7 +173,7 @@ public static partial class XamlParser
             IsParsed = true;
         }
 
-        Debug.Assert(IsParsed);
+        Contract.Assert(IsParsed);
     }
 
     private static void ParseElementMemberDirectiveSimpleValue(XamlParsingContext context, IXamlNamespace attributeNamespace, string attributeName, XamlAttributeCollection attributes)
@@ -183,7 +184,7 @@ public static partial class XamlParser
         attributes.Add(Attribute);
 
         _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.EndMember);
+        Contract.Assert(context.NodeType is XamlNodeType.EndMember);
     }
 
     private static void ParseElementMemberDirectiveContentObject(XamlParsingContext context, IXamlNamespace attributeNamespace, string attributeName, XamlAttributeCollection attributes)
@@ -195,7 +196,7 @@ public static partial class XamlParser
 
         SkipIndentation(context);
 
-        Debug.Assert(context.NodeType is XamlNodeType.EndMember);
+        Contract.Assert(context.NodeType is XamlNodeType.EndMember);
     }
 
     private static void ParseElementMember(XamlParsingContext context, XamlAttributeCollection attributes, int startingLineNumber, ref bool isMultiLine)
@@ -243,9 +244,7 @@ public static partial class XamlParser
             CheckMultiLine = IsOneLine;
         }
 
-        Debug.Assert(Attribute is not null);
-
-        attributes.Add(Attribute!);
+        attributes.Add(Contract.AssertNotNull(Attribute));
 
         if (CheckMultiLine && context.LineNumber > startingLineNumber && attributes.Count > 1)
             isMultiLine = true;
@@ -256,7 +255,7 @@ public static partial class XamlParser
         object? AttributeValue = context.Value;
 
         _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.EndMember);
+        Contract.Assert(context.NodeType is XamlNodeType.EndMember);
 
         return AttributeValue;
     }
@@ -280,12 +279,12 @@ public static partial class XamlParser
     private static XamlElementCollection ParseImplicitElementMemberObjectsValue(XamlParsingContext context)
     {
         _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.StartMember);
+        Contract.Assert(context.NodeType is XamlNodeType.StartMember);
 
         (XamlElementCollection Children, _, _) = ParseElementContent(context);
 
         _ = context.Read();
-        Debug.Assert(context.NodeType is XamlNodeType.EndMember);
+        Contract.Assert(context.NodeType is XamlNodeType.EndMember);
 
         return Children;
     }

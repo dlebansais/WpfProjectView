@@ -9,11 +9,12 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using Contracts;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using FolderView;
 
-public static class TestTools
+public static partial class TestTools
 {
     public const string ProjectRepositoryName = "PgCompletionist";
     public const string ProjectName = "PgCompletionist";
@@ -64,16 +65,13 @@ public static class TestTools
                 Continue = false;
         }
 
-        Debug.Assert(CurrentDirectory is not null);
-
-        return CurrentDirectory!;
+        return Contract.AssertNotNull(CurrentDirectory);
     }
 
-    public static string CompareXamlParingResultWithOriginalContent(Stream content, IXamlParsingResult xamlParsingResult)
+    [RequireNotNull(nameof(content))]
+    private static string CompareXamlParingResultWithOriginalContentVerified(Stream content, IXamlParsingResult xamlParsingResult)
     {
-        Debug.Assert(content is not null);
-
-        _ = content!.Seek(0, SeekOrigin.Begin);
+        _ = content.Seek(0, SeekOrigin.Begin);
         using StreamReader Reader = new(content, Encoding.UTF8);
         string ContentString = Reader.ReadToEnd();
         ContentString = ContentString.Trim();

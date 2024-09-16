@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using Contracts;
 
 /// <summary>
 /// Implements a xaml parser.
@@ -68,8 +69,9 @@ public static partial class XamlParser
             case XamlAttributeSimpleValue SimpleValue:
                 context.ValueString.Clear();
                 context.ValueString.Add(SimpleValue.StringValue);
-                bool StringValueIsValue = SimpleValue.StringValue == (string)SimpleValue.Value!;
-                Debug.Assert(StringValueIsValue);
+
+                string? ValueAsString = SimpleValue.Value as string;
+                Contract.Assert(ValueAsString is null || ValueAsString == SimpleValue.StringValue);
                 break;
             case XamlAttributeMember Member:
                 context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
@@ -95,8 +97,8 @@ public static partial class XamlParser
             string ChildString = string.Empty;
 
             IXamlElementCollection ElementCollection = ElementCollectionAttribute.Children;
-            bool ChildrenIsValue = ElementCollection == (IXamlElementCollection)ElementCollectionAttribute.Value!;
-            Debug.Assert(ChildrenIsValue);
+            bool ChildrenIsValue = ElementCollection == (IXamlElementCollection)Contract.AssertNotNull(ElementCollectionAttribute.Value);
+            Contract.Assert(ChildrenIsValue);
 
             foreach (IXamlElement Child in ElementCollection)
                 ChildString += OneLineElement(Child);
@@ -109,8 +111,8 @@ public static partial class XamlParser
 
     private static void PrintAttributeOnSameLine(XamlPrintingContext context, bool endTag)
     {
-        Debug.Assert(context.NamespaceList.Count <= 1);
-        Debug.Assert(context.ValueString.Count == 0 || endTag);
+        Contract.Assert(context.NamespaceList.Count <= 1);
+        Contract.Assert(context.ValueString.Count == 0 || endTag);
 
         string ElementName = NameWithPrefix(context.Element.Namespace, context.Element.Name);
 
@@ -143,7 +145,7 @@ public static partial class XamlParser
         Parts.AddRange(context.NamespaceList);
         Parts.AddRange(context.AttributeMemberList.ConvertAll(item => AttributeMemberToString(context, item)));
 
-        Debug.Assert(Parts.Count >= 2);
+        Contract.Assert(Parts.Count >= 2);
 
         string FirstDirectiveString = Parts[0];
         string LastDirectiveString = Parts[Parts.Count - 1];
@@ -245,9 +247,7 @@ public static partial class XamlParser
         if (attribute is XamlAttributeElementCollection ElementCollection)
             AttributeString = OneLineElementAttributeElementCollection(ElementCollection);
 
-        Debug.Assert(AttributeString is not null);
-
-        return AttributeString!;
+        return Contract.AssertNotNull(AttributeString);
     }
 
     private static string OneLineElementAttributeMember(XamlAttributeMember member)
@@ -260,19 +260,19 @@ public static partial class XamlParser
         if (member.Value is IXamlElement NestedElement)
             MemberString = OneLineElement(NestedElement);
 
-        Debug.Assert(MemberString is not null);
+        Contract.Assert(MemberString is not null);
 
         if (member.Name != string.Empty)
             MemberString = $"{member.Name}=" + MemberString;
 
-        return MemberString!;
+        return Contract.AssertNotNull(MemberString);
     }
 
     private static string OneLineElementAttributeElementCollection(XamlAttributeElementCollection elementCollection)
     {
         IXamlElementCollection Children = elementCollection.Children;
 
-        Debug.Assert(Children.Count > 0);
+        Contract.Assert(Children.Count > 0);
 
         string ElementCollectionString = $"{elementCollection.Name}=";
 

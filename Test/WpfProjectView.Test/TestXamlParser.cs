@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using Contracts;
 using NUnit.Framework;
 
 [TestFixture]
@@ -62,10 +63,9 @@ public class TestXamlParser
 
         Assert.That(ComparisonMessage, Is.Empty, $"{ResourceName}\r\n{ComparisonMessage}");
 
-        IXamlElement? Root = XamlParsingResult.Root;
-        Debug.Assert(Root is not null);
+        IXamlElement Root = Contract.AssertNotNull(XamlParsingResult.Root);
 
-        Assert.That(Root!.NameWithPrefix, Is.EqualTo("Application"));
+        Assert.That(Root.NameWithPrefix, Is.EqualTo("Application"));
 
         IXamlAttributeElementCollection? ResourceAttribute = null;
 

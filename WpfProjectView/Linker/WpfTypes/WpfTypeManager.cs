@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Contracts;
 
 /// <summary>
 /// Represents a manager of WPF types.
@@ -29,7 +30,7 @@ public static class WpfTypeManager
             return true;
         }
 
-        fullTypeName = null!;
+        Contract.Unused(out fullTypeName);
         return false;
     }
 
@@ -46,12 +47,11 @@ public static class WpfTypeManager
             if (!IsValidWpfType(Item))
                 continue;
 
-            Debug.Assert(Item.Namespace is not null);
-            string TypeNamespace = Item.Namespace!;
+            string TypeNamespace = Contract.AssertNotNull(Item.Namespace);
 
             if (WpfNamespaces.Contains(TypeNamespace))
             {
-                Debug.Assert(!WpfTypeNames.Contains(Item.Name));
+                Contract.Assert(!WpfTypeNames.Contains(Item.Name));
                 WpfTypeNames.Add(Item.Name);
             }
         }

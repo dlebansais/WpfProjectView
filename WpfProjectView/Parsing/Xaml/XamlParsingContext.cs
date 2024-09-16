@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Xaml;
+using Contracts;
 
 /// <summary>
 /// Implements a context for the xaml parser.
@@ -26,12 +27,13 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
 
     /// <summary>
     /// Gets the reader object namespace.
+    /// Can only be queried when starting to parse an object.
     /// </summary>
     public IXamlNamespace ObjectNamespace
     {
         get
         {
-            Debug.Assert(NodeType == XamlNodeType.StartObject);
+            Contract.Assert(NodeType == XamlNodeType.StartObject);
 
             XamlType Object = Reader.Type;
             return FindNamespaceMatch(Object.PreferredXamlNamespace, Object.UnderlyingType);
@@ -40,12 +42,13 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
 
     /// <summary>
     /// Gets the reader object name.
+    /// Can only be queried when starting to parse an object.
     /// </summary>
     public string ObjectName
     {
         get
         {
-            Debug.Assert(NodeType == XamlNodeType.StartObject);
+            Contract.Assert(NodeType == XamlNodeType.StartObject);
 
             return Reader.Type.Name;
         }
@@ -53,16 +56,17 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
 
     /// <summary>
     /// Gets the reader member namespace.
+    /// Can only be queried when starting to parse a member.
     /// </summary>
     public IXamlNamespace MemberNamespace
     {
         get
         {
-            Debug.Assert(NodeType == XamlNodeType.StartMember);
+            Contract.Assert(NodeType == XamlNodeType.StartMember);
 
             XamlMember Member = Reader.Member;
 
-            Debug.Assert(Member.UnderlyingMember is null);
+            Contract.Assert(Member.UnderlyingMember is null);
 
             return FindNamespaceMatch(Member.PreferredXamlNamespace, null);
         }
@@ -70,12 +74,13 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
 
     /// <summary>
     /// Gets the reader member name.
+    /// Can only be queried when starting to parse a member.
     /// </summary>
     public string MemberName
     {
         get
         {
-            Debug.Assert(NodeType == XamlNodeType.StartMember);
+            Contract.Assert(NodeType == XamlNodeType.StartMember);
 
             return Reader.Member.Name;
         }
@@ -111,17 +116,15 @@ internal record XamlParsingContext(XamlXmlReader Reader, XamlNamespaceCollection
         string? TypeNamespace = underlyingType?.Namespace;
         string? TypeAssembly = underlyingType?.Assembly.GetName().Name;
 
-        IXamlNamespace Preferred = null!;
+        IXamlNamespace? PreferredNamespace = null;
 
         foreach (IXamlNamespace Namespace in Namespaces)
-            UpdatePreferredNamespace(Namespace, preferredXamlNamespace, TypeNamespace, TypeAssembly, ref Preferred);
+            UpdatePreferredNamespace(Namespace, preferredXamlNamespace, TypeNamespace, TypeAssembly, ref PreferredNamespace);
 
-        Debug.Assert(Preferred is not null);
-
-        return Preferred!;
+        return Contract.AssertNotNull(PreferredNamespace);
     }
 
-    private static void UpdatePreferredNamespace(IXamlNamespace candidateNamespace, string preferredXamlNamespace, string? typeNamespace, string? typeAssembly, ref IXamlNamespace preferredNamespace)
+    private static void UpdatePreferredNamespace(IXamlNamespace candidateNamespace, string preferredXamlNamespace, string? typeNamespace, string? typeAssembly, ref IXamlNamespace? preferredNamespace)
     {
         if (candidateNamespace is XamlNamespaceDefault Default)
         {

@@ -131,7 +131,7 @@ public class NamedTypeManager
         string FolderName = System.IO.Path.GetFileName(folderPath);
         const string Prefix = "v";
 
-        Debug.Assert(FolderName.StartsWith(Prefix, StringComparison.Ordinal));
+        Contract.Assert(FolderName.StartsWith(Prefix, StringComparison.Ordinal));
 
         string[] Parts = FolderName.Substring(Prefix.Length).Split('.');
         foreach (string Part in Parts)
@@ -155,7 +155,7 @@ public class NamedTypeManager
                 return true;
             }
 
-        namedType = null!;
+        Contract.Unused(out namedType);
         return false;
     }
 
@@ -174,8 +174,7 @@ public class NamedTypeManager
 
         Type? WpfType = WpfTypes.FirstOrDefault(type =>
         {
-            Debug.Assert(type.FullName is not null);
-            string FullName = type.FullName!;
+            string FullName = Contract.AssertNotNull(type.FullName);
 
             return FullName.Equals(name, StringComparison.Ordinal);
         });
@@ -188,7 +187,7 @@ public class NamedTypeManager
             return true;
         }
 
-        wpfNamedType = null!;
+        Contract.Unused(out wpfNamedType);
         return false;
     }
 
@@ -201,9 +200,9 @@ public class NamedTypeManager
 
     private void AddToCodeTypes(INamedTypeSymbol typeSymbol, out NamedType namedType)
     {
-        Debug.Assert(IsValidTypeSymbol(typeSymbol));
+        Contract.Assert(IsValidTypeSymbol(typeSymbol));
 
-        string FullName = typeSymbol.ToString()!;
+        string FullName = Contract.AssertNotNull(typeSymbol.ToString());
 
         if (TryFindCodeType(FullName, out NamedType ExistingNamedType))
             namedType = ExistingNamedType;
@@ -228,7 +227,7 @@ public class NamedTypeManager
 
     private void AddToCodeTypes(Type type, out NamedType namedType)
     {
-        string FullName = type.FullName!;
+        string FullName = Contract.AssertNotNull(type.FullName);
 
         if (TryFindCodeType(FullName, out NamedType ExistingNamedType))
             namedType = ExistingNamedType;

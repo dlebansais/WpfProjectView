@@ -1,6 +1,7 @@
 ﻿namespace WpfProjectView;
 
 using System.Collections.Generic;
+using Contracts;
 
 /// <summary>
 /// Represents a directive for a XAML element.
@@ -76,7 +77,7 @@ public record Directive(string Name)
             return true;
         }
 
-        directive = null!;
+        Contract.Unused(out directive);
         return false;
     }
 }

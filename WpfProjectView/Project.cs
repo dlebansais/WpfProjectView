@@ -84,8 +84,10 @@ public record Project : IProject
                 foreach (var OtherProj in Solution.ProjectList)
                     if (OtherProj.ProjectName == ProjItem)
                     {
-                        string ProjectRefRootPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(SolutionFullPath)!, OtherProj.RelativePath);
-                        string ProjectRefPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProjectRefRootPath)!, "bin", "x64", "Release", "net481", $"{ProjItem}.dll");
+                        string SolutionDirectoryName = Contract.AssertNotNull(System.IO.Path.GetDirectoryName(SolutionFullPath));
+                        string ProjectRefRootPath = System.IO.Path.Combine(SolutionDirectoryName, OtherProj.RelativePath);
+                        string ProjectDirectoryName = Contract.AssertNotNull(System.IO.Path.GetDirectoryName(ProjectRefRootPath));
+                        string ProjectRefPath = System.IO.Path.Combine(ProjectDirectoryName, "bin", "x64", "Release", "net481", $"{ProjItem}.dll");
                         PathToExternalDlls.Add(ProjectRefPath);
                     }
             }
@@ -137,8 +139,8 @@ public record Project : IProject
                     }
         }
 
-        nugetReferences = null!;
-        projectReferences = null!;
+        Contract.Unused(out nugetReferences);
+        Contract.Unused(out projectReferences);
         return false;
     }
 
@@ -210,7 +212,8 @@ public record Project : IProject
         _ = BrowseFolder(folder, (IFolder item) =>
         {
             FillFileList(item, files);
-            return (false, default(object)!);
+            Contract.Unused(out object UnusedResult);
+            return (false, UnusedResult);
         });
     }
 
@@ -233,6 +236,7 @@ public record Project : IProject
                     return (true, Result);
             }
 
-        return (false, default(T)!);
+        Contract.Unused(out T UnusedResult);
+        return (false, UnusedResult);
     }
 }

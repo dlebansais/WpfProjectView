@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Contracts;
 using Microsoft.CodeAnalysis;
 
 /// <summary>
@@ -40,7 +41,7 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
             }
         }
 
-        namedProperty = null!;
+        Contract.Unused(out namedProperty);
         return false;
     }
 
@@ -71,7 +72,7 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
             }
         }
 
-        namedAttachedProperty = null!;
+        Contract.Unused(out namedAttachedProperty);
         return false;
     }
 
@@ -100,18 +101,15 @@ public record NamedType(string FullName, Type? FromGetType, INamedTypeSymbol? Fr
             }
         }
 
-        namedEvent = null!;
+        Contract.Unused(out namedEvent);
         return false;
     }
 
     private IEnumerable<ISymbol> GetAllMemberSymbols()
     {
-        Debug.Assert(FromTypeSymbol is not null);
+        AllMemberSymbols = AllMemberSymbols ?? Contract.AssertNotNull(FromTypeSymbol).GetBaseTypesAndThis().SelectMany(n => n.GetMembers());
 
-        AllMemberSymbols = AllMemberSymbols ?? FromTypeSymbol!.GetBaseTypesAndThis().SelectMany(n => n.GetMembers());
-
-        Debug.Assert(AllMemberSymbols is not null);
-        return AllMemberSymbols!;
+        return Contract.AssertNotNull(AllMemberSymbols);
     }
 
     private IEnumerable<ISymbol>? AllMemberSymbols;

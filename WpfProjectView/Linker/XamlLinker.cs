@@ -6,26 +6,19 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Markup;
+using Contracts;
 using Microsoft.CodeAnalysis;
 
 /// <summary>
 /// Implements a linker that resolve types in Xaml files.
 /// </summary>
-public class XamlLinker
+/// <param name="project">The project to link.</param>
+public class XamlLinker(IProject project)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="XamlLinker"/> class.
-    /// </summary>
-    /// <param name="project">The project to link.</param>
-    public XamlLinker(IProject project)
-    {
-        Project = project;
-    }
-
     /// <summary>
     /// Gets the project to link.
     /// </summary>
-    public IProject Project { get; }
+    public IProject Project { get; } = project;
 
     /// <summary>
     /// Gets the list of errors reported by <see cref="LinkAsync"/>.
@@ -72,11 +65,8 @@ public class XamlLinker
 
             if (Item is IXamlCodeFile XamlCodeFile)
             {
-                Debug.Assert(XamlCodeFile.XamlParsingResult is not null);
-                IXamlParsingResult XamlParsingResult = XamlCodeFile.XamlParsingResult!;
-
-                Debug.Assert(XamlParsingResult.Root is not null);
-                IXamlElement NonResourceXamlRoot = XamlParsingResult.Root!;
+                IXamlParsingResult XamlParsingResult = Contract.AssertNotNull(XamlCodeFile.XamlParsingResult);
+                IXamlElement NonResourceXamlRoot = Contract.AssertNotNull(XamlParsingResult.Root);
 
                 LastXamlSourceFile = XamlCodeFile.XamlSourceFile;
                 XamlRoot = NonResourceXamlRoot;
@@ -128,9 +118,7 @@ public class XamlLinker
                         if (AttributeDirective.Name == "Class")
                         {
                             string? StringValue = Attribute.Value as string;
-                            Debug.Assert(StringValue is not null);
-
-                            FullName = StringValue!;
+                            FullName = Contract.AssertNotNull(StringValue);
                             break;
                         }
                     }
@@ -148,7 +136,7 @@ public class XamlLinker
             }
         }
 
-        elementType = null!;
+        Contract.Unused(out elementType);
         return false;
     }
 
@@ -208,25 +196,19 @@ public class XamlLinker
             Result = $"{ElementCollectionAttribute.Name} ({ElementCollectionAttribute.Children.Count} children)";
         if (attribute is IXamlAttributeSimpleValue SimpleValueAttribute)
         {
-            Debug.Assert(SimpleValueAttribute.Value is not null);
-            object Value = SimpleValueAttribute.Value!;
-
+            object Value = Contract.AssertNotNull(SimpleValueAttribute.Value);
             Result = $"(no name, value type is {Value.GetType().Name})";
         }
 
-        Debug.Assert(Result is not null);
-
-        return Result!;
+        return Contract.AssertNotNull(Result);
     }
 
     private static void AddAttributeToTable<TKey>(IXamlElement xamlElement, IXamlAttribute xamlAttribute, TKey key, IDictionary<TKey, object> table)
     {
         object? Value = xamlAttribute.Value;
-        Debug.Assert(Value is not null);
 
-        Debug.Assert(!table.ContainsKey(key));
-
-        table[key] = Value!;
+        Contract.Assert(!table.ContainsKey(key));
+        table[key] = Contract.AssertNotNull(Value);
     }
 
     private static bool TryGetDirective(IXamlAttribute xamlAttribute, out Directive directive)
@@ -243,7 +225,7 @@ public class XamlLinker
             }
         }
 
-        directive = null!;
+        Contract.Unused(out directive);
         return false;
     }
 
@@ -264,7 +246,7 @@ public class XamlLinker
             }
         }
 
-        namedProperty = null!;
+        Contract.Unused(out namedProperty);
         return false;
     }
 
@@ -279,7 +261,7 @@ public class XamlLinker
             return TryGetAttachedProperty(AttributeElementCollection.Name, namespaceTable, out namedAttachedProperty);
         }
 
-        namedAttachedProperty = null!;
+        Contract.Unused(out namedAttachedProperty);
         return false;
     }
 
@@ -298,29 +280,24 @@ public class XamlLinker
 
                 // Now get the type.
                 bool IsTypeFound = TypeManager.TryFindCodeType(FullTypeName, out NamedType ParsedNamedType);
-                Debug.Assert(IsTypeFound);
-                Debug.Assert(ParsedNamedType is not null);
+                Contract.Assert(IsTypeFound);
 
-                if (ParsedNamedType!.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
+                if (ParsedNamedType.TryFindAttachedProperty(PropertyName, out namedAttachedProperty))
                     return true;
             }
         }
 
-        namedAttachedProperty = null!;
+        Contract.Unused(out namedAttachedProperty);
         return false;
     }
 
     private static bool TryGetDirectEvent(IXamlAttribute xamlAttribute, NamedType elementType, out NamedEvent namedEvent)
     {
         if (xamlAttribute is IXamlAttributeMember AttributeMember)
-        {
             if (elementType.TryGetEvent(AttributeMember.Name, out namedEvent))
-            {
                 return true;
-            }
-        }
 
-        namedEvent = null!;
+        Contract.Unused(out namedEvent);
         return false;
     }
 
@@ -343,7 +320,7 @@ public class XamlLinker
             IsHandled = true;
         }
 
-        Debug.Assert(IsHandled);
+        Contract.Assert(IsHandled);
 
         return Result;
     }
@@ -374,10 +351,9 @@ public class XamlLinker
 
         foreach (AttributeData AttributeData in CustomAttributes)
         {
-            INamedTypeSymbol? AttributeClass = AttributeData.AttributeClass;
-            Debug.Assert(AttributeClass is not null);
+            INamedTypeSymbol AttributeClass = Contract.AssertNotNull(AttributeData.AttributeClass);
 
-            if (AttributeClass!.Name == nameof(ContentPropertyAttribute))
+            if (AttributeClass.Name == nameof(ContentPropertyAttribute))
                 Result = HasDefaultAttributeName(AttributeData, out contentPropertyName);
         }
 
@@ -416,14 +392,14 @@ public class XamlLinker
             string Prefix = Splitted[0];
             string TypeName = Splitted[1];
 
-            Debug.Assert(namespaceTable.ContainsKey(Prefix));
+            Contract.Assert(namespaceTable.ContainsKey(Prefix));
 
             IXamlNamespace XamlNamespace = namespaceTable[Prefix];
             fullTypeName = XamlNamespace.Namespace + "." + TypeName;
             return true;
         }
 
-        fullTypeName = null!;
+        Contract.Unused(out fullTypeName);
         return false;
     }
 
