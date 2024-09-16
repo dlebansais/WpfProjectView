@@ -71,7 +71,7 @@ public static partial class XamlParser
                 context.ValueString.Add(SimpleValue.StringValue);
 
                 string? ValueAsString = SimpleValue.Value as string;
-                Contract.Assert(ValueAsString is null || ValueAsString == SimpleValue.StringValue);
+                Contract.Assert(ValueAsString == SimpleValue.StringValue);
                 break;
             case XamlAttributeMember Member:
                 context.AttributeMemberList.Add($"{Member.Name}=\"{Member.Value}\"");
